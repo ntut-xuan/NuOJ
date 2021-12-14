@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+        <script  src="https://code.jquery.com/jquery-3.1.1.min.js"   integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="   crossorigin="anonymous"></script>
+        <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+        <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        <script>
+            MathJax = {
+                tex: {
+                    inlineMath: [['$', '$'], ['\\(', '\\)']],
+                }
+            };
+        </script>
+        <script>
+            function refresh_mathjax(){
+                MathJax.texReset();
+                MathJax.typesetClear();
+                MathJax.typesetPromise()
+                .catch(function (err) {
+                    console.log(err.message);
+                })
+            }
+        </script>
+        <script>
+            function logout(){
+                var requestURL = window.location.protocol + '//' + window.location.hostname + "/logout";
+                $.ajax({
+				url: requestURL,
+				type: "POST",
+				dataType: "json",
+				contentType: "application/json;charset=utf-8",
+				success: function(data, status, xhr){
+                    Swal.fire({
+                        icon: 'success',
+                        title: "登出成功",
+                        showConfirmButton: false,
+                        timer: 1500
+                    }).then((result) => {
+                        window.location.href = "./";
+                    });
+				},
+				error: function(xhr, ajaxOptions, thrownError){
+					Swal.fire({
+                        icon: 'error',
+                        title: "登出失敗",
+                        text: '請聯繫管理員 QQ',
+                        showConfirmButton: false,
+                        timer: 1500
+                    })
+				}});
+            }
+        </script>
+        <script>
+            function load_announcement(){
+                var requestURL = window.location.protocol + '//' + window.location.hostname + "/announcement";
+                var data = "";
+                console.log(requestURL);
+                $.ajax({
+                    url: requestURL,
+                    type: "GET",
+                    contentType: "application/json;charset=utf-8",
+                    success: function(returnData){
+                        //console.log(returnData);
+                        let textArea = document.getElementById("announcement_area");
+                        textArea.innerHTML = marked.parse(returnData);
+                        refresh_mathjax();
+                    }
+                });
+            }
+            load_announcement();
+        </script>
+    </head>
+    <body>
+        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+            <a class="navbar-brand" href="./"> NuOJ </a>
+            <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+                <div class="navbar-nav">
+                    <a class="nav-item nav-link" href="./problem"> 題目 </a>
+                    <a class="nav-item nav-link" href="./submit"> 提交 </a>
+                    <a class="nav-item nav-link" href="./submissions"> 提交列表 </a>
+                </div>
+                <div id="login_register_area" class="navbar-nav ml-auto">
+                </div>
+            </div>
+        </nav>
+        <div class="container">
+            <h1 class="display-3"> Welcome to NuOJ! </h1>
+            <div class="announcement_div" style="padding-left: 20px; padding-top: 20px; padding-right: 20px; padding-bottom: 20px; margin-top: 20px; box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19); background-color: cornsilk; font-size: 16px;">
+                <a id="announcement_area"></a>
+            </div>
+        </div>
+        <script>
+            function check_sessionExist(){
+                let requestURL = window.location.protocol + '//' + window.location.hostname + "/";
+                $.ajax({
+                    url: requestURL,
+                    type: "POST",
+                    contentType: "application/json;charset=utf-8",
+                    success: function(data, status, xhr){
+                        data = JSON.parse(data);
+                        if(data.status == "OK"){
+                            isLogin(data.username);
+                        }else{
+                            isnLogin();
+                        }
+                    },
+                    error: function(xhr, ajaxOptions, thrownError){
+                        console.log(xhr.status);
+                        console.log(thrownError);
+                        isnLogin();
+                    }
+                });
+                
+            }
+            function isLogin(name){
+                var element = document.getElementById("login_register_area");
+
+                var li = document.createElement("li");
+                li.className = "nav-item dropdown";
+
+                var a = document.createElement("a");
+                a.className = "nav-link dropdown-toggle";
+                a.innerText = name;
+                a.setAttribute("data-toggle", "dropdown");
+                a.setAttribute("aria-haspopup", "true");
+                a.setAttribute("aria-expanded", "false");
+
+                var div = document.createElement("div");
+                div.className = "dropdown-menu";
+                div.setAttribute("aria-labelledby", "navbarDropdownMenuLink");
+                
+                var info = document.createElement("a");
+                info.className = "dropdown-item";
+                info.href = "./profile/" + name;
+                info.innerText = "個人訊息";
+
+                var logout = document.createElement("a");
+                logout.className = "dropdown-item";
+                logout.setAttribute("onClick", "logout()");
+                logout.innerText = "登出";
+
+                div.appendChild(info);
+                div.appendChild(logout);
+                li.appendChild(a);
+                li.appendChild(div);
+                element.appendChild(li);
+
+            }
+            function isnLogin(){
+                var element = document.getElementById("login_register_area");
+                var login = document.createElement("a");
+                login.innerText = "登入";
+                login.className = "nav-item nav-link";
+                login.href = "./login";
+
+                var register = document.createElement("a");
+                register.innerText = "註冊";
+                register.className = "nav-item nav-link";
+                register.href = "./register";
+
+                element.appendChild(login);
+                element.appendChild(register);
+            }
+            check_sessionExist();
+        </script>
+    </body>
+</html>

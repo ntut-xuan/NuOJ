@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+        <script  src="https://code.jquery.com/jquery-3.1.1.min.js"   integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="   crossorigin="anonymous"></script>
+		<script src="../static/lib/codemirror.js"></script>
+		<link rel="stylesheet" href="../static/lib/codemirror.css">
+		<script src="../static/mode/clike/clike.js"></script>
+	</head>
+    <body>
+		<nav class="navbar navbar-expand-lg navbar-light bg-light">
+            <a class="navbar-brand" href="./"> NuOJ </a>
+            <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+                <div class="navbar-nav">
+                    <a class="nav-item nav-link" href="./problem"> 題目 </a>
+                    <a class="nav-item nav-link" href="./submit"> 提交 </a>
+                    <a class="nav-item nav-link" href="./submissions"> 提交列表 </a>
+                </div>
+                <div class="navbar-nav ml-auto">
+                    <a class="nav-item nav-link" href="./login"> 登入 </a>
+                    <a class="nav-item nav-link" href="./register"> 註冊 </a> 
+                </div>
+            </div>
+        </nav>
+		<div class="container">
+			<h1 class="display-3"> Uriah's code submit area </h1>
+			<textarea id="submit_code_area" rows=20 cols=100 style="display: none;"></textarea>
+			<br />
+			<button id="submit_code_button", onclick="onClick()"> Submit </button>
+		</div>
+    </body>
+	<script type="text/javascript">
+		var editor;
+		function onClick(){
+			var requestURL = window.location.protocol + '//' + window.location.hostname + "/submit";
+			var dataJson = {};
+			dataJson["code"] = editor.getValue();
+			console.log(dataJson["code"]);
+			$.ajax({
+				url: requestURL,
+				data: JSON.stringify(dataJson),
+				type: "POST",
+				dataType: "json",
+				contentType: "application/json;charset=utf-8",
+				success: function(data, status, xhr){
+					alertFunc(data);
+				},
+				error: function(xhr, ajaxOptions, thrownError){
+					console.log(xhr.status);
+					console.log(thrownError);
+				}
+			});
+		}
+		function draw(){
+			let textarea = document.getElementById("submit_code_area");
+			editor = CodeMirror.fromTextArea(textarea, {
+				lineNumbers: true,
+				matchBrackets: true,
+				mode: "text/x-c++src"
+			});
+		}
+		function alertFunc(data){
+			if(data["Status"] == "OK"){
+				alert("提交成功，編號為" + data["SubmissionID"]);
+				window.location.href = "./submissions";
+			}
+		}
+		draw();
+	</script>
+</html>
