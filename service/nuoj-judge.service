@@ -1,0 +1,11 @@
+[Unit]
+Description=NUOJ-Judger
+
+[Service]
+Type=simple
+ExecStart=/opt/nuoj/python/nuoj_judger.py
+Restart=always
+Environment=PYTHONUNBUFFERED=1
+
+[Install]
+WantedBy=multi-user.target
