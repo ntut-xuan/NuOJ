@@ -61,25 +61,6 @@
 				}});
             }
         </script>
-        <script>
-            function load_announcement(){
-                var requestURL = window.location.protocol + '//' + window.location.hostname + "/announcement";
-                var data = "";
-                console.log(requestURL);
-                $.ajax({
-                    url: requestURL,
-                    type: "GET",
-                    contentType: "application/json;charset=utf-8",
-                    success: function(returnData){
-                        //console.log(returnData);
-                        let textArea = document.getElementById("announcement_area");
-                        textArea.innerHTML = marked.parse(returnData);
-                        refresh_mathjax();
-                    }
-                });
-            }
-            load_announcement();
-        </script>
         <style>
             #middle-message-div {
                 position: absolute;
