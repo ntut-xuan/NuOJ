@@ -14,7 +14,7 @@ from flask_session import Session
 from datetime import timedelta
 import time;
 
-app = Flask(__name__)
+app = Flask(__name__, static_url_path='/opt/nuoj/static')
 app.config['JSON_SORT_KEYS'] = False
 app.config['SECRET_KEY'] = os.urandom(24)
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=31)
