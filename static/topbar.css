@@ -1,0 +1,33 @@
+.topbar-item{
+    color: white !important;
+    margin-left: 4%;
+    font-size: 1.3vmax;
+    text-decoration: none !important;
+    cursor: pointer;
+    font-family: 'Noto Sans TC', sans-serif;
+    border-bottom: solid;
+    border-color: rgba(255, 255, 255, 0);
+    transition-duration: 0.5s;
+    height: 10%;
+}
+
+.topbar-item-left {
+    margin-left: 5%;
+}
+
+.topbar-item-right {
+    margin-right: 5%;
+}
+
+.topbar-item:hover {
+    border-color: rgba(255, 255, 255, 1);
+    border-bottom: solid;
+}
+
+#topbar {
+    z-index: 100; 
+    display: flex; 
+    flex-flow: row; 
+    align-items: center; 
+    justify-content: space-between;
+}
