@@ -243,7 +243,7 @@ def returnRegisterPage():
 
     return resp
 
-@app.route("/queryProblmeID", methods=["GET"])
+@app.route("/queryProblemID", methods=["GET"])
 def getAvailableProblemID():
     try:
         with conn.cursor() as cursor:
