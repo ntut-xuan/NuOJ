@@ -1,177 +1,71 @@
-<html>
-    <style>
-        @font-face {
-            font-family: "Noto Sans Mono";
-            src: url('https://fonts.googleapis.com/css2?family=Noto+Sans+Mono:wght@700&display=swap');
-        }
-        * {
-            font-family: "Noto Sans Mono";
-            margin: 0;
-            padding: 0;
-        }
-        p {
-            margin: 0;
-        }
-        .sidebar {
-            background-color:gainsboro; 
-            position: fixed; 
-            width: 200px; 
-            height: 100%; 
-            padding: 30px;
-        }
-        .sidebar-item {
-            width: 100%;
-            text-align: center;
-        }
-        .content {
-            padding: 40px;
-            margin-left: 320px;
-            width: 40%;
-        }
-        .preview {
-            padding: 40px;
-            position: fixed; 
-            right: 0; 
-            top: 0; 
-            width: 30%; 
-            height: 100%; 
-        }
-        .input-group {
-            width: 100%;
-            align-items: center;    
-        }
-        .input-item {
-            margin-top: 40px;
-            margin-bottom: 40px;
-        }
-        input[type=text]{
-            outline-width: 0;   
-            border: none;
-            border-bottom: 1px solid;
-            transition-property: border-bottom;
-            transition-timing-function: steps(400, end);
-            transition-duration: .15s;
-        }
-        input[type=text]:focus{
-            border-bottom: 5px solid darkviolet;
-        }
-    </style>
-    <script src="https://kit.fontawesome.com/7b0276e0ce.js" crossorigin="anonymous"></script>
-    <body style="margin: 0; background-color: rgba(0, 0, 0, 0.7);">
-        <div class="sidebar">
-            <div class="sidebar-item">
-                <a href="#">
-                    <img id="topbar-logo" src="../static/logo-black.svg" style="width: 80%;">
-                </a>
-            </div>
-            <div class="sidebar-item" style="margin-top: 50px;">
-                <div class="input-item">
-                <a href="#problem-profile" style="width: 200px; display: flex; text-decoration: none; color: black; vertical-align: middle;">
-                    <i class="fas fa-pen-nib fa-2x"></i>
-                    <p style="font-size: 18pt; padding-left: 12%;"> 題目基本設定 </p>
-                </a>
-                </div>
-                <div class="input-item">
-                    <a href="#problem-detail" style="width: 200px; display: flex; text-decoration: none; color: black; vertical-align: middle;">
-                        <i class="fas fa-pen-nib fa-2x"></i>
-                        <p style="font-size: 18pt; padding-left: 12%;"> 題目敘述 </p>
+<html class="h-full">
+    <head>
+        <link rel="stylesheet" href="../static/css/output.css">
+    </head>
+    <body>
+        <div id="icon" class="fixed p-10 py-5 bg-gray-50 z-50 h-fit w-full">
+            <div class="flex w-2/5   justify-between">
+                <div>
+                    <a class="relative w-fit h-fit" href="/">
+                        <img class="h-[60px] w-auto" src="../static/logo.svg">
                     </a>
+                </div>
+                <div class="my-auto cursor-pointer">
+                    <p class="text-3xl my-auto hover:border-b-2 hover:border-b-black"> 基本設定 </p>
+                </div>
+                <div class="my-auto cursor-pointer">
+                    <p class="text-3xl my-auto hover:border-b-2 hover:border-b-black"> 測資設定 </p>
+                </div>
+                <div class="my-auto cursor-pointer">
+                    <p class="text-3xl my-auto hover:border-b-2 hover:border-b-black"> 程式測試 </p>
                 </div>
             </div>
         </div>
-        <div class="content" style="background-color: white;">
-            <div id="problem-profile" style="background-color: white;">
-                <div id="content-title" style="position: relative; height: 10%; display: flex; align-items: center; justify-content: left;">
-                    <h2 style="position: relative; font-size: 3vw; display: inline-block;"> 題目基本設定 </h2>
+        <div class="relative w-full text-center bg-white flex min-h-full pt-24">
+            <div class="flex flex-col justify-start gap-10 w-[50%]">
+                <div class="p-10">
+                    <p class="font-bold text-5xl m-5 text-left"> 題目敘述 </p>
+                    <div class="flex flex-col gap-5 p-5 text-left">
+                        <input type="text" class="w-full bg-slate-100 text-base p-2 px-4 appearance-none border-2 rounded focus:outline-none focus:border-orange-500 focus:bg-white" placeholder="題目名稱">
+                        <textarea class="h-[200px] bg-slate-100 p-2 text-base px-4 border-2 appearance-none resize-none overflow-y-hidden rounded focus:outline-none focus:border-orange-500 focus:bg-white" placeholder="題目敘述"></textarea>
+                        <textarea class="h-[200px] bg-slate-100 p-2 text-base px-4 border-2 appearance-none resize-none overflow-y-hidden rounded focus:outline-none focus:border-orange-500 focus:bg-white" placeholder="輸入說明"></textarea>
+                        <textarea class="h-[200px] bg-slate-100 p-2 text-base px-4 border-2 appearance-none resize-none overflow-y-hidden rounded focus:outline-none focus:border-orange-500 focus:bg-white" placeholder="輸出說明"></textarea>
+                        <textarea class="h-[200px] bg-slate-100 p-2 text-base px-4 border-2 appearance-none resize-none overflow-y-hidden rounded focus:outline-none focus:border-orange-500 focus:bg-white" placeholder="備注"></textarea>
+                    </div>
                 </div>
-                <hr style="width: 100%;">
-                <div id="content-main" style="position: relative; align-items: center; justify-content: left; padding-top: 20px;">
-                    <div class="input-group" style="height: inherit;">
-                        <div class="input-item">
-                            <label style="position: relative; font-size: 0.9vw; display: inline-block;"> 題目名稱 </label>
-                            <br>
-                            <input type="text" id="problem-name" style="font-size: 1.5vw;">
+            </div>
+            <div class="flex flex-col justify-start gap-10 w-[50%]">
+                <div class="p-10">
+                    <p class="font-bold text-5xl m-5 text-left"> 題目設定 </p>
+                    <div class="flex flex-col gap-5 p-5">
+                        <div class="w-full flex items-center">
+                            <label class="text-right w-1/6"> 觀看權限 </label>
+                            <select class="ml-10 w-3/5 bg-slate-100 p-2 text-base px-4 border-2">
+                                <option value="1"> 僅限自己 </option>
+                                <option value="2"> 公開 </option>
+                            </select>
                         </div>
-                        <div class="input-item">
-                            <label style="position: relative; font-size: 0.9vw; display: inline-block;"> 時間限制(秒) </label>
-                            <br>
-                            <input type="text" id="problem-TL" style="font-size: 1.5vw;">
+                        <div class="w-full flex items-center">
+                            <label class="text-right w-1/6"> 題目限時(秒) 
+                            </label>
+                            <input type="text" class="ml-10 w-3/5 bg-slate-100 p-2 text-base px-4 border-2 appearance-none resize-none overflow-y-hidden rounded focus:outline-none focus:border-orange-500 focus:bg-white">
                         </div>
-                        <div class="input-item">
-                            <label style="position: relative; font-size: 0.9vw; display: inline-block;"> 記憶體限制(MB) </label>
-                            <br>
-                            <input type="text" id="problem-ML" style="font-size: 1.5vw;">
-                        </div>
-                        <div class="input-item" style="height: inherit;">
-                            <label style="position: relative; font-size: 0.9vw; display: inline-block;"> 題目敘述 </label>
-                            <br>
-                            <textarea type="text" id="problem-name" style="font-size: 1vw; font-family: serif; width: 100%; height: 20%; resize: none; outline: none;"></textarea>
-                        </div>
-                        <div class="input-item" style="height: inherit;">
-                            <label style="position: relative; font-size: 0.9vw; display: inline-block;"> 輸入敘述 </label>
-                            <br>
-                            <textarea type="text" id="problem-name" style="font-size: 1vw; font-family: serif; width: 100%; height: 20%; resize: none; outline: none;"></textarea>
-                        </div>
-                        <div class="input-item" style="height: inherit;">
-                            <label style="position: relative; font-size: 0.9vw; display: inline-block;"> 輸出敘述 </label>
-                            <br>
-                            <textarea type="text" id="problem-name" style="font-size: 1vw; font-family: serif; width: 100%; height: 20%; resize: none; outline: none;"></textarea>
+                        <div class="w-full flex items-center">
+                            <label class="text-right w-1/6"> 題目記憶體(MB) 
+                            </label>
+                            <input type="text" class="ml-10 w-3/5 bg-slate-100 p-2 text-base px-4 border-2 appearance-none resize-none overflow-y-hidden rounded focus:outline-none focus:border-orange-500 focus:bg-white">
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-        <div id="problem-preview" class="preview" style="background-color: white;">
-            <div id="content-title" style="position: relative; display: inline-block; width: 100%; align-items: center; text-align: center; justify-content: left;">
-                <h2 id="preview-name" style="position: relative; font-size: 3vw; display: inline-block;"> <題目名稱> </h2>
-                <br />
-                <h2 id="preview-TL" style="position: relative; font-size: 0.9vw; display: inline-block;"> 時間限制：<時間限制> 秒 </h2>
-                <br />
-                <h2 id="preview-ML" style="position: relative; font-size: 0.9vw; display: inline-block;"> 記憶體限制：<記憶體限制> MB </h2>
-                <br />
-            </div>
-            <hr style="width: 100%;">
-            <div id="content-detail" style="position: relative; display: inline-block; width: 100%; align-items: center; justify-content: left;">
-                <h2 id="preview-detail-title" style="position: relative; font-size: 0.9vw; display: inline-block;"> 題目敘述 </h2>
-                <br />
-                <p id="preview-detail" style="position: relative; font-size: 1.2vw; display: inline-block;"> <題目敘述> </p>
-                <br />
-                <br />
-                <h2 id="preview-detail-title" style="position: relative; font-size: 0.9vw; display: inline-block;"> 輸入敘述 </h2>
-                <br />
-                <p id="preview-detail" style="position: relative; font-size: 1.2vw; display: inline-block;"> <輸入敘述> </p>
-                <br />
-                <br />
-                <h2 id="preview-detail-title" style="position: relative; font-size: 0.9vw; display: inline-block;"> 輸出敘述 </h2>
-                <br />
-                <p id="preview-detail" style="position: relative; font-size: 1.2vw; display: inline-block;"> <輸出敘述> </p>
-            </div>
-        </div>
-        <script>
-            function init(){
-                document.getElementById("problem-name").addEventListener('keyup', () => {
-                    if(document.getElementById("problem-name").value.length > 0){
-                        document.getElementById("preview-name").innerText = document.getElementById("problem-name").value;
-                    }else{
-                        document.getElementById("preview-name").innerText = "<題目名稱>";
-                    }
-                })
-                document.getElementById("problem-TL").addEventListener('keyup', () => {
-                    if(document.getElementById("problem-TL").value.length > 0){
-                        document.getElementById("preview-TL").innerText = "時間限制：" + document.getElementById("problem-TL").value + " 秒";
-                    }else{
-                        document.getElementById("preview-TL").innerText = "時間限制：<時間限制> 秒";
-                    }
-                })
-                document.getElementById("problem-ML").addEventListener('keyup', () => {
-                    if(document.getElementById("problem-ML").value.length > 0){
-                        document.getElementById("preview-ML").innerText = "記憶體限制：" + document.getElementById("problem-ML").value + " MB";
-                    }else{
-                        document.getElementById("preview-ML").innerText = "記憶體限制：<記憶體限制> MB";
-                    }
-                })
-            }
-            init();
-        </script>
     </body>
+    <script>
+        document.body.addEventListener('keydown', (e) => {
+            if(e.ctrlKey && e.key === "s"){
+                console.log("Save!");
+                e.preventDefault();
+            }
+        })
+    </script>
 </html>

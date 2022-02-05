@@ -243,6 +243,19 @@ def returnRegisterPage():
 
     return resp
 
+@app.route("/queryProblmeID", methods=["GET"])
+def getAvailableProblemID():
+    try:
+        with conn.cursor() as cursor:
+            cursor.execute("SELECT COUNT(*) from `problem`")
+            count = cursor.fetchone()[0]
+    except Exception as ex:
+            print(ex)
+    data = {}
+    data["Status"] = "OK"
+    data["Result"] = {"Count": count}
+    return json.dumps(data)
+
 @app.route("/announcement", methods=["GET"])
 def getAnnouncement():
     announcementFile = open("/opt/nuoj/markdown/announcement.md", "r")
