@@ -79,7 +79,7 @@ def nuoj_getID(conn):
 
 @app.route("/static/<path:path>")
 def returnStaticFile(path):
-    return send_from_directory('static', path)
+    return send_from_directory('../static', path)
 
 @app.route("/", methods=["GET", "POST"])
 def returnIndex():
