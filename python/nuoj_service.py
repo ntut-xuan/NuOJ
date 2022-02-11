@@ -78,6 +78,16 @@ def nuoj_getID(conn):
     finally:
         return int(result)
 
+@app.route("/veriCookie")
+def veriCookie(cookie):
+    data = {}
+    if cookie in session:
+        data["status"] = "OK"
+        data["result"] = {"cookie": session[cookie]}
+    else:
+        data["status"] = "Failed"
+    return json.dumps(data)
+
 @app.route("/static/<path:path>")
 def returnStaticFile(path):
     return send_from_directory('../static', path)
@@ -89,22 +99,20 @@ def returnIndex():
         return index_html.read()
     
     SID = request.cookies.get("SID")
-    print(SID)
-    data = {}
-    if(SID in session):
-        data["status"] = "OK"
-        data["username"] = session[SID]["username"]
-    else:
-        data["status"] = "Failed"
-    return json.dumps(data)
+    return veriCookie(SID)
     
 @app.route("/add_problem", methods=["GET", "POST"])
 def returnAddProblemPage():
-    
+
+    SID = request.cookies.get("SID")
+
+    if(SID not in session):
+        redirect("./")
+
     html = open("/opt/nuoj/html/add_problem.html", "r")
 
     if request.method == "POST":
-        return add_problem.post(request.json)
+        return add_problem.post(conn, request.json)
 
     return html.read()
 
@@ -163,7 +171,7 @@ def returnLoginPage():
                 message = "登入失敗，使用者帳號不存在"
             cursor.close()
         with conn.cursor() as cursor:
-            cursor.execute("SELECT COUNT(*) FROM `user` WHERE username=%s AND password=%s", (account, password))
+            cursor.execute("SELECT COUNT(*) FROM `電user` WHERE username=%s AND password=%s", (account, password))
             result = cursor.fetchone()[0]
             if result == 0:
                 status = "Failed"
@@ -237,19 +245,19 @@ def returnRegisterPage():
                 cursor.execute("INSERT INTO `user` (username, email, password, admin) values (%s, %s, %s, 0)", (username, email, password))
                 conn.commit()
                 cursor.close()
+            sessionID = os.urandom(16).hex()
+            session[sessionID] = {"username": username, "email": email}
+
         except Exception as ex:
             print(ex)
     
     data = {}
     data["status"] = status
     data["message"] = message
-
-    sessionID = os.urandom(16).hex()
-
     resp = Response(json.dumps(data))
-    resp.set_cookie("SID", value = sessionID, expires=time.time()+6*60)
 
-    session[sessionID] = {"username": username, "email": email}
+    if(status == "OK"):
+        resp.set_cookie("SID", value = sessionID, expires=time.time()+6*60)
 
     return resp
 
@@ -320,7 +328,7 @@ def problemList():
         subDict = {}
         subDict["problem_id"] = result[i][0]
         subDict["problem_name"] = result[i][1]
-        subDict["problem_deadline"] = result[i][2]
+        subDict["problem_deadline"] = "None"
         subDict["problem_author"] = result[i][3]
         problemData.append(subDict)
     data["DataCount"] = len(result)

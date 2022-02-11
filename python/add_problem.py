@@ -16,26 +16,42 @@ import time;
 import requests
 import add_problem
 
-def post(data):
+def post(conn, data):
 
-    resp = {}
+	resp = {}
 
-    try:
+	try:
 
-        problemDirPath = "/opt/nuoj/problem/" + str(data["problemID"])
-        problemJsonPath = problemDirPath + "/problem.json"
+		''' add file to file dic '''
 
-        if(not os.path.exists(problemDirPath)):
-            os.makedirs(problemDirPath)
-        
-        f = open(problemJsonPath, "w+")
-        f.write(json.dumps(data, indent=4))
-        f.close()
+		problemDirPath = "/opt/nuoj/problem/" + str(data["problemID"])
+		problemJsonPath = problemDirPath + "/problem.json"
 
-        resp = {"Status": "OK"}
+		if(not os.path.exists(problemDirPath)):
+			os.makedirs(problemDirPath)
 
-    except Exception as e:
+		jsonObject = data
+		
+		f = open(problemJsonPath, "w+")
+		f.write(json.dumps(data, indent=4))
+		f.close()
 
-        resp = {"Status": "Failed", "Exception": str(e)}
-    
-    return json.dumps(resp)
+		''' SQL '''
+
+		try:
+			with conn.cursor() as cursor:
+				command = "INSERT `problem`(name, visibility, author) VALUES ('%s', '%s', '%s')" % (str(jsonObject["problemContent"]["title"]), str(jsonObject["basicSetting"]["permission"]), "null")
+				cursor.execute(command)
+				conn.commit()
+				cursor.close()
+				conn.close()
+		except Exception as ex:
+			logger.error(ex)
+
+		resp = {"Status": "OK"}
+
+	except Exception as e:
+
+		resp = {"Status": "Failed", "Exception": str(e)}
+	
+	return json.dumps(resp)
