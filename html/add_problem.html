@@ -1,6 +1,7 @@
 <html class="h-full">
     <head>
         <link rel="stylesheet" href="../static/css/output.css">
+        <script  src="https://code.jquery.com/jquery-3.1.1.min.js"   integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="   crossorigin="anonymous"></script>
     </head>
     <body>
         <div id="icon" class="fixed p-10 py-5 bg-gray-50 z-50 h-fit w-full">
@@ -63,7 +64,39 @@
     <script>
         document.body.addEventListener('keydown', (e) => {
             if(e.ctrlKey && e.key === "s"){
-                console.log("Save!");
+
+                dataJson = {}
+                dataJson["problemContent"] = {}
+                dataJson["basicSetting"] = {}
+                dataJson["problemContent"]["title"] = document.getElementsByTagName("input")[0].value
+                dataJson["problemContent"]["description"] = document.getElementsByTagName("textarea")[0].value
+                dataJson["problemContent"]["input"] = document.getElementsByTagName("textarea")[1].value
+                dataJson["problemContent"]["output"] = document.getElementsByTagName("textarea")[2].value
+                dataJson["problemContent"]["note"] = document.getElementsByTagName("textarea")[3].value
+                dataJson["basicSetting"]["permission"] = document.getElementsByTagName("select")[0].value
+                dataJson["basicSetting"]["timeLimit"] = document.getElementsByTagName("input")[1].value
+                dataJson["basicSetting"]["memoryLimit"] = document.getElementsByTagName("input")[2].value
+
+                $.ajax({
+                    url: "./queryProblemID",
+                    type: "GET",
+                    dataType: "json",
+                    contentType: "application/json;charset=utf-8",
+                    success(resp, textStatus, xhr){
+                        console.log(resp)
+                        dataJson["problemID"] = resp["Result"]["Count"] + 1
+                        $.ajax({
+                            url: "./add_problem",
+                            data: JSON.stringify(dataJson),
+                            type: "POST",
+                            dataType: "json",
+                            contentType: "application/json;charset=utf-8",
+                            success(resp, textStatus, xhr){
+                                console.log(resp)
+                            }
+                        })
+                    }
+                })
                 e.preventDefault();
             }
         })

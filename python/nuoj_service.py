@@ -13,6 +13,7 @@ from flask_login import LoginManager, UserMixin, login_user, logout_user, login_
 from flask_session import Session
 from datetime import timedelta
 import time;
+import add_problem
 
 app = Flask(__name__, static_url_path='/opt/nuoj/static')
 app.config['JSON_SORT_KEYS'] = False
@@ -97,6 +98,15 @@ def returnIndex():
         data["status"] = "Failed"
     return json.dumps(data)
     
+@app.route("/add_problem", methods=["GET", "POST"])
+def returnAddProblemPage():
+    
+    html = open("/opt/nuoj/html/add_problem.html", "r")
+
+    if request.method == "POST":
+        return add_problem.post(request.json)
+
+    return html.read()
 
 @app.route("/submit", methods=["GET"], strict_slashes=False)
 def returnSubmitPage():
