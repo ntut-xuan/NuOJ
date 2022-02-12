@@ -2,76 +2,71 @@
 <html>
     <head>
         <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+        <link rel="stylesheet" href="../static/css/output.css">
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
-        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
         <script  src="https://code.jquery.com/jquery-3.1.1.min.js"   integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="   crossorigin="anonymous"></script>
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
         <script>
-        function onClick(){
-			var requestURL = window.location.protocol + '//' + window.location.hostname + "/login";
-			var dataJson = {};
-			dataJson["account"] = document.getElementById("account").value;
-            dataJson["password"] = document.getElementById("password").value;
-			$.ajax({
-				url: requestURL,
-				data: JSON.stringify(dataJson),
-				type: "POST",
-				dataType: "json",
-				contentType: "application/json;charset=utf-8",
-				success: function(data, status, xhr){
-                    if(data["status"] == "OK"){
-                        Swal.fire({
-                            icon: 'success',
-                            title: data["message"],
-                            showConfirmButton: false,
-                            timer: 1500
-                        }).then((result) => {
-                            window.location.href = "./";
-                        });
-                    }else{
-                        Swal.fire({
-                            icon: 'error',
-                            title: data["message"],
-                            showConfirmButton: false,
-                            timer: 1500
-                        })
+            function onClick(){
+                var requestURL = window.location.protocol + '//' + window.location.hostname + "/login";
+                var dataJson = {};
+                dataJson["account"] = document.getElementById("account").value;
+                dataJson["password"] = document.getElementById("password").value;
+                $.ajax({
+                    url: requestURL,
+                    data: JSON.stringify(dataJson),
+                    type: "POST",
+                    dataType: "json",
+                    contentType: "application/json;charset=utf-8",
+                    success: function(data, status, xhr){
+                        if(data["status"] == "OK"){
+                            Swal.fire({
+                                icon: 'success',
+                                title: data["message"],
+                                showConfirmButton: false,
+                                timer: 1500
+                            }).then((result) => {
+                                window.location.href = "./";
+                            });
+                        }else{
+                            Swal.fire({
+                                icon: 'error',
+                                title: data["message"],
+                                showConfirmButton: false,
+                                timer: 1500
+                            })
+                        }
+                    },
+                    error: function(xhr, ajaxOptions, thrownError){
+                        console.log(xhr.status);
+                        console.log(thrownError);
                     }
-				},
-				error: function(xhr, ajaxOptions, thrownError){
-					console.log(xhr.status);
-					console.log(thrownError);
-				}
-			});
-		}   
+                });
+            }
         </script>
     </head>
     <body>
-        <nav class="navbar navbar-expand-lg navbar-light bg-light">
-            <a class="navbar-brand" href="./"> NuOJ </a>
-        </nav>
-        <div class="container">
-            <h1 class="display-3"> 登入 NuOJ </h1>
-            <br />
-            <form id="login_form">
-                <div class="form-group">
-                    <label for="exampleInputEmail1"> 使用者名稱或電子郵件 </label>
-                    <input type="text" class="form-control" id="account" name="account" aria-describedby="accountHelp" placeholder="輸入使用者名稱或電子郵件">
+        <div class="w-full h-screen flex">
+            <div class="w-full h-screen bg-cover bg-[url('../login.jpg')]">
+                <div class="w-full h-full bg-black bg-opacity-70">
+                    <div class="absolute left-[50%] top-[50%] -translate-x-[50%] -translate-y-[50%] w-fit bg-white bg-opacity-100 rounded p-10">
+                        <p class="text-4xl text-center mb-10"> 登入 </p>
+                        <div class="my-10">
+                            <input id="account" class="w-full text-lg bg-slate-200 border-2 border-slate-600 rounded text-center p-2 my-2" placeholder="帳號或信箱">
+                            <input id="password" type="password" class="w-full text-lg bg-slate-200 border-2 border-slate-600 rounded text-center p-2 my-2" placeholder="密碼">
+                        </div>
+                        <div class="mt-10">
+                            <button class="w-full bg-blue-600 text-white text-lg p-2 rounded my-2 duration-150 hover:bg-blue-500" onclick="onClick()"> 登入 </button>
+                            <button id="viaGithub" class="w-full bg-black text-white text-lg p-2 rounded my-2 duration-150 hover:bg-gray-800"> 使用 Github 進行登入 </button>
+                        </div>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label for="exampleInputPassword1"> 密碼 </label>
-                    <input type="password" class="form-control" id="password" name="password" aria-describedby="passwordHelp" placeholder="輸入密碼">
-                </div>
-                <div class="button-group">
-                    <button type="button" class="btn btn-primary btn-lg btn-block" onclick="onClick()"> 登入 </button>
-                </div>
-                <div class="button-group">
-                    <button type="button" class="btn btn-primary btn-lg btn-block" style="margin-top: 10px" onclick="location.href='https://github.com/login/oauth/authorize?client_id=a00b6ba16a262302ed3b&scope=repo'"> 使用 Github 登入 </button>
-                </div>
-            </form>
+            </div>
         </div>
-        
     </body>
+    <script>
+        document.getElementById("viaGithub").addEventListener("click", () => {
+            window.location.href = "https://github.com/login/oauth/authorize?client_id=a00b6ba16a262302ed3b&scope=repo";
+        })
+    </script>
 </html>
