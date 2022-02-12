@@ -1,154 +1,103 @@
 <!DOCTYPE html>
 <html>
-
-<head>
-    <meta charset="utf-8">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@500&display=swap" rel="stylesheet">
-    <script src="https://code.jquery.com/jquery-3.1.1.min.js"
-        integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
-    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
-    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script>
-        MathJax = {
-            tex: {
-                inlineMath: [['$', '$'], ['\\(', '\\)']],
+    <head>
+        <meta charset="utf-8">
+        <title> NuOJ - Index </title>
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@500&display=swap" rel="stylesheet">
+        <link href="../static/css/output.css" rel="stylesheet">
+        <script src="https://code.jquery.com/jquery-3.1.1.min.js"
+            integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        <script>
+            function logout() {
+                var requestURL = window.location.protocol + '//' + window.location.hostname + "/logout";
+                $.ajax({
+                    url: requestURL,
+                    type: "POST",
+                    dataType: "json",
+                    contentType: "application/json;charset=utf-8",
+                    success: function (data, status, xhr) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: "登出成功",
+                            showConfirmButton: false,
+                            timer: 1500
+                        }).then((result) => {
+                            window.location.href = "./";
+                        });
+                    },
+                    error: function (xhr, ajaxOptions, thrownError) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: "登出失敗",
+                            text: '請聯繫管理員 QQ',
+                            showConfirmButton: false,
+                            timer: 1500
+                        })
+                    }
+                });
             }
-        };
-    </script>
+        </script>
+    </head>
+    <body>
+        <div class="absolute h-full w-full bg-cover bg-[url('../index.jpg')]">
+            <div class="absolute h-full w-full bg-gray-900 bg-opacity-80">
+                <div class="absolute p-10 w-1/2">
+                    <div class="flex gap-20 items-center">
+                        <div class="w-[20%] h-auto">
+                            <a href="#">
+                                <img src="../static/logo-white.svg">
+                            </a>
+                        </div>
+                        <div>
+                            <a class="text-white text-2xl border-b-2 border-white border-opacity-0 duration-500 hover:border-white hover:border-opacity-100" href="/problem"> 題目 </a>
+                        </div>
+                        <div>
+                            <a class="text-white text-2xl border-b-2 border-white border-opacity-0 duration-500 hover:border-white hover:border-opacity-100" href="/submissionList"> 提交列表 </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="absolute left-[50%] top-[50%] -translate-x-[50%] -translate-y-[50%] text-center">
+                    <p class="text-white text-5xl m-5 hover:text-gray-400 font-medium "> Welcome to NuOJ! </p>
+                    <p class="text-white text-2xl m-5 hover:text-gray-400"> 一款來自 國立臺北科技大學 的線上程式評測系統 </p>
+                </div>
+                <div class="absolute bottom-14 w-full" id="icon">
+                    <div class="w-full flex justify-center">
+                        <div class="p-3 w-fit duration-500 bg-white hover:bg-slate-400">
+                            <a href="https://ntut.edu.tw">
+                                <img src="https://www.ntut.edu.tw/var/file/7/1007/img/2858/845828669.png">
+                            </a>
+                        </div>
+                    </div>
+                    <div class="w-fit mx-auto m-5">
+                        <p class="text-white"> 2022, Uriah Xuan. </p>
+                    </div>
+                </div>
+                <div class="absolute right-0 top-0 p-10 w-1/2">
+                    <div id="topbar-right" class="flex gap-20 items-center justify-end">
+                        <div class="w-[20%] h-auto invisible">
+                            <a href="#">
+                                <img src="../static/logo-white.svg">
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </body>
     <script>
-        function refresh_mathjax() {
-            MathJax.texReset();
-            MathJax.typesetClear();
-            MathJax.typesetPromise()
-                .catch(function (err) {
-                    console.log(err.message);
-                })
-        }
-    </script>
-    <script>
-        function logout() {
-            var requestURL = window.location.protocol + '//' + window.location.hostname + "/logout";
+        function check_sessionExist() {
             $.ajax({
-                url: requestURL,
+                url: "./",
                 type: "POST",
                 dataType: "json",
                 contentType: "application/json;charset=utf-8",
                 success: function (data, status, xhr) {
-                    Swal.fire({
-                        icon: 'success',
-                        title: "登出成功",
-                        showConfirmButton: false,
-                        timer: 1500
-                    }).then((result) => {
-                        window.location.href = "./";
-                    });
-                },
-                error: function (xhr, ajaxOptions, thrownError) {
-                    Swal.fire({
-                        icon: 'error',
-                        title: "登出失敗",
-                        text: '請聯繫管理員 QQ',
-                        showConfirmButton: false,
-                        timer: 1500
-                    })
-                }
-            });
-        }
-    </script>
-    <style>
-        section {
-            height: 100vh;
-        }
-
-        #middle-message-div {
-            position: absolute;
-            left: 50%;
-            top: 50%;
-            color: white;
-            font-family: 'Noto Sans TC', sans-serif;
-            text-align: center;
-            z-index: 5;
-            transform: translate(-50%, -50%);
-        }
-
-        #title {
-            font-size: 3vmax;
-            white-space: nowrap;
-            margin: 0 auto;
-            letter-spacing: 0;
-        }
-
-        #sub-title {
-            font-size: 2vmax;
-            white-space: nowrap;
-            margin: 0 auto;
-            letter-spacing: 0;
-        }
-
-        .topbar-item {
-            color: white !important;
-            margin-left: 4%;
-            font-size: 1.3vmax;
-            text-decoration: none !important;
-            cursor: pointer;
-            font-family: 'Noto Sans TC', sans-serif;
-            border-bottom: solid;
-            border-color: rgba(255, 255, 255, 0);
-            transition-duration: 0.5s;
-            height: 10%;
-        }
-
-        .topbar-item-left {
-            margin-left: 5%;
-        }
-
-        .topbar-item-right {
-            margin-right: 5%;
-        }
-        
-        .topbar-item:hover {
-            border-color: rgba(255, 255, 255, 1);
-            border-bottom: solid;
-        }
-    </style>
-</head>
-<body style="margin: 0%">
-    <section id="fullscreen-photo" style="position: absolute; height: 100%; width: 100%; background-size: contain; background-image: url(../static/index.png);">
-        <section id="black-fliter" style="position: absolute; height: 100%; width: 100%; background-color: rgba(0, 0, 0, 0.7);">
-            <div id="topbar" style="z-index: 100; display: flex; flex-flow: row; align-items: center; justify-content: space-between; height: 20%;">
-                <div id="topbar-left" style="position: static; width: 20%; display: flex; flex: 4; align-items: center; justify-content: left;">
-                    <a class="topbar-item-left"style="width: 20%;" href="./">
-                        <img id="topbar-logo" src="../static/logo-white.svg" style="width: 100%;">
-                    </a>
-                    <a class="topbar-item topbar-item-left" href="./problem">題目</a>
-                    <a class="topbar-item topbar-item-left" href="./submissions">提交列表</a>
-                </div>
-                <div id="topbar-center" style="position: relative; display: flex; flex: 2; align-items: center;">
-                </div>
-                <div id="topbar-right" style="position: relative; width: 20%; display: flex; flex: 2; align-items: center; justify-content: right;">
-                </div>
-            </div>
-            <div id="middle-message-div" style="z-index: 105;">
-                <p id="title"> Welcome to NuOJ </p>
-                <p id="sub-title"> 致力打造舒服的程式評測系統 </p>
-            </div>
-        </div>
-    </section>
-    <script>
-        function check_sessionExist() {
-            let requestURL = window.location.protocol + '//' + window.location.hostname + "/";
-            $.ajax({
-                url: requestURL,
-                type: "POST",
-                contentType: "application/json;charset=utf-8",
-                success: function (data, status, xhr) {
-                    data = JSON.parse(data);
-                    if (data.status == "OK") {
-                        isLogin(data.username);
+                    console.log(data)
+                    if (data["status"] == "OK") {
+                        isLogin(data["result"]["cookie"]["username"]);
                     } else {
                         isnLogin();
                     }
@@ -163,32 +112,34 @@
         }
         function isLogin(name) {
             var element = document.getElementById("topbar-right");
-
+            var div = document.createElement("div");
             var info = document.createElement("a");
-            info.className = "topbar-item topbar-item-right";
+            info.setAttribute("class", "text-white text-2xl border-b-2 border-white border-opacity-0 duration-500 hover:border-white hover:border-opacity-100")
             info.href = "./profile/" + name;
-            info.innerText = "個人訊息";
+            info.innerText = name;
 
             element.appendChild(info);
 
         }
         function isnLogin() {
             var element = document.getElementById("topbar-right");
+            var div1 = document.createElement("div");
             var login = document.createElement("a");
             login.innerText = "登入";
-            login.className = "topbar-item topbar-item-right";
+            login.setAttribute("class", "text-white text-2xl border-b-2 border-white border-opacity-0 duration-500 hover:border-white hover:border-opacity-100")
             login.href = "./login";
+            div1.appendChild(login)
 
+            var div2 = document.createElement("div");
             var register = document.createElement("a");
             register.innerText = "註冊";
-            register.className = "topbar-item topbar-item-right";
+            register.setAttribute("class", "text-white text-2xl border-b-2 border-white border-opacity-0 duration-500 hover:border-white hover:border-opacity-100")
             register.href = "./register";
+            div2.appendChild(register)
 
-            element.appendChild(login);
-            element.appendChild(register);
+            element.appendChild(div1);
+            element.appendChild(div2);
         }
         check_sessionExist();
     </script>
-</body>
-
 </html>
