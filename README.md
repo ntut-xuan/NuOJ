@@ -50,14 +50,10 @@ Flask, MariaDB
 
 - 修改了 Problem 的資料庫 Table 結構，將原先的 problem_deadline 移除，並且將資料庫欄位名稱修改稍微簡短一點。
 - 修正 register 失敗後依然會產生 cookie 給使用者的問題。
+- 使用 tailwindcss 重新編寫 index.html
 
 #### TODO
 
-- 使用 tailwindcss 重新編寫 index.html
 - 使用 tailwindcss 重新編寫 register.html
 - 使用 tailwindcss 重新編寫 login.html
-
-
-
-
 
