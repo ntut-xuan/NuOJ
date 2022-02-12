@@ -57,3 +57,12 @@ Flask, MariaDB
 
 - 使用 tailwindcss 重新編寫 register.html
 
+### 2022-02-13
+
+#### ChangeLog
+
+ - 完成 github 登入的功能
+
+#### TODO
+
+ - 使用 tailwindcss 重新編寫 register.html

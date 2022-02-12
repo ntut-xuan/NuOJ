@@ -14,6 +14,7 @@ from flask_session import Session
 from datetime import timedelta
 import time;
 import add_problem
+import githubLogin
 
 app = Flask(__name__, static_url_path='/opt/nuoj/static')
 app.config['JSON_SORT_KEYS'] = False
@@ -389,7 +390,7 @@ def submit():
 
     return response
 
-@app.route("/logout", methods=["POST"])
+@app.route("/logout", methods=["GET", "POST"])
 def logout():
     data = {}
     data["status"] = "OK"
@@ -417,11 +418,6 @@ def returnProfilePageWithName(name):
     conn = connect_mysql()
     try:
         with conn.cursor() as cursor:
-            command = "select username, email, admin from `user` where username=%s"
-            cursor.execute(command, name)
-            result = cursor.fetchone()
-            profile_data["username"] = str(result[0])
-            profile_data["email"] = str(result[1])
             if(int(result[2]) == 1):
                 profile_data["identity"] = "站務管理員"
             else:
@@ -434,6 +430,21 @@ def returnProfilePageWithName(name):
         code = 500
     response = Response(json.dumps(response_data), status=code)
     return response
+
+@app.route("/github_login", methods=["GET", "POST"])
+def processGithubLogin():
+    
+    data = githubLogin.githubLogin(session, conn, request.args.get("code"))
+
+    if(data["status"] == "OK"):
+        resp = redirect("/")
+        sessionID = os.urandom(16).hex()
+        resp.set_cookie("SID", value = sessionID, expires=time.time()+6*60)
+        session[sessionID] = {"username": data["user"], "email": data["email"]}
+        return resp
+    else:
+        return Response(json.dumps(data), mimetype="application/json")
+
 
 if __name__ == "__main__":
     
