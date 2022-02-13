@@ -62,7 +62,16 @@ Flask, MariaDB
 #### ChangeLog
 
  - 完成 github 登入的功能
+ - 完成 https 的網域建置
+ - Google OAuth 初勘
 
 #### TODO
 
  - 使用 tailwindcss 重新編寫 register.html
+
+### 2022-02-14
+
+#### ChangeLog
+
+ - 完成 Google OAuth 登入的功能
+ - 廢除原先使用帳號密碼登入的功能

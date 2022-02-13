@@ -2,10 +2,12 @@
 <html>
     <head>
         <meta charset="utf-8">
+        <title> NuOJ - 登入 </title> 
         <link rel="stylesheet" href="../static/css/output.css">
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
         <script  src="https://code.jquery.com/jquery-3.1.1.min.js"   integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="   crossorigin="anonymous"></script>
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        <script src="https://apis.google.com/js/platform.js?onload=init" async defer></script>
         <script>
             function onClick(){
                 var requestURL = window.location.protocol + '//' + window.location.hostname + "/login";
@@ -51,13 +53,9 @@
                 <div class="w-full h-full bg-black bg-opacity-70">
                     <div class="absolute left-[50%] top-[50%] -translate-x-[50%] -translate-y-[50%] w-fit bg-white bg-opacity-100 rounded p-10">
                         <p class="text-4xl text-center mb-10"> 登入 </p>
-                        <div class="my-10">
-                            <input id="account" class="w-full text-lg bg-slate-200 border-2 border-slate-600 rounded text-center p-2 my-2" placeholder="帳號或信箱">
-                            <input id="password" type="password" class="w-full text-lg bg-slate-200 border-2 border-slate-600 rounded text-center p-2 my-2" placeholder="密碼">
-                        </div>
                         <div class="mt-10">
-                            <button class="w-full bg-blue-600 text-white text-lg p-2 rounded my-2 duration-150 hover:bg-blue-500" onclick="onClick()"> 登入 </button>
-                            <button id="viaGithub" class="w-full bg-black text-white text-lg p-2 rounded my-2 duration-150 hover:bg-gray-800"> 使用 Github 進行登入 </button>
+                            <button id="viaGithub" class="w-full bg-black text-white text-lg p-2 rounded my-2 duration-150 hover:bg-gray-800"> 使用 Github OAuth 進行登入 </button>
+                            <button id="viaGoogle" class="w-full bg-gray-300 text-black text-lg p-2 rounded my-2 duration-150 hover:bg-gray-200"> 使用 Google OAuth 進行登入 </button>
                         </div>
                     </div>
                 </div>
@@ -67,6 +65,13 @@
     <script>
         document.getElementById("viaGithub").addEventListener("click", () => {
             window.location.href = "https://github.com/login/oauth/authorize?client_id=a00b6ba16a262302ed3b&scope=repo";
+        })
+        document.getElementById("viaGoogle").addEventListener("click", () => {
+            let client_id = "434328667842-4pqp3g8snef36jvf41g0ciu58rtek555.apps.googleusercontent.com"
+            let redirect_url = "https://nuoj.ntut-xuan.net/google_login"
+            let response_type = "code"
+            let scope = "https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email"
+            window.location.href = "https://accounts.google.com/o/oauth2/v2/auth?client_id=" + client_id + "&redirect_uri=" + redirect_url + "&response_type=" + response_type + "&scope=" + scope;
         })
     </script>
 </html>

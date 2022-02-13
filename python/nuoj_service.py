@@ -15,6 +15,7 @@ from datetime import timedelta
 import time;
 import add_problem
 import githubLogin
+import googleLogin
 
 app = Flask(__name__, static_url_path='/opt/nuoj/static')
 app.config['JSON_SORT_KEYS'] = False
@@ -434,7 +435,7 @@ def returnProfilePageWithName(name):
 @app.route("/github_login", methods=["GET", "POST"])
 def processGithubLogin():
     
-    data = githubLogin.githubLogin(session, conn, request.args.get("code"))
+    data = githubLogin.githubLogin(conn, request.args.get("code"))
 
     if(data["status"] == "OK"):
         resp = redirect("/")
@@ -445,6 +446,19 @@ def processGithubLogin():
     else:
         return Response(json.dumps(data), mimetype="application/json")
 
+@app.route("/google_login", methods=["GET", "POST"])
+def processGoogleLogin():
+
+    data = googleLogin.googleLogin(conn, request.args)
+
+    if(data["status"] == "OK"):
+        resp = redirect("/")
+        sessionID = os.urandom(16).hex()
+        resp.set_cookie("SID", value = sessionID, expires=time.time()+6*60)
+        session[sessionID] = {"username": data["user"], "email": data["email"]}
+        return resp
+    else:
+        return Response(json.dumps(data), mimetype="application/json")
 
 if __name__ == "__main__":
     
@@ -454,4 +468,4 @@ if __name__ == "__main__":
     conn = connect_mysql()
     
     app.debug = True
-    app.run(host="0.0.0.0", port=80)
+    app.run(host="0.0.0.0", port=443, ssl_context=("/etc/letsencrypt/live/nuoj.ntut-xuan.net/fullchain.pem", "/etc/letsencrypt/live/nuoj.ntut-xuan.net/privkey.pem"))

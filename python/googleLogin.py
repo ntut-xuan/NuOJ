@@ -14,39 +14,35 @@ from flask_session import Session
 from datetime import timedelta
 import time;
 import requests
-import add_problem
 
-def githubLogin(conn, code):
+def googleLogin(conn, args):
+    
+    if(args.get("error")):
+        data = {"status": "error", "message": args.get("error")}
+    else:
+        data = {"status": "OK", "result": {"code": args.get("code"), "scope": args.get("scope")}}
+    
+    code = args.get("code")
+    client_id = "434328667842-4pqp3g8snef36jvf41g0ciu58rtek555.apps.googleusercontent.com"
+    client_secret = open("gcp_secret.txt", "r").read()
 
-    client_secret = open("/opt/nuoj/github_secret.txt", "r").read()
-    parameter = {"client_id": "a00b6ba16a262302ed3b", "client_secret": client_secret, "code": code}
-    header = {"Accept": "application/json"}
-    req = requests.post("https://github.com/login/oauth/access_token", params=parameter, headers=header)
+    post_data = {"code": code, "client_id": client_id, "client_secret": client_secret, "redirect_uri": "https://nuoj.ntut-xuan.net/google_login", "grant_type": "authorization_code"}
+
+    req = requests.post("https://oauth2.googleapis.com/token", data=post_data)
     jsonObject = json.loads(req.text)
+
+    req = requests.get("https://www.googleapis.com/oauth2/v2/userinfo?access_token=" + jsonObject["access_token"])
+    jsonObject = json.loads(req.text)
+
+    email = jsonObject["email"]
+    username = jsonObject["name"]
 
     data = {}
-
-    if "access_token" not in jsonObject:
-        data["status"] = "Failed"
-        data["message"] = "登入失敗"
-        return data
-
-    header["Authorization"] = "token " + jsonObject["access_token"]
-    req = requests.get("https://api.github.com/user", headers=header)
-    jsonObject = json.loads(req.text)
     data["status"] = "OK"
-    count = 0
-
-    # Fetch data
-    username = jsonObject["login"]
-    email = jsonObject["email"]
-
-    if(email == None):
-        email = "github" + str(jsonObject["id"]) + "@github.noreply.com"
 
     try:
         with conn.cursor() as cursor:
-            cursor.execute("SELECT COUNT(*) from `user` where username=%s", jsonObject["login"])
+            cursor.execute("SELECT COUNT(*) from `user` where username=%s", username)
             count = cursor.fetchone()[0]
             cursor.close()
     except Exception as e:
@@ -64,7 +60,7 @@ def githubLogin(conn, code):
             data["status"] = "Failed"
             data["message"] = str(e)
             return data
-    
+
     data["user"] = username
     data["email"] = email
 
