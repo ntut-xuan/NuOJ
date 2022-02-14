@@ -15,6 +15,7 @@ from datetime import timedelta
 import time;
 import requests
 import add_problem
+import codecs
 
 def post(conn, data):
 
@@ -32,15 +33,15 @@ def post(conn, data):
 
 		jsonObject = data
 		
-		f = open(problemJsonPath, "w+")
-		f.write(json.dumps(data, indent=4))
+		f = codecs.open(problemJsonPath, "w+", "UTF-8")
+		f.write(json.dumps(data, indent=4, ensure_ascii=False))
 		f.close()
 
 		''' SQL '''
 
 		try:
 			with conn.cursor() as cursor:
-				command = "INSERT `problem`(name, visibility, author) VALUES ('%s', '%s', '%s')" % (str(jsonObject["problemContent"]["title"]), str(jsonObject["basicSetting"]["permission"]), "null")
+				command = "INSERT `problem`(name, visibility, author) VALUES (%s, %s, %s)" % (str(jsonObject["problemContent"]["title"]), str(jsonObject["basicSetting"]["permission"]), "null")
 				cursor.execute(command)
 				conn.commit()
 				cursor.close()

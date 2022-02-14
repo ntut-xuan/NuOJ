@@ -102,14 +102,18 @@ def returnIndex():
     
     SID = request.cookies.get("SID")
     return veriCookie(SID)
-    
+
+@app.route("/edit_problem", methods=["GET"])
+def returnEditProblemPage():
+    pass
+
 @app.route("/add_problem", methods=["GET", "POST"])
 def returnAddProblemPage():
 
     SID = request.cookies.get("SID")
 
     if(SID not in session):
-        redirect("./")
+        return redirect("/")
 
     html = open("/opt/nuoj/html/add_problem.html", "r")
 
@@ -440,7 +444,7 @@ def processGithubLogin():
     if(data["status"] == "OK"):
         resp = redirect("/")
         sessionID = os.urandom(16).hex()
-        resp.set_cookie("SID", value = sessionID, expires=time.time()+6*60)
+        resp.set_cookie("SID", value = sessionID, expires=time.time()+24*60*60)
         session[sessionID] = {"username": data["user"], "email": data["email"]}
         return resp
     else:
@@ -454,7 +458,7 @@ def processGoogleLogin():
     if(data["status"] == "OK"):
         resp = redirect("/")
         sessionID = os.urandom(16).hex()
-        resp.set_cookie("SID", value = sessionID, expires=time.time()+6*60)
+        resp.set_cookie("SID", value = sessionID, expires=time.time()+24*60*60)
         session[sessionID] = {"username": data["user"], "email": data["email"]}
         return resp
     else:
