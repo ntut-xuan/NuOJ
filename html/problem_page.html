@@ -12,6 +12,25 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.1/codemirror.min.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.1/mode/clike/clike.js"></script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+            }
+        };
+    </script>
+    <script>
+        function refresh_mathjax(){
+            MathJax.texReset();
+            MathJax.typesetClear();
+            MathJax.typesetPromise()
+            .catch(function (err) {
+                console.log(err.message);
+            })
+        }
+    </script>
     <body class="p-10 flex flex-col gap-10 bg-slate-100">
         <div class="w-full">
             <div class="w-fit mx-auto">
@@ -63,12 +82,14 @@
                 success(data, status, xhr){
                     document.getElementById("title").innerText = data["problemContent"]["title"]
                     document.getElementById("TL-text").innerText = "程式運行時間限制（TL）：" + data["basicSetting"]["timeLimit"] + " 秒"
-                    document.getElementById("ML-text").innerText = "程式運行時間限制（ML）：" + data["basicSetting"]["memoryLimit"] + " 秒"
+                    document.getElementById("ML-text").innerText = "程式運行時間限制（ML）：" + data["basicSetting"]["memoryLimit"] + " MB"
                     document.getElementById("description").innerText = data["problemContent"]["description"]
                     document.getElementById("input").innerText = data["problemContent"]["input"]
                     document.getElementById("output").innerText = data["problemContent"]["output"]
                     document.getElementById("note").innerText = data["problemContent"]["note"]
                 }
+            }).then(() => {
+                refresh_mathjax();
             })
         }
         loadProblem();
