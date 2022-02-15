@@ -1,0 +1,88 @@
+<html>
+    <meta charset="utf-8">
+    <title> NuOJ - Problem </title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@500&display=swap" rel="stylesheet">
+    <link href="../static/css/output.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.1/codemirror.css">
+    <link rel="stylesheet" href="https://codemirror.net/theme/darcula.css">
+    <script src="https://code.jquery.com/jquery-3.1.1.min.js"
+        integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.1/codemirror.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.1/mode/clike/clike.js"></script>
+    <body class="p-10 flex flex-col gap-10 bg-slate-100">
+        <div class="w-full">
+            <div class="w-fit mx-auto">
+                <a class="w-fit h-fit" href="/">
+                    <img class="h-20 w-auto" src="../static/logo-black.svg">
+                </a>
+            </div>
+        </div>
+        <div class="flex gap-10">
+            <div class="w-full h-screen rounded border-2 shadow flex flex-col p-10 gap-10 bg-white">
+                <div class="text-center">
+                    <p id="title" class="text-4xl font-medium my-2"> </p>
+                    <p id="TL-text" class="text-lg font-medium my-2"> </p>
+                    <p id="ML-text" class="text-lg font-medium my-2"> </p>
+                </div>
+                <div>
+                    <p class="text-xl font-semibold my-5">題目敘述</p>
+                    <p id="description"></p>
+                </div>
+                <div>
+                    <p class="text-xl font-semibold my-5">輸入說明</p>
+                    <p id="input"></p>
+                </div>
+                <div>
+                    <p class="text-xl font-semibold my-5">輸入說明</p>
+                    <p id="output"></p>
+                </div>
+                <div>
+                    <!-- 測試資料 -->
+                </div>
+                <div>
+                    <p class="text-xl font-semibold my-5">備註</p>
+                    <p id="note"></p>
+                </div>
+            </div>
+        </div>
+        <div class="border-2 text-lg flex flex-col gap-10 p-10 shadow bg-white">
+            <textarea id="code_area" class="resize-none w-full h-20\"></textarea>
+            <button class="bg-blue-700 w-full delay-50 p-2 hover:bg-blue-500 rounded text-white text-2xl"> 提交 </button>
+        </div>
+    </body>
+    <script>
+        function loadProblem(){
+            $.ajax({
+                url: window.location.href,
+                type: "POST",
+                dataType: "json",
+                contentType: "application/json",
+                success(data, status, xhr){
+                    document.getElementById("title").innerText = data["problemContent"]["title"]
+                    document.getElementById("TL-text").innerText = "程式運行時間限制（TL）：" + data["basicSetting"]["timeLimit"] + " 秒"
+                    document.getElementById("ML-text").innerText = "程式運行時間限制（ML）：" + data["basicSetting"]["memoryLimit"] + " 秒"
+                    document.getElementById("description").innerText = data["problemContent"]["description"]
+                    document.getElementById("input").innerText = data["problemContent"]["input"]
+                    document.getElementById("output").innerText = data["problemContent"]["output"]
+                    document.getElementById("note").innerText = data["problemContent"]["note"]
+                }
+            })
+        }
+        loadProblem();
+    </script>
+    <script>
+        function draw(){
+			let textarea = document.getElementById("code_area");
+			editor = CodeMirror.fromTextArea(textarea, {
+				lineNumbers: true,
+				matchBrackets: true,
+				mode: "text/x-c++src",
+                theme: "darcula"
+			});
+		}
+        draw();
+    </script>
+</html>

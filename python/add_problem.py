@@ -17,7 +17,7 @@ import requests
 import add_problem
 import codecs
 
-def post(conn, data):
+def post(conn, data, username):
 
 	resp = {}
 
@@ -38,16 +38,12 @@ def post(conn, data):
 		f.close()
 
 		''' SQL '''
-
-		try:
-			with conn.cursor() as cursor:
-				command = "INSERT `problem`(name, visibility, author) VALUES (%s, %s, %s)" % (str(jsonObject["problemContent"]["title"]), str(jsonObject["basicSetting"]["permission"]), "null")
-				cursor.execute(command)
-				conn.commit()
-				cursor.close()
-				conn.close()
-		except Exception as ex:
-			logger.error(ex)
+		
+		with conn.cursor() as cursor:
+			command = "INSERT `problem`(name, visibility, author) VALUES ('%s', '%s', '%s')" % (str(jsonObject["problemContent"]["title"]), str(jsonObject["basicSetting"]["permission"]), username)
+			cursor.execute(command)
+			cursor.close()
+			conn.commit()
 
 		resp = {"Status": "OK"}
 
