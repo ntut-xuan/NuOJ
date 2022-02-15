@@ -1,6 +1,6 @@
 <html>
     <meta charset="utf-8">
-    <title> NuOJ - Problem </title>
+    <title id="meta_title"> </title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@500&display=swap" rel="stylesheet">
@@ -40,7 +40,7 @@
             </div>
         </div>
         <div class="flex gap-10">
-            <div class="w-full h-screen rounded border-2 shadow flex flex-col p-10 gap-10 bg-white">
+            <div class="w-3/4 mx-auto h-fit rounded border-2 shadow flex flex-col p-10 gap-10 bg-white">
                 <div class="text-center">
                     <p id="title" class="text-4xl font-medium my-2"> </p>
                     <p id="TL-text" class="text-lg font-medium my-2"> </p>
@@ -55,7 +55,7 @@
                     <p id="input"></p>
                 </div>
                 <div>
-                    <p class="text-xl font-semibold my-5">輸入說明</p>
+                    <p class="text-xl font-semibold my-5">輸出說明</p>
                     <p id="output"></p>
                 </div>
                 <div>
@@ -67,7 +67,7 @@
                 </div>
             </div>
         </div>
-        <div class="border-2 text-lg flex flex-col gap-10 p-10 shadow bg-white">
+        <div class="w-3/4 mx-auto border-2 text-lg flex flex-col gap-10 p-10 shadow bg-white">
             <textarea id="code_area" class="resize-none w-full h-20\"></textarea>
             <button class="bg-blue-700 w-full delay-50 p-2 hover:bg-blue-500 rounded text-white text-2xl"> 提交 </button>
         </div>
@@ -87,6 +87,7 @@
                     document.getElementById("input").innerText = data["problemContent"]["input"]
                     document.getElementById("output").innerText = data["problemContent"]["output"]
                     document.getElementById("note").innerText = data["problemContent"]["note"]
+                    document.getElementById("meta_title").innerText = "NuOJ - " + data["problemContent"]["title"]
                 }
             }).then(() => {
                 refresh_mathjax();

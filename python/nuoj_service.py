@@ -422,7 +422,7 @@ def returnProblemIDPage(PID):
 def returnProfilePageWithName(name):
 	index_html = open("/opt/nuoj/html/profile.html", "r")
 	if request.method == "GET":
-		return index_html
+		return index_html.read()
 	response_data = {}
 	profile_data = {}
 	code = 200

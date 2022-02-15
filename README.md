@@ -57,6 +57,8 @@ Flask, MariaDB
 
 - 使用 tailwindcss 重新編寫 register.html
 
+
+
 ### 2022-02-13
 
 #### ChangeLog
@@ -69,6 +71,8 @@ Flask, MariaDB
 
  - 使用 tailwindcss 重新編寫 register.html
 
+
+
 ### 2022-02-14
 
 #### ChangeLog
@@ -76,8 +80,18 @@ Flask, MariaDB
  - 完成 Google OAuth 登入的功能
  - 廢除原先使用帳號密碼登入的功能
 
+
+
 ### 2022-02-15
 
 #### ChangeLog
 
  - 完成一些的題目建置的部份
+
+
+
+### 2022-02-16
+
+#### ChangeLog
+
+- 完成一些個人檔案的前端
