@@ -41,6 +41,8 @@ all:
 	sudo pip3 install flask_session
 	# load service 
 	sudo systemctl daemon-reload
+	sudo systemctl enable nuoj
+	sudo systemctl enable nuoj-judge
 	sudo systemctl start nuoj
 	sudo systemctl start nuoj-judge
 
