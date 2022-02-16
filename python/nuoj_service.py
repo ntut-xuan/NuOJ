@@ -262,5 +262,11 @@ if __name__ == "__main__":
 	# Initilize mariadb
 	conn = connect_mysql()
 	
+	settingJsonObject = json.loads(open("../setting.json", "r").read())
+
 	app.debug = True
-	app.run(host="0.0.0.0", port=443, ssl_context=("/etc/letsencrypt/live/nuoj.ntut-xuan.net/fullchain.pem", "/etc/letsencrypt/live/nuoj.ntut-xuan.net/privkey.pem"))
+
+	if(settingJsonObject["cert"]["enable"] == False):
+		app.run(host="0.0.0.0", port=80)
+	else:
+		app.run(host="0.0.0.0", port=443, ssl_context=(settingJsonObject["cert"]["fullchain_path"], settingJsonObject["cert"]["private_key_path"]))
