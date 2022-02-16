@@ -32,7 +32,7 @@
         <div id="profile" class="w-3/4 bg-gray-50 h-fit border-2 shadow-sm rounded p-10 flex gap-10 mx-auto">
             <div class="w-full flex flex-col gap-10">
                 <div class="mx-auto">
-                    <p class="text-4xl font-mono"> UserName </p>
+                    <p class="text-4xl font-mono"> {{username}} </p>
                 </div>
                 <div class="h-96 w-96 p-5 bg-slate-200 mx-auto">
                     <img class="relative w-full h-auto left-1/2 top-1/2 -translate-x-[50%] -translate-y-[50%]" src="../static/logo-black.svg">
@@ -42,15 +42,15 @@
             <div class="w-full flex flex-col justify-start gap-10">
                 <div>
                     <p class="text-2xl font-bold my-5"> 學校／機構 </p>
-                    <p class="text-xl font-medium my-5"> </p>
+                    <p class="text-xl font-medium my-5"> {{school}} </p>
                 </div>
                 <div>
                     <p class="text-2xl font-bold my-5"> 帳號類別 </p>
-                    <p class="text-xl font-medium my-5"> </p>
+                    <p class="text-xl font-medium my-5"> {{accountType}} </p>
                 </div>
                 <div>
                     <p class="text-2xl font-bold my-5"> 個人簡介 </p>
-                    <textarea class="text-xl font-medium my-5 w-full overflow-hidden resize-none h-96 outline-none cursor-default" readonly></textarea>
+                    <textarea class="text-xl font-medium my-5 w-full overflow-hidden resize-none h-96 outline-none cursor-default" readonly>{{Bio}}</textarea>
                 </div>
             </div>
         </div>
