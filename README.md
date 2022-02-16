@@ -95,3 +95,4 @@ Flask, MariaDB
 #### ChangeLog
 
 - 完成一些個人檔案的前端
+- 新增 setting.json，用於設定 NuOJ 的相關設定
