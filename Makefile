@@ -29,7 +29,7 @@ all:
 	# create table
 	sudo mysql --user="root" --database="NuOJ" --execute="CREATE TABLE \`user\` (\`user_id\` INT NOT NULL AUTO_INCREMENT, \`username\` VARCHAR(32) NOT NULL, \`password\` VARCHAR(32) NOT NULL, \`email\` VARCHAR(100	) NOT NULL, \`admin\` TINYINT(1) NOT NULL, PRIMARY KEY(user_id));"
 	sudo mysql --user="root" --database="NuOJ" --execute="CREATE TABLE \`submission\` ( \`submissionID\` INT NOT NULL AUTO_INCREMENT, \`submissionTime\` VARCHAR(40) NOT NULL, \`submissionBy\` VARCHAR(40) NOT NULL, \`Language\` VARCHAR(20) NOT NULL, \`ProblemID\` VARCHAR(20) NOT NULL,  \`VerdictResult\` VARCHAR(20), \`VerdictTime\` VARCHAR(40), \`VerdictMemory\` VARCHAR(40), PRIMARY KEY(submissionID));"
-	sudo mysql --user="root" --database="NuOJ" --execute="CREATE TABLE \`problem\` (\`ID\` int NOT NULL AUTO_INCREMENT, \`name\` VARCHAR(20) NOT NULL, \`visibility\` VARCHAR(20) NOT NULL, \`author\` VARCHAR(20) NOT NULL, PRIMARY KEY(ID)));"
+	sudo mysql --user="root" --database="NuOJ" --execute="CREATE TABLE \`problem\` (\`ID\` int NOT NULL AUTO_INCREMENT, \`name\` VARCHAR(20) NOT NULL, \`visibility\` VARCHAR(20) NOT NULL, \`author\` VARCHAR(20) NOT NULL, PRIMARY KEY(ID));"
 	# create a new admin account
 	sudo mysql --user="root" --database="NuOJ" --execute="INSERT INTO \`user\` (username, password, email, admin) VALUES ('NuOJ', 'Nu0J!@#$$', 'NuOJ@ntut.edu.tw', 1);"
 	# install pip package
