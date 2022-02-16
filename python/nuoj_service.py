@@ -230,7 +230,8 @@ def returnProfilePageWithName(name):
 @app.route("/github_login", methods=["GET", "POST"])
 def processGithubLogin():
 	
-	data = githubLogin.githubLogin(conn, request.args.get("code"))
+	settingJsonObject = json.loads(open("/opt/nuoj/setting.json", "r").read())
+	data = githubLogin.githubLogin(conn, request.args.get("code"), settingJsonObject)
 
 	if(data["status"] == "OK"):
 		resp = redirect("/")
@@ -262,7 +263,7 @@ if __name__ == "__main__":
 	# Initilize mariadb
 	conn = connect_mysql()
 	
-	settingJsonObject = json.loads(open("../setting.json", "r").read())
+	settingJsonObject = json.loads(open("/opt/nuoj/setting.json", "r").read())
 
 	app.debug = True
 
