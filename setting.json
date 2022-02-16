@@ -6,8 +6,8 @@
     },
     "oauth": {
         "github": {
-            "enable": true,
-            "secret": "b664108f5c1ceb2eac1166556b7b3ed8f850e310"
+            "enable": false,
+            "secret": ""
         },
         "google": {
             "enable": false,
