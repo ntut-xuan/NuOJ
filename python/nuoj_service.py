@@ -16,7 +16,8 @@ import add_problem
 import githubLogin
 import googleLogin
 
-app = Flask(__name__, static_url_path='/opt/nuoj/static')
+template_dir = "/opt/nuoj/templates"
+app = Flask(__name__, static_url_path='', template_folder=template_dir)
 app.config['JSON_SORT_KEYS'] = False
 app.config['SECRET_KEY'] = os.urandom(24)
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=31)
@@ -133,9 +134,19 @@ def returnSubmissionPage():
 
 @app.route("/login", methods=["GET"])
 def returnLoginPage():
-	index_html = open("/opt/nuoj/html/login.html", "r")
+	settingJsonObject = json.loads(open("/opt/nuoj/setting.json", "r").read())
+	githubStatus = settingJsonObject["oauth"]["github"]["enable"]
+	googleStatus = settingJsonObject["oauth"]["google"]["enable"]
 	if request.method == "GET":
-		return index_html.read()
+		return render_template("login.html", **locals())
+
+@app.route("/register", methods=["GET"])
+def returnRegisterPage():
+	settingJsonObject = json.loads(open("/opt/nuoj/setting.json", "r").read())
+	githubStatus = settingJsonObject["oauth"]["github"]["enable"]
+	googleStatus = settingJsonObject["oauth"]["google"]["enable"]
+	if request.method == "GET":
+		return render_template("register.html", **locals())
 
 @app.route("/queryProblemID", methods=["GET"])
 def getAvailableProblemID():
