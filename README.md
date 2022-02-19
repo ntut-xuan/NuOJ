@@ -96,3 +96,9 @@ Flask, MariaDB
 
 - 完成一些個人檔案的前端
 - 新增 setting.json，用於設定 NuOJ 的相關設定
+
+### 2022-02-19 
+
+#### ChangeLog
+
+- 修改 setting.json，使它能夠完全支援 github 與 google 的 OAuth 功能
