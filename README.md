@@ -102,3 +102,4 @@ Flask, MariaDB
 #### ChangeLog
 
 - 修改 setting.json，使它能夠完全支援 github 與 google 的 OAuth 功能
+- 重新改寫註冊與登入系統

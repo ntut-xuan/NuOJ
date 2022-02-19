@@ -135,8 +135,16 @@
             login.setAttribute("class", "text-white text-2xl border-b-2 border-white border-opacity-0 duration-500 hover:border-white hover:border-opacity-100")
             login.href = "./login";
             div1.appendChild(login)
+            
+            var div2 = document.createElement("div");
+            var register = document.createElement("a");
+            register.innerText = "註冊";
+            register.setAttribute("class", "text-white text-2xl border-b-2 border-white border-opacity-0 duration-500 hover:border-white hover:border-opacity-100")
+            register.href = "./register";
+            div2.appendChild(register)
 
             element.appendChild(div1);
+            element.appendChild(div2);
         }
 
         check_sessionExist();

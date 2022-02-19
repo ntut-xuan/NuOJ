@@ -55,7 +55,7 @@
                         <p class="text-4xl text-center mb-10"> 登入 </p>
                         <div class="mt-10 flex flex-col gap-5">
                             <input type="text" class="w-full bg-slate-100 p-2 text-base px-4 border-2 border-gray-600 appearance-none resize-none overflow-y-hidden rounded focus:outline-none focus:border-orange-500 focus:bg-white" placeholder="帳號或電子信箱">
-                            <input type="text" class="w-full bg-slate-100 p-2 text-base px-4 border-2 border-gray-600 appearance-none resize-none overflow-y-hidden rounded focus:outline-none focus:border-orange-500 focus:bg-white" placeholder="密碼">
+                            <input type="password" class="w-full bg-slate-100 p-2 text-base px-4 border-2 border-gray-600 appearance-none resize-none overflow-y-hidden rounded focus:outline-none focus:border-orange-500 focus:bg-white" placeholder="密碼">
                         </div>
                         <div class="mt-10">
                             <button id="viaAccount" class="w-full bg-orange-800 text-white text-lg p-2 rounded my-2 duration-150 hover:bg-orange-600"> 登入 </button>
@@ -89,6 +89,41 @@
                 let response_type = "code"
                 let scope = "https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email"
                 window.location.href = "https://accounts.google.com/o/oauth2/v2/auth?client_id=" + client_id + "&redirect_uri=" + redirect_url + "&response_type=" + response_type + "&scope=" + scope;
+            })
+        }
+        if(document.getElementById("viaAccount") != undefined) {
+            document.getElementById("viaAccount").addEventListener("click", () => {
+                let account = document.getElementsByTagName("input")[0].value
+                let password = document.getElementsByTagName("input")[1].value
+                let dataJson = {}
+                dataJson["account"] = account
+                dataJson["password"] = password
+                $.ajax({
+                    url: "./login",
+                    type: "POST",
+                    data: JSON.stringify(dataJson),
+                    dataType: "json",
+                    contentType: "application/json",
+                    success(data, status, xhr){
+                        if(data["status"] == "OK"){
+                            Swal.fire({
+                                icon: "success",
+                                title: "登入成功",
+                                timer: 1500,
+                                showConfirmButton: false
+                            }).then(() => {
+                                window.location.href = "/"
+                            })
+                        }else{
+                            Swal.fire({
+                                icon: "error",
+                                title: "登入失敗",
+                                timer: 1500,
+                                showConfirmButton: false
+                            })
+                        }
+                    }
+                })
             })
         }
     </script>

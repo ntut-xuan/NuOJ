@@ -15,6 +15,7 @@ import time;
 import add_problem
 import githubLogin
 import googleLogin
+import auth
 
 template_dir = "/opt/nuoj/templates"
 app = Flask(__name__, static_url_path='', template_folder=template_dir)
@@ -132,21 +133,41 @@ def returnSubmissionPage():
 	index_html = open("/opt/nuoj/html/submissions.html", "r")
 	return index_html.read()
 
-@app.route("/login", methods=["GET"])
+@app.route("/login", methods=["GET", "POST"])
 def returnLoginPage():
 	settingJsonObject = json.loads(open("/opt/nuoj/setting.json", "r").read())
 	githubStatus = settingJsonObject["oauth"]["github"]["enable"]
 	googleStatus = settingJsonObject["oauth"]["google"]["enable"]
 	if request.method == "GET":
 		return render_template("login.html", **locals())
+	data = request.json
+	result = auth.login(conn, data)
+	resp = Response(json.dumps(result), mimetype="application/json")
 
-@app.route("/register", methods=["GET"])
+	if(result["status"] == "OK"):
+		sessionID = os.urandom(16).hex()
+		resp.set_cookie("SID", value = sessionID, expires=time.time()+24*60*60)
+		session[sessionID] = {"username": result["username"], "email": result["email"]}
+
+	return resp
+
+@app.route("/register", methods=["GET", "POST"])
 def returnRegisterPage():
 	settingJsonObject = json.loads(open("/opt/nuoj/setting.json", "r").read())
 	githubStatus = settingJsonObject["oauth"]["github"]["enable"]
 	googleStatus = settingJsonObject["oauth"]["google"]["enable"]
 	if request.method == "GET":
 		return render_template("register.html", **locals())
+	data = request.json
+	result = auth.register(conn, data)
+	resp = Response(json.dumps(result), mimetype="application/json")
+
+	if(result["status"] == "OK"):
+		sessionID = os.urandom(16).hex()
+		resp.set_cookie("SID", value = sessionID, expires=time.time()+24*60*60)
+		session[sessionID] = {"username": result["username"], "email": result["email"]}
+	
+	return resp
 
 @app.route("/queryProblemID", methods=["GET"])
 def getAvailableProblemID():
