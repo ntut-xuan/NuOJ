@@ -245,8 +245,9 @@ def processGithubLogin():
 @app.route("/google_login", methods=["GET", "POST"])
 def processGoogleLogin():
 
-	data = googleLogin.googleLogin(conn, request.args)
-
+	settingJsonObject = json.loads(open("/opt/nuoj/setting.json", "r").read())
+	data = googleLogin.googleLogin(conn, request.args, settingJsonObject)
+	
 	if(data["status"] == "OK"):
 		resp = redirect("/")
 		sessionID = os.urandom(16).hex()

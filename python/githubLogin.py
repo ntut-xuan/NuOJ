@@ -18,8 +18,9 @@ import add_problem
 
 def githubLogin(conn, code, settingJsonObject):
 
+    client_id = settingJsonObject["oauth"]["github"]["ID"]
     client_secret = settingJsonObject["oauth"]["github"]["secret"]
-    parameter = {"client_id": "a00b6ba16a262302ed3b", "client_secret": client_secret, "code": code}
+    parameter = {"client_id": client_id, "client_secret": client_secret, "code": code}
     header = {"Accept": "application/json"}
     req = requests.post("https://github.com/login/oauth/access_token", params=parameter, headers=header)
     jsonObject = json.loads(req.text)

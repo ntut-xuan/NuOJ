@@ -7,11 +7,13 @@
     "oauth": {
         "github": {
             "enable": true,
+            "ID": "a00b6ba16a262302ed3b",
             "secret": "c0e99366e07b2c4df46de05d57ba5e985f22fc47"
         },
         "google": {
-            "enable": false,
-            "secret": ""
+            "enable": true,
+            "ID": "434328667842-4pqp3g8snef36jvf41g0ciu58rtek555.apps.googleusercontent.com",
+            "secret": "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"
         }
     }
 }
