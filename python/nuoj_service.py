@@ -27,6 +27,8 @@ app.secret_key = os.urandom(16).hex()
 CORS(app)
 isolate_path = ""
 
+add_problem_map = {}
+
 def init_isolate():
 	
 	# clean up isolate
@@ -98,9 +100,29 @@ def returnIndex():
 	SID = request.cookies.get("SID")
 	return veriCookie(SID)
 
-@app.route("/edit_problem", methods=["GET"])
-def returnEditProblemPage():
-	pass
+@app.route("/edit_problem/<PID>", methods=["GET", "POST"])
+def returnEditProblemPage(PID):
+	
+	SID = request.cookies.get("SID")
+
+	if(SID not in session):
+		return redirect("/")
+
+	data = session[SID]
+	username = data["username"]
+
+	if(username not in add_problem_map):
+		return redirect("/")
+
+	if(add_problem_map[username] != PID):
+		return redirect("/")
+
+	if(request.method == "GET"):
+		return render_template("add_problem.html", **locals())
+
+	result = add_problem.post(conn, request.json, PID, username)
+
+	return result
 
 @app.route("/add_problem", methods=["GET", "POST"])
 def returnAddProblemPage():
@@ -110,13 +132,14 @@ def returnAddProblemPage():
 	if(SID not in session):
 		return redirect("/")
 
-	html = open("/opt/nuoj/html/add_problem.html", "r")
+	data = session[SID]
+	username = data["username"]
 
-	if request.method == "POST":
-		username = session[SID]["username"]
-		return add_problem.post(conn, request.json, username)
+	global add_problem_map
+	
+	add_problem_map[username] = os.urandom(10).hex()
 
-	return html.read()
+	return redirect("/edit_problem/" + add_problem_map[username])
 
 @app.route("/submit", methods=["GET"], strict_slashes=False)
 def returnSubmitPage():
@@ -234,13 +257,39 @@ def logout():
 	resp = Response(response=json.dumps(data), status=code)
 	return resp
 
+@app.route("/problemList", methods=["GET"])
+def returnProblemList():
+	
+	with conn.cursor() as cursor:
+		cursor.execute("SELECT ID,name,author from `problem`")
+		datas = cursor.fetchall()
+		cursor.close()
+	
+	result = {"status": "OK", "result": []}
+
+	for data in datas:
+		problem_data = {}
+		problem_data["ID"] = data[0]
+		problem_data["name"] = data[1]
+		problem_data["author"] = data[2]
+		result["result"].append(problem_data)
+	
+	return Response(json.dumps(result), mimetype="application/json")
+
 @app.route("/problem/<PID>", methods=["GET", "POST"])
-def returnProblemIDPage(PunauthorizedID):
-	page = open("/opt/nuoj/html/problem_page.html", "r")
-	if request.method == "GET":
-		return page.read()
-	data = open("/opt/nuoj/problem/" + PID + "/problem.json")
-	return data.read()
+def returnProblemIDPage(PID):
+	with conn.cursor() as cursor:
+		cursor.execute("SELECT token FROM `problem` where ID=%s", PID)
+		token = cursor.fetchone()[0]
+	problemJsonObject = json.loads(open("/opt/nuoj/problem/" + token + "/problem.json", "r").read())
+	title = problemJsonObject["problemContent"]["title"]
+	description = problemJsonObject["problemContent"]["description"].replace("\n", "<br>")
+	input_description = problemJsonObject["problemContent"]["input"].replace("\n", "<br>")
+	output_description = problemJsonObject["problemContent"]["output"].replace("\n", "<br>")
+	note = problemJsonObject["problemContent"]["note"].replace("\n", "<br>")
+	TL = problemJsonObject["basicSetting"]["timeLimit"]
+	ML = problemJsonObject["basicSetting"]["memoryLimit"]
+	return render_template("problem_page.html", **locals())
 
 @app.route("/profile/<name>", methods=["GET"])
 def returnProfilePageWithName(name):

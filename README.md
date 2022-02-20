@@ -103,3 +103,9 @@ Flask, MariaDB
 
 - 修改 setting.json，使它能夠完全支援 github 與 google 的 OAuth 功能
 - 重新改寫註冊與登入系統
+
+### 2022-02-20
+
+#### ChangeLog
+
+- 推進新增題目功能的進度

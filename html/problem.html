@@ -9,13 +9,14 @@
         <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
         <script  src="https://code.jquery.com/jquery-3.1.1.min.js"   integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="   crossorigin="anonymous"></script>
         <script>
-            var requestURL = window.location.protocol + '//' + window.location.hostname + "/problemList";
+            var requestURL = "./problemList"
             var data = "";
             $.ajax({
                 url: requestURL,
                 type: "GET",
-                contentType: "application/json;charset=utf-8",
-                success: function(returnData){
+                dataType: "json",
+                contentType: "application/json",
+                success: function(returnData, status, xhr){
                     //console.log(returnData);
                     createTable(returnData);
                 },
@@ -26,36 +27,24 @@
                 }
             });
             function createTable(data){
-                console.log(data);
-                data = JSON.parse(data);
                 var div = document.getElementById("mainDiv");
                 var table = document.createElement("table");
                 table.setAttribute("class", "table table-hover");
-                var headers = ["problem_id", "problem_name", "problem_deadline", "problem_author"];
-                var headers_translate = ["題目 ID", "題目名稱", "題目期限", "題目作者"];
-                var dataCount = parseInt(data["DataCount"]);
-                console.log(data["DataCount"]);
-                for(var i = 0; i < dataCount; i++){
+                var headers = ["ID", "name", "author"];
+                var headers_translate = ["題目 ID", "題目名稱", "題目作者"];
+                for(var i = 0; i < data["result"].length; i++){
                     var row = table.insertRow(i);
                     for(var j = 0; j < headers.length; j++){
                         let cell = row.insertCell(j);
-                        let value = data["problemData"][i][headers[j]];
-                        if(headers[j] == "problem_name"){
+                        let value = data["result"][i][headers[j]];
+                        if(headers[j] === "name"){
                             let a = document.createElement("a");
-                            a.setAttribute("href", window.location.protocol + '//' + window.location.hostname + "/problem/" + data["problemData"][i]["problem_id"]);
+                            a.setAttribute("href", window.location.protocol + '//' + window.location.hostname + "/problem/" + data["result"][i]["ID"]);
                             a.innerText = value;
                             cell.appendChild(a);
                             continue;
                         }
-                        if(headers[j] == "problem_deadline"){
-                            if(parseInt(value) == 0){
-                                value = "無限期";
-                            }else{
-                                var date = new Date(value);
-                                value = date.toString();
-                            }
-                        }
-                        if(headers[j] == "problem_author"){
+                        if(headers[j] === "author"){
                             let a = document.createElement("a");
                             a.setAttribute("href", window.location.protocol + '//' + window.location.hostname + "/profile/" + value);
                             a.innerText = value;

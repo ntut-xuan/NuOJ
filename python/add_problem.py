@@ -17,7 +17,7 @@ import requests
 import add_problem
 import codecs
 
-def post(conn, data, username):
+def post(conn, data, PID, username):
 
 	resp = {}
 
@@ -25,7 +25,7 @@ def post(conn, data, username):
 
 		''' add file to file dic '''
 
-		problemDirPath = "/opt/nuoj/problem/" + str(data["problemID"])
+		problemDirPath = "/opt/nuoj/problem/" + PID
 		problemJsonPath = problemDirPath + "/problem.json"
 
 		if(not os.path.exists(problemDirPath)):
@@ -40,7 +40,7 @@ def post(conn, data, username):
 		''' SQL '''
 		
 		with conn.cursor() as cursor:
-			command = "INSERT `problem`(name, visibility, author) VALUES ('%s', '%s', '%s')" % (str(jsonObject["problemContent"]["title"]), str(jsonObject["basicSetting"]["permission"]), username)
+			command = "INSERT `problem`(name, visibility, token, author) VALUES ('%s', '%s', '%s', '%s')" % (str(jsonObject["problemContent"]["title"]), str(jsonObject["basicSetting"]["permission"]), PID, username)
 			cursor.execute(command)
 			cursor.close()
 			conn.commit()

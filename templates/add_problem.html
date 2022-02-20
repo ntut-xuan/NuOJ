@@ -60,6 +60,9 @@
                 </div>
             </div>
         </div>
+        <div class="w-full text-center py-10">
+            <p id="PID" class="italic text-gray-400"> {{PID}} </p>
+        </div>
     </body>
     <script>
         document.body.addEventListener('keydown', (e) => {
@@ -76,25 +79,17 @@
                 dataJson["basicSetting"]["permission"] = document.getElementsByTagName("select")[0].value
                 dataJson["basicSetting"]["timeLimit"] = document.getElementsByTagName("input")[1].value
                 dataJson["basicSetting"]["memoryLimit"] = document.getElementsByTagName("input")[2].value
+                
+                let PID = document.getElementById("PID").innerText
 
                 $.ajax({
-                    url: "./queryProblemID",
-                    type: "GET",
+                    url: window.location.href,
+                    data: JSON.stringify(dataJson),
+                    type: "POST",
                     dataType: "json",
                     contentType: "application/json;charset=utf-8",
                     success(resp, textStatus, xhr){
                         console.log(resp)
-                        dataJson["problemID"] = resp["Result"]["Count"] + 1
-                        $.ajax({
-                            url: "./add_problem",
-                            data: JSON.stringify(dataJson),
-                            type: "POST",
-                            dataType: "json",
-                            contentType: "application/json;charset=utf-8",
-                            success(resp, textStatus, xhr){
-                                console.log(resp)
-                            }
-                        })
                     }
                 })
                 e.preventDefault();
