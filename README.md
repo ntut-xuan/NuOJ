@@ -109,3 +109,9 @@ Flask, MariaDB
 #### ChangeLog
 
 - 推進新增題目功能的進度
+
+### 2022-02-21
+
+#### ChangeLog
+
+- 初勘 pre-compile system 並進行實作
