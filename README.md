@@ -94,24 +94,24 @@ Flask, MariaDB
 
 #### ChangeLog
 
-- 完成一些個人檔案的前端
-- 新增 setting.json，用於設定 NuOJ 的相關設定
+ - 完成一些個人檔案的前端
+ - 新增 setting.json，用於設定 NuOJ 的相關設定
 
 ### 2022-02-19 
 
 #### ChangeLog
 
-- 修改 setting.json，使它能夠完全支援 github 與 google 的 OAuth 功能
-- 重新改寫註冊與登入系統
+ - 修改 setting.json，使它能夠完全支援 github 與 google 的 OAuth 功能
+ - 重新改寫註冊與登入系統
 
 ### 2022-02-20
 
 #### ChangeLog
 
-- 推進新增題目功能的進度
+ - 推進新增題目功能的進度
 
 ### 2022-02-21
 
 #### ChangeLog
 
-- 初勘 pre-compile system 並進行實作
+ - 初勘 pre-compile system 並進行實作

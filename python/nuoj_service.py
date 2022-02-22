@@ -100,7 +100,8 @@ def returnIndex():
 	SID = request.cookies.get("SID")
 	return veriCookie(SID)
 
-@app.route("/edit_problem/<PID>", methods=["GET", "POST"])
+@app.route("/edit_problem/<PID>/", methods=["GET", "POST"])
+@app.route("/edit_problem/<PID>/basicSetting", methods=["GET", "POST"])
 def returnEditProblemPage(PID):
 	
 	SID = request.cookies.get("SID")
@@ -118,7 +119,7 @@ def returnEditProblemPage(PID):
 		return redirect("/")
 
 	if(request.method == "GET"):
-		return render_template("add_problem.html", **locals())
+		return render_template("add_problem_bs.html", **locals())
 
 	result = add_problem.post(conn, request.json, PID, username)
 
@@ -139,7 +140,7 @@ def returnAddProblemPage():
 	
 	add_problem_map[username] = os.urandom(10).hex()
 
-	return redirect("/edit_problem/" + add_problem_map[username])
+	return redirect("/edit_problem/" + add_problem_map[username] + "/basicSetting")
 
 @app.route("/submit", methods=["GET"], strict_slashes=False)
 def returnSubmitPage():
@@ -191,19 +192,6 @@ def returnRegisterPage():
 		session[sessionID] = {"username": result["username"], "email": result["email"]}
 	
 	return resp
-
-@app.route("/queryProblemID", methods=["GET"])
-def getAvailableProblemID():
-	try:
-		with conn.cursor() as cursor:
-			cursor.execute("SELECT COUNT(*) from `problem`")
-			count = cursor.fetchone()[0]
-	except Exception as ex:
-			print(ex)
-	data = {}
-	data["Status"] = "OK"
-	data["Result"] = {"Count": count}
-	return json.dumps(data)
 
 @app.route("/announcement", methods=["GET"])
 def getAnnouncement():

@@ -111,7 +111,7 @@ def judge(conn):
             elif (status == "TO"):
                 time = metafile_data["time-wall"]
                 judgeResult[i] = [status, time, message]
-            elif (status == "XX"):
+            elif (status =設定= "XX"):
                 judgeResult[i] = ["CE", time, message]
 
         if(status == ""):

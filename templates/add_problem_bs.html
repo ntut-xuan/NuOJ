@@ -1,18 +1,22 @@
 <html class="h-full">
     <head>
-        <link rel="stylesheet" href="../static/css/output.css">
+        <link rel="stylesheet" href="/static/css/output.css">
         <script  src="https://code.jquery.com/jquery-3.1.1.min.js"   integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="   crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     </head>
     <body>
         <div id="icon" class="fixed p-10 py-5 bg-gray-50 z-50 h-fit w-full">
-            <div class="flex w-2/5 justify-between">
+            <div class="flex w-3/5 justify-between">
                 <div>
                     <a class="relative w-fit h-fit" href="/">
-                        <img class="h-[60px] w-auto" src="../static/logo.svg">
+                        <img class="h-[60px] w-auto" src="/static/logo.svg">
                     </a>
                 </div>
                 <div class="my-auto cursor-pointer">
                     <a class="text-3xl my-auto hover:border-b-2 hover:border-b-black"> 基本設定 </a>
+                </div>
+                <div class="my-auto cursor-pointer">
+                    <a class="text-3xl my-auto hover:border-b-2 hover:border-b-black"> 解答設定 </a>
                 </div>
                 <div class="my-auto cursor-pointer">
                     <a class="text-3xl my-auto hover:border-b-2 hover:border-b-black"> 測資設定 </a>
@@ -56,6 +60,9 @@
                             </label>
                             <input type="text" class="ml-10 w-3/5 bg-slate-100 p-2 text-base px-4 border-2 border-gray-600 appearance-none resize-none overflow-y-hidden rounded focus:outline-none focus:border-orange-500 focus:bg-white">
                         </div>
+                        <div>
+                            <button id="submit" class="w-full text-lg bg-orange-600 rounded text-white p-2 hover:bg-orange-400 active:translate-y-1"> 存檔 </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -65,35 +72,80 @@
         </div>
     </body>
     <script>
+        function save(){
+            dataJson = {}
+            dataJson["problemContent"] = {}
+            dataJson["basicSetting"] = {}
+            dataJson["problemContent"]["title"] = document.getElementsByTagName("input")[0].value
+            dataJson["problemContent"]["description"] = document.getElementsByTagName("textarea")[0].value
+            dataJson["problemContent"]["input"] = document.getElementsByTagName("textarea")[1].value
+            dataJson["problemContent"]["output"] = document.getElementsByTagName("textarea")[2].value
+            dataJson["problemContent"]["note"] = document.getElementsByTagName("textarea")[3].value
+            dataJson["basicSetting"]["permission"] = document.getElementsByTagName("select")[0].value
+            dataJson["basicSetting"]["timeLimit"] = document.getElementsByTagName("input")[1].value
+            dataJson["basicSetting"]["memoryLimit"] = document.getElementsByTagName("input")[2].value
+            
+            let PID = document.getElementById("PID").innerText
+
+            if(dataJson["problemContent"]["title"].length == ""){
+                Swal.fire({
+                    icon: "error",
+                    title: "標題不能為空",
+                    timer: 2000,
+                    showConfirmButton: false
+                }).then(() => {
+                    return;
+                })
+            }else if(dataJson["basicSetting"]["timeLimit"].length == ""){
+                Swal.fire({
+                    icon: "error",
+                    title: "題目限時不能為空",
+                    timer: 2000,
+                    showConfirmButton: false
+                }).then(() => {
+                    return;
+                })
+            }else if(dataJson["basicSetting"]["memoryLimit"].length == ""){
+                Swal.fire({
+                    icon: "error",
+                    title: "題目限時不能為空",
+                    timer: 2000,
+                    showConfirmButton: false
+                }).then(() => {
+                    return;
+                })
+            }else{
+                Swal.fire({
+                    title: "存檔中...",
+                    timer: 2000,
+                    timerProgressBar: true,
+                    showConfirmButton: false,
+                    didOpen: () => {
+                        $.ajax({
+                            url: window.location.href,
+                            data: JSON.stringify(dataJson),
+                            type: "POST",
+                            dataType: "json",
+                            contentType: "application/json;charset=utf-8",
+                            success(resp, textStatus, xhr){
+                                Swal.fire({
+                                    icon: "success",
+                                    timer: 1500,
+                                    title: "存檔成功！",
+                                    showConfirmButton: false
+                                })
+                            }
+                        })
+                    }
+                });
+            }
+        }
         document.body.addEventListener('keydown', (e) => {
             if(e.ctrlKey && e.key === "s"){
-
-                dataJson = {}
-                dataJson["problemContent"] = {}
-                dataJson["basicSetting"] = {}
-                dataJson["problemContent"]["title"] = document.getElementsByTagName("input")[0].value
-                dataJson["problemContent"]["description"] = document.getElementsByTagName("textarea")[0].value
-                dataJson["problemContent"]["input"] = document.getElementsByTagName("textarea")[1].value
-                dataJson["problemContent"]["output"] = document.getElementsByTagName("textarea")[2].value
-                dataJson["problemContent"]["note"] = document.getElementsByTagName("textarea")[3].value
-                dataJson["basicSetting"]["permission"] = document.getElementsByTagName("select")[0].value
-                dataJson["basicSetting"]["timeLimit"] = document.getElementsByTagName("input")[1].value
-                dataJson["basicSetting"]["memoryLimit"] = document.getElementsByTagName("input")[2].value
-                
-                let PID = document.getElementById("PID").innerText
-
-                $.ajax({
-                    url: window.location.href,
-                    data: JSON.stringify(dataJson),
-                    type: "POST",
-                    dataType: "json",
-                    contentType: "application/json;charset=utf-8",
-                    success(resp, textStatus, xhr){
-                        console.log(resp)
-                    }
-                })
+                save();
                 e.preventDefault();
             }
         })
+        document.getElementById("submit").addEventListener("click", save)   
     </script>
 </html>
