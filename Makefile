@@ -47,6 +47,12 @@ all:
 	sudo systemctl start nuoj
 	sudo systemctl start nuoj-judge
 
+cert:
+	sudo snap install core; sudo snap refresh core
+	sudo snap install --classic certbot
+	-sudo ln -s /snap/bin/certbot /usr/bin/certbot
+	sudo certbot certonly --manual --preferred-challenge dns
+
 clean:
 	-sudo pip3 uninstall -y flask_session
 	-sudo pip3 uninstall -y flask_login
