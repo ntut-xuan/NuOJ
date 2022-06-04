@@ -1,0 +1,19 @@
+{
+    "cert": {
+        "enable": true,
+        "fullchain_path": "",
+        "private_key_path": ""  
+    },
+    "oauth": {
+        "github": {
+            "enable": true,
+            "ID": "",
+            "secret": ""
+        },
+        "google": {
+            "enable": true,
+            "ID": "",
+            "secret": ""
+        }
+    }
+}
