@@ -1,8 +1,8 @@
 {
     "cert": {
-        "enable": false,
-        "fullchain_path": "",
-        "private_key_path": ""  
+        "enable": true,
+        "fullchain_path": "/etc/letsencrypt/live/nuoj.ntut-xuan.net/fullchain.pem",
+        "private_key_path": "/etc/letsencrypt/live/nuoj.ntut-xuan.net/privkey.pem"
     },
     "oauth": {
         "github": {

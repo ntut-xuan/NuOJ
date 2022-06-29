@@ -326,6 +326,14 @@ def processGoogleLogin():
 	else:
 		return Response(json.dumps(data), mimetype="application/json")
 
+@app.route("/dev_progress", methods=["GET"])
+def progressPage():
+	frontend_pc = 40
+	backend_pc = 37
+	judge_pc = 25
+	other_pc = 25
+	return render_template("progress.html", **locals())
+
 if __name__ == "__main__":
 	
 	# Initilize isolate

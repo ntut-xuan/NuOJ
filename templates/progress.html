@@ -1,0 +1,133 @@
+<html>
+    <head>
+        <title> NuOJ - 開發進度追蹤 </title>
+        <meta charset="utf-8">
+        <meta content="NuOJ - 開發進度追蹤" name="title">
+        <meta content="一款來自國立臺北科技大學的線上程式評測系統" name="description">
+        <meta content="https://nuoj.ntut-xuan.net/" name="url">
+        <meta content="https://nuoj.ntut-xuan.net/static/logo.png" name="image">
+        <meta content="#f7b068" data-react-helmet="true" name="theme-color">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="../static/css/output.css">
+        <style>
+            @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Mono:wght@500&display=swap');
+        </style>
+        <style>
+            @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@100;300;400;500;700;900&display=swap');
+        </style>
+        <style>
+            @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@200;300;400;500;600;700;900&display=swap');
+        </style>
+        <style>
+            .circular-chart {
+                display: block;
+                margin: 10px auto;
+                max-width: 80%;
+                max-height: 250px;
+            }
+            .circle {
+                stroke: currentColor;
+                fill: none;
+                stroke-width: 30;
+                stroke-linecap: round;
+                animation: progress 1s ease-out forwards;
+            }
+            .circle-opacity {
+                stroke: currentColor;
+                opacity: 15%;
+                fill: none;
+                stroke-width: 30;
+                stroke-linecap: round;
+                animation: progress 1s ease-out forwards;
+            }
+            @keyframes progress {
+                0% {
+                    stroke-dasharray: 0, 1000;
+                }
+            }
+        </style>
+    </head>
+    <body class="bg-slate-200">
+        <div class="w-full h-full">
+            <div class="w-full p-10 flex flex-col justify-center text-center">
+                <img class="w-[38%] md:w-[8%] mx-auto" src="/static/logo_min.png">
+                <p class="text-2xl md:text-4xl p-5 font-['Noto_Serif_TC'] font-bold"> NuOJ 開發進度追蹤 </p>
+                <a class="font-[Noto Sans mono] font-bold hover:text-gray-500" href="https://github.com/ntut-xuan/NuOJ" target="_blank"> NuOJ Github Repo </a>
+            </div>
+            <div class="w-[80%] mx-auto rounded-xl bg-white p-5 md:p-10 grid grid-flow-col gap-5 grid-rows-2 md:grid-rows-1">
+                <div class="text-center text-xl">
+                    <a class="text-orange-400">
+                        <svg viewBox="0 0 360 360" class="circular-chart" xmlns="http://www.w3.org/2000/svg">
+                            <path class="circle"
+                              stroke-dasharray="{{frontend_pc}}0, 1000"
+                              d="M180 20.845
+                                a 159.155 159.155 0 0 1 0 318.31
+                                a 159.155 159.155 0 0 1 0 -318.31"/>
+                            <path class="circle-opacity"
+                                stroke-dasharray="1000, 1000"
+                                d="M180 20.845
+                                  a 159.155 159.155 0 0 1 0 318.31
+                                  a 159.155 159.155 0 0 1 0 -318.31"/>
+                            <text x="52%" y="45%" class="font-[Noto Sans TC] font-bold text-5xl" dominant-baseline="middle" text-anchor="middle"> 前端開發 </text>
+                            <text x="52%" y="65%" class="font-[Noto Sans TC] font-bold text-5xl" dominant-baseline="middle" text-anchor="middle"> {{frontend_pc}}% </text>
+                        </svg>
+                    </a>
+                </div>
+                <div class="text-center text-xl">
+                    <a class="text-green-400">
+                        <svg viewBox="0 0 360 360" class="circular-chart" xmlns="http://www.w3.org/2000/svg">
+                            <path class="circle"
+                              stroke-dasharray="{{backend_pc}}0, 1000"
+                              d="M180 20.845
+                                a 159.155 159.155 0 0 1 0 318.31
+                                a 159.155 159.155 0 0 1 0 -318.31"/>
+                            <path class="circle-opacity"
+                                stroke-dasharray="1000, 1000"
+                                d="M180 20.845
+                                  a 159.155 159.155 0 0 1 0 318.31
+                                  a 159.155 159.155 0 0 1 0 -318.31"/>
+                            <text x="50%" y="45%" class="font-[Noto Sans TC] font-bold text-5xl" dominant-baseline="middle" text-anchor="middle"> 後端開發 </text>
+                            <text x="50%" y="65%" class="font-[Noto Sans TC] font-bold text-5xl" dominant-baseline="middle" text-anchor="middle"> {{backend_pc}}% </text>
+                        </svg>
+                    </a>
+                </div>
+                <div class="text-center text-xl">
+                    <a class="text-blue-400">
+                        <svg viewBox="0 0 360 360" class="circular-chart" xmlns="http://www.w3.org/2000/svg">
+                            <path class="circle"
+                              stroke-dasharray="{{judge_pc}}0, 1000"
+                              d="M180 20.845
+                                a 159.155 159.155 0 0 1 0 318.31
+                                a 159.155 159.155 0 0 1 0 -318.31"/>
+                            <path class="circle-opacity"
+                                stroke-dasharray="1000, 1000"
+                                d="M180 20.845
+                                  a 159.155 159.155 0 0 1 0 318.31
+                                  a 159.155 159.155 0 0 1 0 -318.31"/>
+                                  <text x="50%" y="45%" class="font-[Noto Sans TC] font-bold text-5xl" dominant-baseline="middle" text-anchor="middle"> 裁判機開發 </text>
+                                  <text x="50%" y="65%" class="font-[Noto Sans TC] font-bold text-5xl" dominant-baseline="middle" text-anchor="middle"> {{judge_pc}}% </text>
+                        </svg>
+                    </a>
+                </div>
+                <div class="text-center text-xl">
+                    <a class="text-purple-400">
+                        <svg viewBox="0 0 360 360" class="circular-chart" xmlns="http://www.w3.org/2000/svg">
+                            <path class="circle"
+                              stroke-dasharray="{{other_pc}}0, 1000"
+                              d="M180 20.845
+                                a 159.155 159.155 0 0 1 0 318.31
+                                a 159.155 159.155 0 0 1 0 -318.31"/>
+                            <path class="circle-opacity"
+                                stroke-dasharray="1000, 1000"
+                                d="M180 20.845
+                                  a 159.155 159.155 0 0 1 0 318.31
+                                  a 159.155 159.155 0 0 1 0 -318.31"/>
+                            <text x="50%" y="45%" class="font-[Noto Sans TC] font-bold text-5xl" dominant-baseline="middle" text-anchor="middle"> 其餘事項 </text>
+                            <text x="50%" y="65%" class="font-[Noto Sans TC] font-bold text-5xl" dominant-baseline="middle" text-anchor="middle"> {{other_pc}}% </text>
+                        </svg>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>
