@@ -330,7 +330,7 @@ def processGoogleLogin():
 def progressPage():
 	frontend_pc = 40
 	backend_pc = 37
-	judge_pc = 25
+	judge_pc = 28
 	other_pc = 25
 	return render_template("progress.html", **locals())
 
