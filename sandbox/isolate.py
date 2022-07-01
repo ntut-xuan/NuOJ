@@ -37,6 +37,7 @@ def touch_text_file(text, type: CodeType, language: Language, box_id=0) -> tuple
     
     '''
     path = "/var/local/lib/isolate/%d/box/%s%s" % (box_id, type, language)
+    print("create file at", path)
     with open(path, "w") as code_file:
         code_file.write(text)
     if not os.path.exists(path):
@@ -87,6 +88,6 @@ def compile(type, language, box_id=0) -> str:
     code_path = "%s%s" % (type, language)
     code_output = "%s%s" % (type, ".o")
     meta_path = "/var/local/lib/isolate/%d/box/meta" % (box_id)
-    touch_text_file("init", CodeType.META, Language.NONE, box_id=0)
+    touch_text_file("init", CodeType.META.value, Language.NONE.value, box_id=0)
     subprocess.call("isolate --time=2 -p --full-env --meta='%s' --run -- /usr/bin/g++ %s -o %s" % (meta_path, code_path, code_output), shell=True)
     return read_meta(box_id)

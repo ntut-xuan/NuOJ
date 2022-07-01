@@ -10,15 +10,19 @@ from datetime import datetime as dt
 from uuid import uuid4
 from loguru import logger
 from flask_session import Session
-from datetime import timedelta
+from datetime import datetime, timedelta
+from dateutil import parser
 import time;
 import add_problem
 import githubLogin
 import googleLogin
+import asanaUtil
 import auth
+import pytz
 
 template_dir = "/opt/nuoj/templates"
 app = Flask(__name__, static_url_path='', template_folder=template_dir)
+asana_util = asanaUtil.AsanatUil(json.loads(open("/opt/nuoj/setting.json", "r").read())["asana"]["token"])
 app.config['JSON_SORT_KEYS'] = False
 app.config['SECRET_KEY'] = os.urandom(24)
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=31)
@@ -328,10 +332,40 @@ def processGoogleLogin():
 
 @app.route("/dev_progress", methods=["GET"])
 def progressPage():
-	frontend_pc = 40
-	backend_pc = 37
-	judge_pc = 28
-	other_pc = 25
+
+	fetch_section_id = ["1202538198680473", "1202538198680519", "1202538198680522", "1202538198680525"]
+	completed_task = asana_util.get_tasks("1202538198680466")
+	task_count_by_section = {}
+	complete_task_count_by_section = {}
+	section_complete_percentage = {}
+	section_task_info = {}
+	completed_task_info = []
+
+	for task in completed_task:
+		task_section_gid = task["memberships"][0]["section"]["gid"]
+		task_section_name = task["memberships"][0]["section"]["name"]
+		if task_section_gid not in task_count_by_section:
+			task_count_by_section[task_section_gid] = 0
+			complete_task_count_by_section[task_section_gid] = 0
+			section_task_info[task_section_gid] = []
+		task_count_by_section[task_section_gid] += 1
+		if task["completed"] and task_section_gid in fetch_section_id:
+			completed_time = parser.parse(task["completed_at"]).astimezone(pytz.timezone("Asia/Taipei"))
+			completed_time_string = datetime.strftime(completed_time, "%Y-%m-%d %H:%M:%S")
+			completed_task_info.append({"task_section_name": task_section_name, "task_name": task["name"], "task_complete_time": completed_time_string, "task_assignee": task["assignee"]["name"]})
+			complete_task_count_by_section[task_section_gid] += 1
+		section_complete_percentage[task_section_gid] = complete_task_count_by_section[task_section_gid] / task_count_by_section[task_section_gid]
+
+	front_end_complete_task_list = sorted(section_task_info["1202538198680473"], key=lambda d : d["task_complete_time"], reverse=True)
+	back_end_complete_task_list = sorted(section_task_info["1202538198680519"], key=lambda d : d["task_complete_time"], reverse=True)
+	judge_complete_task_list = sorted(section_task_info["1202538198680522"], key=lambda d : d["task_complete_time"], reverse=True)
+	other_complete_task_list = sorted(section_task_info["1202538198680525"], key=lambda d : d["task_complete_time"], reverse=True)
+	completed_task_info = sorted(completed_task_info, key=lambda d : d["task_complete_time"], reverse=True)
+	frontend_pc = int(section_complete_percentage["1202538198680473"] * 100)
+	backend_pc = int(section_complete_percentage["1202538198680519"] * 100)
+	judge_pc = int(section_complete_percentage["1202538198680522"] * 100)
+	other_pc = int(section_complete_percentage["1202538198680525"] * 100)
+	
 	return render_template("progress.html", **locals())
 
 if __name__ == "__main__":

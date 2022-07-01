@@ -2,6 +2,7 @@ from flask import Flask, request, Response
 from sandbox_enum import CodeType, Language
 import isolate
 import json
+import traceback
 
 app = Flask(__name__)
 
@@ -12,13 +13,9 @@ def compile(code, language, type, box_id, option=None):
 
         # 將程式檔案創建至沙箱內
         path, status = isolate.touch_text_file(code, type, language, 0)
-        if status == True:
-            print("create file at", path)
 
         # 執行編譯
-        meta, status = isolate.compile(type, language, 0)
-        if status == True:
-            print(meta)
+        meta = isolate.compile(type, language, 0)
 
         # 處理 meta file 並回傳
         meta_data = {}
@@ -30,9 +27,14 @@ def compile(code, language, type, box_id, option=None):
             meta_data["compile-result"] = "Failed"
         else:
             meta_data["compile-result"] = "OK"
+
+        # 清理沙箱
+        isolate.cleanup_sandbox(box_id)
+        
+        # 回傳
         return (meta_data, status)
     except Exception as e:
-        return (str(e), False)
+        return (str(traceback.format_exc()), False)
 
 
 @app.route("/judge", methods=["POST"])
