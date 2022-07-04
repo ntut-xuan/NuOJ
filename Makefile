@@ -9,12 +9,10 @@ all:
 	sudo make -C ~/isolate install
 	# clone NuOJ repository on github
 	sudo mkdir /opt/nuoj
-	sudo chmod -R 777 /opt/nuoj
-	sudo chmod -R 777 /opt/nuoj/*
 	sudo git clone --recursive https://github.com/ntut-xuan/NuOJ.git /opt/nuoj
-	sudo chmod 647 /opt/nuoj/*
-	sudo chmod 647 /opt/nuoj/python/nuoj_service.py
-	sudo chmod 647 /opt/nuoj/python/nuoj_judger.py
+	sudo chmod -R 647 /opt/nuoj/*
+	sudo chmod -R 647 /opt/nuoj/python/nuoj_service.py
+	sudo chmod -R 647 /opt/nuoj/python/nuoj_judger.py
 	# clone service file
 	sudo cp /opt/nuoj/service/nuoj.service /etc/systemd/system/
 	sudo cp /opt/nuoj/service/nuoj-judge.service /etc/systemd/system/
