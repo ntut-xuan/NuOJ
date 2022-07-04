@@ -1,0 +1,32 @@
+name: Ubuntu 20.04
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+jobs:
+  build:
+  
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+    
+    - uses: shogo82148/actions-setup-mysql@v1
+      with:
+        mysql-version: 'mariadb-10.6'
+    
+    - name: Verify MySQL connection from host
+      run: sudo mysql --host 127.0.0.1 --user "root" --execute "SHOW DATABASES"
+    
+    - name: Install
+      run: make install
+    
+    - name: Deploy Database (Socket)
+      run: make db-socket
+      
+    - name: Check NuOJ status
+      run: sudo python3 test.py

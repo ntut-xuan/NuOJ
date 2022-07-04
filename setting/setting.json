@@ -1,0 +1,22 @@
+{
+    "cert": {
+        "enable": false,
+        "fullchain_path": "",
+        "private_key_path": ""
+    },
+    "oauth": {
+        "github": {
+            "enable": true,
+            "ID": "",
+            "secret": ""
+        },
+        "google": {
+            "enable": false,
+            "ID": "",
+            "secret": ""
+        }
+    },
+    "asana": {
+        "token": ""
+    }
+}
