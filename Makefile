@@ -1,4 +1,4 @@
-.PHONY: install db-tcp
+all: install db-tcp
 
 install:
 	sudo apt-get install -y python3 python3-pip mariadb-server git build-essential asciidoc-base libcap-dev
