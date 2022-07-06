@@ -1,4 +1,4 @@
-# NuOJ
+# NuOJ - Web
 
 <img src="https://i.imgur.com/YHtW6Kj.png" alt="img" style="zoom: 25%;" />
 
@@ -10,28 +10,9 @@
 
 ## 簡介
 
-由 國立臺北科技大學 109 資訊工程系 黃漢軒 開發，一款來自國立臺北科技大學的開源的 Online Judge，可供教學與競賽使用。
+由 國立臺北科技大學 109 資訊工程系黃漢軒、吳秉宸、溫紹傑開發，郭忠義教授指導。
 
-
-
-銘謝：國立臺北科技大學 資訊工程系 郭忠義 教授。
-
-
-
-## 使用開源資源
-
-### 前端
-
-JQuery, Boostrap, Tailwindcss, SweetAlert2
-
-
-
-### 後端
-
-Flask, MariaDB
-
-
-
+一款來自國立臺北科技大學的開源的 Online Judge，可供教學與競賽使用。
 
 
 ## ChangeLog / TODO
