@@ -85,6 +85,10 @@ def nuoj_getID(conn):
 def page_not_found(error):
     return render_template('404.html', error=error)
 
+@app.errorhandler(500)
+def internel_server_error(error):
+    return render_template('500.html', error=error)
+
 @app.route("/veriCookie")
 def veriCookie(cookie):
 	data = {}
@@ -350,7 +354,8 @@ def processGoogleLogin():
 @app.route("/dev_progress", methods=["GET"])
 def progressPage():
 
-	fetch_section_id = ["1202538198680473", "1202538198680519", "1202538198680522", "1202538198680525"]
+	fetch_section_id = ["1202538198680473", "1202538198680519", "1202538198680522", "1202538198680525", "1202561659397276", "1202561659397287"]
+	section_color = ["bg-orange-400", "bg-green-400", "bg-blue-400", "bg-purple-400", "bg-cyan-400", "bg-teal-400"]
 	completed_task = asana_util.get_tasks("1202538198680466")
 	task_count_by_section = {}
 	complete_task_count_by_section = {}
@@ -367,21 +372,30 @@ def progressPage():
 			section_task_info[task_section_gid] = []
 		task_count_by_section[task_section_gid] += 1
 		if task["completed"] and task_section_gid in fetch_section_id:
+			index = fetch_section_id.index(task_section_gid)
+			card_background_color = section_color[index]
 			completed_time = parser.parse(task["completed_at"]).astimezone(pytz.timezone("Asia/Taipei"))
 			completed_time_string = datetime.strftime(completed_time, "%Y-%m-%d %H:%M:%S")
-			completed_task_info.append({"task_section_name": task_section_name, "task_name": task["name"], "task_complete_time": completed_time_string, "task_assignee": task["assignee"]["name"]})
+			assignee_photo = None
+			if task["assignee"]["photo"] == None:
+				assignee_photo = "/static/logo_min.png"
+			else:
+				assignee_photo = task["assignee"]["photo"]["image_128x128"]
+			completed_task_info.append({
+				"task_section_name": task_section_name, "task_name": task["name"], 
+				"task_complete_time": completed_time_string, "task_assignee": task["assignee"]["name"], 
+				"task_assignee_photo": assignee_photo, "task_color": card_background_color})
 			complete_task_count_by_section[task_section_gid] += 1
 		section_complete_percentage[task_section_gid] = complete_task_count_by_section[task_section_gid] / task_count_by_section[task_section_gid]
 
-	front_end_complete_task_list = sorted(section_task_info["1202538198680473"], key=lambda d : d["task_complete_time"], reverse=True)
-	back_end_complete_task_list = sorted(section_task_info["1202538198680519"], key=lambda d : d["task_complete_time"], reverse=True)
-	judge_complete_task_list = sorted(section_task_info["1202538198680522"], key=lambda d : d["task_complete_time"], reverse=True)
-	other_complete_task_list = sorted(section_task_info["1202538198680525"], key=lambda d : d["task_complete_time"], reverse=True)
 	completed_task_info = sorted(completed_task_info, key=lambda d : d["task_complete_time"], reverse=True)
 	frontend_pc = int(section_complete_percentage["1202538198680473"] * 100)
 	backend_pc = int(section_complete_percentage["1202538198680519"] * 100)
 	judge_pc = int(section_complete_percentage["1202538198680522"] * 100)
 	other_pc = int(section_complete_percentage["1202538198680525"] * 100)
+	database_pc = int(section_complete_percentage["1202561659397276"] * 100)
+	test_pc = int(section_complete_percentage["1202561659397287"] * 100)
+	complete_pc = (frontend_pc + backend_pc + judge_pc + other_pc + database_pc) // 5
 	
 	return render_template("progress.html", **locals())
 
