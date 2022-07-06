@@ -81,6 +81,10 @@ def nuoj_getID(conn):
 	finally:
 		return int(result)
 
+@app.errorhandler(404)
+def page_not_found(error):
+    return render_template('404.html', error=error)
+
 @app.route("/veriCookie")
 def veriCookie(cookie):
 	data = {}
@@ -153,8 +157,21 @@ def returnSubmitPage():
 
 @app.route("/problem", methods=["GET"])
 def returnProblemPage():
-	index_html = open("/opt/nuoj/html/problem.html", "r")
-	return index_html.read()
+
+	problem = []
+	login = False
+	username = None
+
+	SID = request.cookies.get("SID")
+	if(SID in session):
+		login = True
+		username = session[SID]["username"]
+
+	for i in range(90):
+		problem_dict = {"problem_ID": i+1, "problem_name": "A. 夏日祭", "problem_author": "ntut-xuan", "problem_tag": ["實作", "數學", "很難的題目", "week8", "星爆氣流斬 orz"]}
+		problem.append(problem_dict)
+
+	return render_template("problem.html", **locals())
 
 @app.route("/submissions", methods=["GET"])
 def returnSubmissionPage():
