@@ -1,1 +1,0 @@
-CREATE TABLE `problem` (`problem_id` VARCHAR(20) NOT NULL, `problem_name` VARCHAR(20) NOT NULL, `problem_deadline` VARCHAR(20) NOT NULL, `problem_author` VARCHAR(20) NOT NULL, PRIMARY KEY(problem_id));
