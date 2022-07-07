@@ -21,6 +21,7 @@ from flask_session import Session
 from datetime import timedelta
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
+from email.mime.image import MIMEImage
 
 def login(conn, data):
     account = data["account"]
@@ -171,11 +172,19 @@ def VerifyCode(conn, data):
     json.dump(VerifyCodeObject, file)
     file.close()
 
+    img_file_name = "/opt/nuoj/static/logo_min.png"
+    with open(img_file_name, 'rb') as f:
+        img_data = f.read()
+
+    image = MIMEImage(img_data, name=os.path.basename(img_file_name))
+    image.add_header('Content-ID', '<{}>'.format(os.path.basename(img_file_name)))
+
     content = MIMEMultipart()  #建立MIMEMultipart物件
-    content["subject"] = "NuOJ驗證信件"  #郵件標題
-    content["from"] = "Mail Authentication"  #寄件者
+    content["subject"] = "NuOJ 驗證信件"  #郵件標題
+    content["from"] = "NuOJ@noreply.me"  #寄件者
     content["to"] = email #收件者
-    content.attach(MIMEText(verify_code['code']))  #郵件內容
+    content.attach(MIMEText(render_template("mail_template.html", **locals()), 'html'))  #郵件內容
+    content.attach(image)
 
     with smtplib.SMTP(host=mail_info["server"], port=mail_info["port"]) as smtp:  # 設定SMTP伺服器
         try:
