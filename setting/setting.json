@@ -18,5 +18,12 @@
     },
     "asana": {
         "token": ""
+    },
+    "mail": {
+        "enable": false,
+        "server": "",
+        "port": "",
+        "mailname": "",
+        "password": ""
     }
 }
