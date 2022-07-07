@@ -104,6 +104,7 @@
                 dataJson["username"] = username
                 dataJson["email"] = email
                 dataJson["password"] = password
+                dataJson["check"] = true
 
                 $.ajax({
                     url: "./register",
@@ -122,16 +123,8 @@
                         if(data["message"] == "Repeat Username"){
                             message = "使用者名稱已被註冊"
                         }
-                        if(data["status"] == "OK"){
-                            Swal.fire({
-                                icon: "success",
-                                title: "註冊成功",
-                                timer: 1500,
-                                showConfirmButton: false
-                            }).then(() => {
-                                window.location.href = "/"
-                            })
-                        }else{
+                        if(data["status"] == "OK")verify();
+                        else{
                             Swal.fire({
                                 icon: "error",
                                 title: "註冊失敗",
@@ -142,6 +135,51 @@
                         }
                     }
                 })
+            })
+        }
+
+        function verify(){
+            Swal.fire({
+                title: '輸入您的驗證碼',
+                input: 'text',
+                inputAttributes: {
+                    autocapitalize: 'off'
+                },
+                showCancelButton: true,
+                confirmButtonText: 'OK',
+                showLoaderOnConfirm: true,
+                preConfirm: (login) => {
+                    dataJson['check'] = false
+                    dataJson['verify_code'] = login
+                    return $.ajax({
+                        url: "./register",
+                        type: "POST",
+                        data: JSON.stringify(dataJson),
+                        dataType: "json",
+                        contentType: "application/json",
+                        success(data, status, xhr){
+                            if(data["status"] == "OK"){
+                                return true;
+                            }
+                            Swal.showValidationMessage(`驗證碼錯誤!`)
+                            return false
+                        }
+                    })
+                },
+                allowOutsideClick: () => false
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    if (result.value){
+                        Swal.fire({
+                        icon: "success",
+                        title: "註冊成功",
+                        timer: 1500,
+                        showConfirmButton: false
+                        }).then(() => {
+                            window.location.href = "/"
+                        })
+                    }
+                }
             })
         }
     </script>

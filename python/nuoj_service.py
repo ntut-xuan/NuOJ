@@ -46,6 +46,15 @@ def init_isolate():
 	logger.debug(isolate_path)
 	logger.info("ISOLATE_INIT (2/2) INIT")
 
+def init_verifycode():
+	
+	# init verifycode
+	code = {}
+	file = open("/tmp/verify_code", "w")
+	json.dump(code, file)
+	file.close()
+	
+
 def connect_mysql():
 	
 	# connect NuOJ Database
@@ -207,16 +216,24 @@ def returnRegisterPage():
 	googleStatus = settingJsonObject["oauth"]["google"]["enable"]
 	if request.method == "GET":
 		return render_template("register.html", **locals())
-	data = request.json
-	result = auth.register(conn, data)
-	resp = Response(json.dumps(result), mimetype="application/json")
 
-	if(result["status"] == "OK"):
-		sessionID = os.urandom(16).hex()
-		resp.set_cookie("SID", value = sessionID, expires=time.time()+24*60*60)
-		session[sessionID] = {"username": result["username"], "email": result["email"]}
-	
-	return resp
+	data = request.json
+
+	if data['check']:
+		result = auth.VerifyCode(conn, data)
+		resp = Response(json.dumps(result), mimetype="application/json")
+		
+		return resp
+	else:
+		result = auth.register(conn, data)
+		resp = Response(json.dumps(result), mimetype="application/json")
+
+		if(result["status"] == "OK"):
+			sessionID = os.urandom(16).hex()
+			resp.set_cookie("SID", value = sessionID, expires=time.time()+24*60*60)
+			session[sessionID] = {"username": result["username"], "email": result["email"]}
+
+		return resp
 
 @app.route("/announcement", methods=["GET"])
 def getAnnouncement():
@@ -403,6 +420,8 @@ if __name__ == "__main__":
 	
 	# Initilize isolate
 	init_isolate()
+	# Initilize verifycode
+	init_verifycode()
 	# Initilize mariadb
 	conn = connect_mysql()
 	
