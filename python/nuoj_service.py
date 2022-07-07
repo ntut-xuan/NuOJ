@@ -411,6 +411,6 @@ if __name__ == "__main__":
 	app.debug = True
 
 	if(settingJsonObject["cert"]["enable"] == False):
-		app.run(host="0.0.0.0", port=80)
+		app.run(host="0.0.0.0", port=80, threaded=True)
 	else:
-		app.run(host="0.0.0.0", port=443, ssl_context=(settingJsonObject["cert"]["fullchain_path"], settingJsonObject["cert"]["private_key_path"]))
+		app.run(host="0.0.0.0", port=443, ssl_context=(settingJsonObject["cert"]["fullchain_path"], settingJsonObject["cert"]["private_key_path"]), threaded=True)
