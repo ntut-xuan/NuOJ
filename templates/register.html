@@ -95,6 +95,9 @@
                 window.location.href = "https://accounts.google.com/o/oauth2/v2/auth?client_id=" + client_id + "&redirect_uri=" + redirect_url + "&response_type=" + response_type + "&scope=" + scope;
             })
         }
+    </script>
+    {% if verifyStatus == true %}
+    <script>
         if(document.getElementById("viaAccount") != undefined){
             document.getElementById("viaAccount").addEventListener("click", () => {
                 let username = document.getElementsByTagName("input")[0].value
@@ -183,4 +186,59 @@
             })
         }
     </script>
+    {% endif %}
+    {% if verifyStatus == false %}
+    <script>
+        if(document.getElementById("viaAccount") != undefined){
+            document.getElementById("viaAccount").addEventListener("click", () => {
+                let username = document.getElementsByTagName("input")[0].value
+                let email = document.getElementsByTagName("input")[1].value
+                let password = document.getElementsByTagName("input")[2].value
+                dataJson = {}
+                dataJson["username"] = username
+                dataJson["email"] = email
+                dataJson["password"] = password
+                dataJson["check"] = false
+
+                $.ajax({
+                    url: "./register",
+                    type: "POST",
+                    data: JSON.stringify(dataJson),
+                    dataType: "json",
+                    contentType: "application/json",
+                    success(data, status, xhr){
+                        let message = ""
+                        if(data["message"] == "Invalid username"){
+                            message = "無效的使用者名稱"
+                        }
+                        if(data["message"] == "Repeat Email"){
+                            message = "信箱已被註冊"
+                        }
+                        if(data["message"] == "Repeat Username"){
+                            message = "使用者名稱已被註冊"
+                        }
+                        if(data["status"] == "OK"){
+                            Swal.fire({
+                                icon: "success",
+                                title: "註冊成功",
+                                timer: 1500,
+                                showConfirmButton: false
+                            }).then(() => {
+                                window.location.href = "/"
+                            })
+                        }else{
+                            Swal.fire({
+                                icon: "error",
+                                title: "註冊失敗",
+                                text: message,
+                                timer: 1500,
+                                showConfirmButton: false
+                            })
+                        }
+                    }
+                })
+            })
+        }
+    </script>
+    {% endif %}
 </html>

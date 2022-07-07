@@ -214,6 +214,7 @@ def returnRegisterPage():
 	settingJsonObject = json.loads(open("/opt/nuoj/setting.json", "r").read())
 	githubStatus = settingJsonObject["oauth"]["github"]["enable"]
 	googleStatus = settingJsonObject["oauth"]["google"]["enable"]
+	verifyStatus = settingJsonObject["mail"]["enable"]
 	if request.method == "GET":
 		return render_template("register.html", **locals())
 

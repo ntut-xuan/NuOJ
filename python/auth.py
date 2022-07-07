@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+from ast import arg
 from tabnanny import check, verbose
 from unicodedata import name
 from flask import *
@@ -13,6 +14,7 @@ import string
 import random
 import time
 import smtplib
+import threading
 from flask_cors import cross_origin, CORS
 from datetime import datetime as dt
 from uuid import uuid4
@@ -48,10 +50,12 @@ def login(conn, data):
     return data
 
 def register(conn, data):
+    settingJsonObject = json.loads(open("/opt/nuoj/setting.json", "r").read())
     email = data["email"]
     username = data["username"]
     password = data["password"]
-    verify_code = data["verify_code"]
+    if settingJsonObject["mail"]["enable"]:
+        verify_code = data["verify_code"]
 
     m = hashlib.md5()
     m.update(password.encode("utf8"))
@@ -92,33 +96,42 @@ def register(conn, data):
     VerifyCodeObject = json.loads(open("/tmp/verify_code", "r").read())
 
     print(data)
-    
-    if username in VerifyCodeObject:
-        VerifyCodeUser = VerifyCodeObject[username]
-        
-        if VerifyCodeUser['time'] - time.time() > 600:
-            data["status"] = "TimeOut"
+
+    if settingJsonObject["mail"]["enable"]:
+        if username in VerifyCodeObject:
+            VerifyCodeUser = VerifyCodeObject[username]
+            
+            if VerifyCodeUser['time'] - time.time() > 600:
+                data["status"] = "TimeOut"
+                data["username"] = username
+                data["email"] = email
+
+                return data
+
+            if VerifyCodeUser['code'] != verify_code:
+                data["status"] = "WrongCode"
+                data["username"] = username
+                data["email"] = email
+            
+                return data
+            
+            with conn.cursor() as cursor:
+                cursor.execute("INSERT INTO `user` (username, email, password, admin) values (%s, %s, %s, 0)", (username, email, password))
+                conn.commit()
+                cursor.close()
+            
+            data["status"] = "OK"
             data["username"] = username
             data["email"] = email
-
-            return data
-
-        if VerifyCodeUser['code'] != verify_code:
-            data["status"] = "WrongCode"
-            data["username"] = username
-            data["email"] = email
-        
-            return data
-        
+    else:
         with conn.cursor() as cursor:
-            cursor.execute("INSERT INTO `user` (username, email, password, admin) values (%s, %s, %s, 0)", (username, email, password))
-            conn.commit()
-            cursor.close()
-        
+                cursor.execute("INSERT INTO `user` (username, email, password, admin) values (%s, %s, %s, 0)", (username, email, password))
+                conn.commit()
+                cursor.close()
+            
         data["status"] = "OK"
         data["username"] = username
         data["email"] = email
-
     return data
 
 def VerifyCode(conn, data):
@@ -183,8 +196,18 @@ def VerifyCode(conn, data):
     content["subject"] = "NuOJ 驗證信件"  #郵件標題
     content["from"] = "NuOJ@noreply.me"  #寄件者
     content["to"] = email #收件者
-    content.attach(MIMEText(render_template("mail_template.html", **locals()), 'html'))  #郵件內容
+    
     content.attach(image)
+    content.attach(MIMEText(render_template("mail_template.html", **locals()), 'html'))  #郵件內容
+
+    thread = threading.Thread(target=SendMail, args=[mail_info, content])
+    thread.start()
+
+    data['status'] = "OK"
+
+    return data
+
+def SendMail(mail_info, content):
 
     with smtplib.SMTP(host=mail_info["server"], port=mail_info["port"]) as smtp:  # 設定SMTP伺服器
         try:
@@ -195,7 +218,3 @@ def VerifyCode(conn, data):
             print("Complete!")
         except Exception as e:
             print("Error message: ", e)
-    
-    data['status'] = "OK"
-
-    return data
