@@ -121,6 +121,7 @@ def register(conn, data):
     return data
 
 def VerifyCode(conn, data):
+    mail_info = json.loads(open("/opt/nuoj/setting.json", "r").read())["mail"]
     email = data["email"]
     username = data["username"]
     password = data["password"]
@@ -176,11 +177,11 @@ def VerifyCode(conn, data):
     content["to"] = email #收件者
     content.attach(MIMEText(verify_code['code']))  #郵件內容
 
-    with smtplib.SMTP(host="smtp.gmail.com", port="587") as smtp:  # 設定SMTP伺服器
+    with smtplib.SMTP(host=mail_info["server"], port=mail_info["port"]) as smtp:  # 設定SMTP伺服器
         try:
             smtp.ehlo()  # 驗證SMTP伺服器
             smtp.starttls()  # 建立加密傳輸
-            smtp.login("roytest0001@gmail.com", "ckvnncqnhjxsvdym")  # 登入寄件者gmail
+            smtp.login(mail_info["mailname"], mail_info["password"])  # 登入寄件者gmail
             smtp.send_message(content)  # 寄送郵件
             print("Complete!")
         except Exception as e:
