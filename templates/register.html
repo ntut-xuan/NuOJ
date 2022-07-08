@@ -8,6 +8,7 @@
         <script  src="https://code.jquery.com/jquery-3.1.1.min.js"   integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="   crossorigin="anonymous"></script>
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
         <script src="https://apis.google.com/js/platform.js?onload=init" async defer></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jsSHA/3.1.2/sha.js"></script>
         <script>
             function onClick(){
                 var requestURL = window.location.protocol + '//' + window.location.hostname + "/login";
@@ -96,6 +97,9 @@
             })
         }
     </script>
+    <script>
+        
+    </script>
     {% if verifyStatus == true %}
     <script>
         if(document.getElementById("viaAccount") != undefined){
@@ -103,10 +107,14 @@
                 let username = document.getElementsByTagName("input")[0].value
                 let email = document.getElementsByTagName("input")[1].value
                 let password = document.getElementsByTagName("input")[2].value
+                
+                const shaObj = new jsSHA("SHA-512", "TEXT", { encoding: "UTF8" });
+                shaObj.update(password)
+
                 dataJson = {}
                 dataJson["username"] = username
                 dataJson["email"] = email
-                dataJson["password"] = password
+                dataJson["password"] = shaObj.getHash("HEX")
                 dataJson["check"] = true
 
                 $.ajax({
@@ -194,10 +202,14 @@
                 let username = document.getElementsByTagName("input")[0].value
                 let email = document.getElementsByTagName("input")[1].value
                 let password = document.getElementsByTagName("input")[2].value
+
+                const shaObj = new jsSHA("SHA-512", "TEXT", { encoding: "UTF8" });
+                shaObj.update(password)
+
                 dataJson = {}
                 dataJson["username"] = username
                 dataJson["email"] = email
-                dataJson["password"] = password
+                dataJson["password"] = shaObj.getHash("HEX")
                 dataJson["check"] = false
 
                 $.ajax({

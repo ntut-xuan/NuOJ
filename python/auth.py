@@ -138,12 +138,6 @@ def VerifyCode(conn, data):
     mail_info = json.loads(open("/opt/nuoj/setting.json", "r").read())["mail"]
     email = data["email"]
     username = data["username"]
-    password = data["password"]
-
-    m = hashlib.md5()
-    m.update(password.encode("utf8"))
-    m.update(m.hexdigest().encode("utf8"))
-    password = m.hexdigest()
 
     data = {"status": "Failed", "message": ""}
 
