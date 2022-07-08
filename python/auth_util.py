@@ -2,6 +2,7 @@
 from ast import arg
 from tabnanny import check, verbose
 from unicodedata import name
+import uuid
 from flask import *
 import subprocess
 from flask.wrappers import Response
@@ -15,6 +16,7 @@ import random
 import time
 import smtplib
 import threading
+import database
 from flask_cors import cross_origin, CORS
 from datetime import datetime as dt
 from uuid import uuid4
@@ -25,29 +27,27 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.mime.image import MIMEImage
 
-def login(conn, data):
-    account = data["account"]
-    password = data["password"]
+def password_cypto(password) -> str:
     m = hashlib.md5()
     m.update(password.encode("utf8"))
     m.update(m.hexdigest().encode("utf8"))
     password = m.hexdigest()
+    return password
 
-    data = {"status": "Failed", "message": "Incorrect account or password"}
+def login(data):
+    account = data["account"]
+    password = password_cypto(data["password"])
 
-    with conn.cursor() as cursor:
-        if('@' in account):
-            cursor.execute("SELECT email, username FROM `user` WHERE email=%s and password=%s", (account, password))
-        else:
-            cursor.execute("SELECT email, username FROM `user` WHERE username=%s and password=%s", (account, password))
-        result = cursor.fetchone()
-        if result != None:
-            data["status"] = "OK"
-            data["email"] = result[0]
-            data["username"] = result[1]
-        cursor.close()
+    if '@' in account:
+        userdata = database.get_data("/users/", {"email": account})["data"][0]
+    else:
+        userdata = database.get_data("/users/", {"username": account})["data"][0]
 
-    return data
+    if userdata == None or userdata["password"] != password:
+        return {"status": "Failed", "message": "Incorrect account or password"}
+    
+    response_data = {"status": "OK", "data": {"username": userdata["username"], "email": userdata["email"]}}
+    return response_data
 
 def register(conn, data):
     settingJsonObject = json.loads(open("/opt/nuoj/setting.json", "r").read())
@@ -134,50 +134,9 @@ def register(conn, data):
         data["email"] = email
     return data
 
-def VerifyCode(conn, data):
+def send_email(email, username, verification_code):
+
     mail_info = json.loads(open("/opt/nuoj/setting.json", "r").read())["mail"]
-    email = data["email"]
-    username = data["username"]
-
-    data = {"status": "Failed", "message": ""}
-
-
-    username_valid = bool(re.match("^[a-z\d](?:[a-z\d]|-(?=[a-z\d])){0,38}$", username))
-
-    print(username_valid)
-
-    if(username_valid != True):
-        data["message"] = "Invalid username"
-        return data
-
-    with conn.cursor() as cursor:
-        cursor.execute("SELECT * FROM `user` WHERE email=%s", (email))
-        result = cursor.fetchone()
-        if result != None:
-            data["message"] = "Repeat Email"
-            cursor.close()
-            return data
-        cursor.close()
-
-    print("OK")
-    with conn.cursor() as cursor:
-        cursor.execute("SELECT * FROM `user` WHERE username=%s", (username))
-        result = cursor.fetchone()
-        if result != None:
-            data["message"] = "Repeat Username"
-            cursor.close()
-            return data
-        cursor.close()
-
-    VerifyCodeObject = json.loads(open("/tmp/verify_code", "r").read())
-    verify_code = {}
-    verify_code['time'] = time.time()
-    verify_code['code'] = ''.join(random.choice(string.ascii_letters + string.digits) for _ in range(8))
-    VerifyCodeObject[username] = verify_code
-
-    file = open("/tmp/verify_code", "w")
-    json.dump(VerifyCodeObject, file)
-    file.close()
 
     img_file_name = "/opt/nuoj/static/logo_min.png"
     with open(img_file_name, 'rb') as f:
@@ -191,24 +150,65 @@ def VerifyCode(conn, data):
     content["from"] = "NuOJ@noreply.me"  #寄件者
     content["to"] = email #收件者
     
+    verification_url = mail_info["redirect_url"] + "?vericode=%s" % (verification_code)
+
     content.attach(image)
     content.attach(MIMEText(render_template("mail_template.html", **locals()), 'html'))  #郵件內容
 
-    thread = threading.Thread(target=SendMail, args=[mail_info, content])
+    def send(mail_info, content):
+        with smtplib.SMTP(host=mail_info["server"], port=mail_info["port"]) as smtp:  # 設定SMTP伺服器
+            try:
+                smtp.ehlo()  # 驗證SMTP伺服器
+                smtp.starttls()  # 建立加密傳輸
+                smtp.login(mail_info["mailname"], mail_info["password"])  # 登入寄件者gmail
+                smtp.send_message(content)  # 寄送郵件
+                print("Complete!")
+            except Exception as e:
+                print("Error message: ", e)
+
+    thread = threading.Thread(target=send, args=[mail_info, content])
     thread.start()
 
-    data['status'] = "OK"
+def register_db(data) -> dict:
 
-    return data
+    # User Data
+    email = data["email"]
+    username = data["username"]
+    password = data["password"]
+    admin = 0
+    response = {"status": "OK"}
 
-def SendMail(mail_info, content):
+    # Check Data Valid
+    username_valid = bool(re.match("^[a-z\d](?:[a-z\d]|-(?=[a-z\d])){0,38}$", username))
+    if not username_valid:
+        return {"status": "Failed", "message": "Invalid username"}
 
-    with smtplib.SMTP(host=mail_info["server"], port=mail_info["port"]) as smtp:  # 設定SMTP伺服器
-        try:
-            smtp.ehlo()  # 驗證SMTP伺服器
-            smtp.starttls()  # 建立加密傳輸
-            smtp.login(mail_info["mailname"], mail_info["password"])  # 登入寄件者gmail
-            smtp.send_message(content)  # 寄送郵件
-            print("Complete!")
-        except Exception as e:
-            print("Error message: ", e)
+    user_data = database.get_data("/users", {})
+    for user in user_data["data"]:
+        if user["email"] == email:
+            return {"status": "Failed", "message": "Repeat Email"}
+        if user["username"] == username:
+            return {"status": "Failed", "message": "Repeat Username"}
+
+    # Cypto
+    password = password_cypto(password)
+
+    # Write into database
+    data_dict = {"user_id": str(uuid4()), "email": email, "username": username, 
+                "password": password, "admin": admin, "email_verification": False}
+    resp = database.post_data("/users", {}, json.dumps(data_dict))
+
+    # Email verification
+    mail_info = json.loads(open("/opt/nuoj/setting.json", "r").read())["mail"]
+    response["mail_verification_require"] = mail_info["enable"]
+    if mail_info["enable"] == True:
+        # Make email with verification link:
+        verification_code = str(uuid4())
+        response["verification_code"] = verification_code
+        send_email(email, username, verification_code)
+
+    # Check write result
+    response["data"] = data_dict
+    if resp["status"] == "OK":
+        return response
+    return {"status": "Failed", "message": resp["message"]}

@@ -23,7 +23,7 @@ def googleLogin(conn, args, settingJsonObject):
         data = {"status": "OK", "result": {"code": args.get("code"), "scope": args.get("scope")}}
     
     code = args.get("code")
-    client_id = settingJsonObject["oauth"]["google"]["ID"]
+    client_id = settingJsonObject["oauth"]["google"]["client_id"]
     client_secret = settingJsonObject["oauth"]["google"]["secret"]
 
     post_data = {"code": code, "client_id": client_id, "client_secret": client_secret, "redirect_uri": "https://nuoj.ntut-xuan.net/google_login", "grant_type": "authorization_code"}

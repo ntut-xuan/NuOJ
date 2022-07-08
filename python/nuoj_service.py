@@ -17,11 +17,13 @@ import add_problem
 import githubLogin
 import googleLogin
 import asanaUtil
-import auth
 import pytz
+import requests
+from app_auth import auth
 
-template_dir = "/opt/nuoj/templates"
-app = Flask(__name__, static_url_path='', template_folder=template_dir)
+app = Flask(__name__, static_url_path='', template_folder="/opt/nuoj/templates")
+app.register_blueprint(auth)
+
 asana_util = asanaUtil.AsanatUil(json.loads(open("/opt/nuoj/setting.json", "r").read())["asana"]["token"])
 app.config['JSON_SORT_KEYS'] = False
 app.config['SECRET_KEY'] = os.urandom(24)
@@ -74,6 +76,17 @@ def connect_mysql():
 		print(ex)
 	finally:
 		return conn
+
+def connect_database():
+	setting = json.loads(open("/opt/nuoj/setting.json", "r").read())
+	database_list = setting["database"]
+	for data in database_list:
+		url = data["url"] + ":" + data["port"] 
+		print(url)
+		req = requests.get(url + "/heartbeat")
+		if req.status_code == 200:
+			return url
+	return None
 
 def nuoj_getID(conn):
 	reuslt = ""
@@ -190,51 +203,6 @@ def returnProblemPage():
 def returnSubmissionPage():
 	index_html = open("/opt/nuoj/html/submissions.html", "r")
 	return index_html.read()
-
-@app.route("/login", methods=["GET", "POST"])
-def returnLoginPage():
-	settingJsonObject = json.loads(open("/opt/nuoj/setting.json", "r").read())
-	githubStatus = settingJsonObject["oauth"]["github"]["enable"]
-	googleStatus = settingJsonObject["oauth"]["google"]["enable"]
-	if request.method == "GET":
-		return render_template("login.html", **locals())
-	data = request.json
-	result = auth.login(conn, data)
-	resp = Response(json.dumps(result), mimetype="application/json")
-
-	if(result["status"] == "OK"):
-		sessionID = os.urandom(16).hex()
-		resp.set_cookie("SID", value = sessionID, expires=time.time()+24*60*60)
-		session[sessionID] = {"username": result["username"], "email": result["email"]}
-
-	return resp
-
-@app.route("/register", methods=["GET", "POST"])
-def returnRegisterPage():
-	settingJsonObject = json.loads(open("/opt/nuoj/setting.json", "r").read())
-	githubStatus = settingJsonObject["oauth"]["github"]["enable"]
-	googleStatus = settingJsonObject["oauth"]["google"]["enable"]
-	verifyStatus = settingJsonObject["mail"]["enable"]
-	if request.method == "GET":
-		return render_template("register.html", **locals())
-
-	data = request.json
-
-	if data['check']:
-		result = auth.VerifyCode(conn, data)
-		resp = Response(json.dumps(result), mimetype="application/json")
-		
-		return resp
-	else:
-		result = auth.register(conn, data)
-		resp = Response(json.dumps(result), mimetype="application/json")
-
-		if(result["status"] == "OK"):
-			sessionID = os.urandom(16).hex()
-			resp.set_cookie("SID", value = sessionID, expires=time.time()+24*60*60)
-			session[sessionID] = {"username": result["username"], "email": result["email"]}
-
-		return resp
 
 @app.route("/announcement", methods=["GET"])
 def getAnnouncement():
@@ -425,7 +393,7 @@ if __name__ == "__main__":
 	init_verifycode()
 	# Initilize mariadb
 	conn = connect_mysql()
-	
+
 	settingJsonObject = json.loads(open("/opt/nuoj/setting.json", "r").read())
 
 	app.debug = True
