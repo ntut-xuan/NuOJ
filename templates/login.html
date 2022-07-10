@@ -8,44 +8,7 @@
         <script  src="https://code.jquery.com/jquery-3.1.1.min.js"   integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="   crossorigin="anonymous"></script>
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
         <script src="https://apis.google.com/js/platform.js?onload=init" async defer></script>
-        <script>
-            function onClick(){
-                var requestURL = window.location.protocol + '//' + window.location.hostname + "/login";
-                var dataJson = {};
-                dataJson["account"] = document.getElementById("account").value;
-                dataJson["password"] = document.getElementById("password").value;
-                $.ajax({
-                    url: requestURL,
-                    data: JSON.stringify(dataJson),
-                    type: "POST",
-                    dataType: "json",
-                    contentType: "application/json;charset=utf-8",
-                    success: function(data, status, xhr){
-                        if(data["status"] == "OK"){
-                            Swal.fire({
-                                icon: 'success',
-                                title: data["message"],
-                                showConfirmButton: false,
-                                timer: 1500
-                            }).then((result) => {
-                                window.location.href = "./";
-                            });
-                        }else{
-                            Swal.fire({
-                                icon: 'error',
-                                title: data["message"],
-                                showConfirmButton: false,
-                                timer: 1500
-                            })
-                        }
-                    },
-                    error: function(xhr, ajaxOptions, thrownError){
-                        console.log(xhr.status);
-                        console.log(thrownError);
-                    }
-                });
-            }
-        </script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jsSHA/3.1.2/sha.js"></script>
     </head>
     <body>
         <div class="w-full h-screen flex bg-orange-300">
@@ -79,13 +42,13 @@
     <script>
         if(document.getElementById("viaGithub") != undefined){
             document.getElementById("viaGithub").addEventListener("click", () => {
-                window.location.href = "https://github.com/login/oauth/authorize?client_id=a00b6ba16a262302ed3b&scope=repo";
+                window.location.href = "https://github.com/login/oauth/authorize?client_id={{github_client_id}}&scope=repo";
             })
         }
         if(document.getElementById("viaGoogle") != undefined){
             document.getElementById("viaGoogle").addEventListener("click", () => {
-                let client_id = "434328667842-4pqp3g8snef36jvf41g0ciu58rtek555.apps.googleusercontent.com"
-                let redirect_url = "https://nuoj.ntut-xuan.net/google_login"
+                let client_id = "{{google_client_id}}"
+                let redirect_url = "{{google_redirect_url}}"
                 let response_type = "code"
                 let scope = "https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email"
                 window.location.href = "https://accounts.google.com/o/oauth2/v2/auth?client_id=" + client_id + "&redirect_uri=" + redirect_url + "&response_type=" + response_type + "&scope=" + scope;
@@ -96,8 +59,13 @@
                 let account = document.getElementsByTagName("input")[0].value
                 let password = document.getElementsByTagName("input")[1].value
                 let dataJson = {}
+
+                const shaObj = new jsSHA("SHA-512", "TEXT", { encoding: "UTF8" });
+                shaObj.update(password)
+
                 dataJson["account"] = account
-                dataJson["password"] = password
+                dataJson["password"] = shaObj.getHash("HEX")
+
                 $.ajax({
                     url: "./login",
                     type: "POST",
@@ -115,12 +83,16 @@
                                 window.location.href = "/"
                             })
                         }else{
-                            Swal.fire({
-                                icon: "error",
-                                title: "登入失敗",
-                                timer: 1500,
-                                showConfirmButton: false
-                            })
+                            if(data["code"] === 304){
+                                window.location.href = "/mail_check"
+                            }else{
+                                Swal.fire({
+                                    icon: "error",
+                                    title: "登入失敗",
+                                    timer: 1500,
+                                    showConfirmButton: false
+                                })
+                            }
                         }
                     }
                 })

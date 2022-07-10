@@ -17,6 +17,7 @@ import time
 import smtplib
 import threading
 import database
+import setting_util
 from flask_cors import cross_origin, CORS
 from datetime import datetime as dt
 from uuid import uuid4
@@ -26,6 +27,7 @@ from datetime import timedelta
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.mime.image import MIMEImage
+from error_code import ErrorCode, error_dict
 
 def password_cypto(password) -> str:
     m = hashlib.md5()
@@ -38,14 +40,16 @@ def login(data):
     account = data["account"]
     password = password_cypto(data["password"])
 
-    if '@' in account:
-        userdata = database.get_data("/users/", {"email": account})["data"][0]
-    else:
-        userdata = database.get_data("/users/", {"username": account})["data"][0]
+    setting = open("/opt/nuoj/setting.json", "r").read()
+    data = {"email": account} if '@' in account else {"username": account}
+    userdata = database.get_data("/users/", data)["data"][0]
 
     if userdata == None or userdata["password"] != password:
-        return {"status": "Failed", "message": "Incorrect account or password"}
+        return error_dict(ErrorCode.PASSWORD_NOT_MATCH)
     
+    if setting_util.mail_verification_enable() and userdata["email_verification"] == False:
+        return error_dict(ErrorCode.EMAIL_NOT_VERIFICATION)
+
     response_data = {"status": "OK", "data": {"username": userdata["username"], "email": userdata["email"]}}
     return response_data
 

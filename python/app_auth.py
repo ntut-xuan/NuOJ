@@ -3,6 +3,7 @@ import auth_util
 import time
 import os
 import database
+from error_code import *
 
 auth = Blueprint('auth', __name__)
 
@@ -19,6 +20,7 @@ def returnLoginPage():
 
 	if request.method == "GET":
 		return render_template("login.html", **locals())
+	
 	data = request.json
 	result = auth_util.login(data)
 	resp = Response(json.dumps(result), mimetype="application/json")
@@ -63,24 +65,23 @@ def returnRegisterPage():
 
 @auth.route("/mail_verification", methods=["GET"])
 def mail_verification():
-	
+
 	resp = {"status": "OK"}
 
 	if "vericode" not in request.args:
-		resp["status"] = "Failed"
-		resp["message"] = "Require Verification Code"
-		return Response(json.dumps(resp), mimetype="application/json")
+		return error_dict(ErrorCode.REQUIRE_PAPRMETER)
 
 	verification_code = request.args["vericode"]
 
 	if verification_code not in verification_code_dict:
-		resp["status"] = "Failed"
-		resp["message"] = "Invalid Verification Code"
-		return Response(json.dumps(resp), mimetype="application/json")
+		return error_dict(ErrorCode.EMAIL_VERIFICATION_FAILED)
 
 	username = verification_code_dict[verification_code]
-
 	put_data_str = json.dumps({"email_verification": True})
 	resp = database.put_data(("/users/%s" % username), {}, put_data_str)
 	
 	return Response(json.dumps(resp), mimetype="application/json")
+
+@auth.route("/mail_check", methods=["GET"])
+def mail_check_page():
+	return render_template("mail_check.html", **locals())

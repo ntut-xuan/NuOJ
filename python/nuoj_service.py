@@ -19,6 +19,7 @@ import googleLogin
 import asanaUtil
 import pytz
 import requests
+import database
 from app_auth import auth
 
 app = Flask(__name__, static_url_path='', template_folder="/opt/nuoj/templates")
@@ -199,46 +200,6 @@ def returnProblemPage():
 
 	return render_template("problem.html", **locals())
 
-@app.route("/submissions", methods=["GET"])
-def returnSubmissionPage():
-	index_html = open("/opt/nuoj/html/submissions.html", "r")
-	return index_html.read()
-
-@app.route("/announcement", methods=["GET"])
-def getAnnouncement():
-	announcementFile = open("/opt/nuoj/markdown/announcement.md", "r")
-	return announcementFile.read()
-
-@app.route("/submissionList", methods=["GET"])
-def submissionList():
-	conn = connect_mysql()
-	result = None
-	try:
-		with conn.cursor() as cursor:
-			command = "select * from submission"
-			cursor.execute(command)
-			result = cursor.fetchall()
-			cursor.close()
-			conn.close()
-	except Exception as ex:
-		logger.error(ex)
-	data = {}
-	submissionData = []
-	for i in range (0, len(result)):
-		subDict = {}
-		subDict["submissionID"] = result[i][0]
-		subDict["submissionTime"] = result[i][1]
-		subDict["submissionBy"] = result[i][2]
-		subDict["Language"] = result[i][3]
-		subDict["ProblemID"] = result[i][4]
-		subDict["VerdictResult"] = result[i][5]
-		subDict["VerdictTime"] = result[i][6]
-		subDict["VerdictMemory"] = result[i][7]
-		submissionData.append(subDict)
-	data["DataCount"] = len(result)
-	data["SubmissionData"] = submissionData
-	return json.dumps(data)
-
 @app.route("/logout", methods=["GET", "POST"])
 def logout():
 	data = {}
@@ -292,19 +253,11 @@ def returnProblemIDPage(PID):
 
 @app.route("/profile/<name>", methods=["GET"])
 def returnProfilePageWithName(name):
-	try:    
-		with conn.cursor() as cursor:
-			cursor.execute("SELECT * from `user` where username=%s", (name))
-			data  = cursor.fetchone()
-			username = data[1]
-			admin = data[4]
-			cursor.close()
-	except Exception as ex:
-		print(ex)
+	user_db = database.get_data("/users/" + name, {})
+	admin = user_db["data"]["admin"]
+	username = name
 	school = "未知"
-	accountType = "使用者"
-	if (admin == 1):
-		accountType = "管理員"
+	accountType = "使用者" if admin == 0 else "管理員"
 	return render_template("profile.html", **locals())
 
 @app.route("/github_login", methods=["GET", "POST"])

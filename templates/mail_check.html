@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html>
 	<head>
-        <title> NuOJ - 500 </title>
+        <title> NuOJ - 帳號驗證 </title>
         <link rel="icon" href="/static/logo_min.png" sizes="16x16" type="image/png">
 		<meta charset="utf-8">
         <meta content="#f7b068" data-react-helmet="true" name="theme-color">
-        <meta property="og:title" content="NuOJ - 500">
+        <meta property="og:title" content="NuOJ - 帳號驗證">
         <meta property="og:site_name" content="NuOJ">
         <meta property="og:type" content="website">
         <meta property="og:url" content="https://nuoj.ntut-xuan.net/dev_progress">
@@ -19,10 +19,16 @@
         <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@200;300;400;500;600;700;900&display=swap" rel="stylesheet">
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 	</head>
-    <body class="bg-purple-300 p-10 overflow-y-clip">
-        <div class="absolute left-[50%] top-[50%] translate-x-[-50%] translate-y-[-50%] w-[40vh] text-center">
-            <img class="w-[50%] mx-auto" src="/static/logo_min.png">
-            <p class="m-5 p-2 w-fit mx-auto text-2xl font-mono bg-purple-400 rounded-lg"> 500 Internal Server Error :(</p>
+    <body class="bg-orange-300 p-10 overflow-y-clip">
+        <div class="absolute left-[50%] top-[50%] translate-x-[-50%] translate-y-[-50%] w-[40vh] text-center bg-white rounded-lg p-5">
+            <a href="/"><img class="w-[50%] mx-auto" src="/static/logo_min.png"></a>
+            <div class="pt-5 w-full h-full">
+                <p class="w-fit mx-auto text-lg font-mono rounded-lg"> 驗證信已發送至個人信箱！ </p>
+                <p class="w-fit mx-auto text-lg font-mono rounded-lg"> 請前去收信以進行帳號驗證。 </p>
+                <p class="w-fit pt-5 mx-auto text-sm font-mono text-gray-400">
+                    <a> 沒有收到信嗎？重新發送！ </a>
+                </p>
+            </div>
         </div>
     </body>
 </html>
