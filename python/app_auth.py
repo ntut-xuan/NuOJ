@@ -68,19 +68,21 @@ def mail_verification():
 
 	resp = {"status": "OK"}
 
+
 	if "vericode" not in request.args:
-		return error_dict(ErrorCode.REQUIRE_PAPRMETER)
+		return render_template("mail_check_complete.html", message="驗證失敗，驗證連結需要驗證碼。")
 
 	verification_code = request.args["vericode"]
 
 	if verification_code not in verification_code_dict:
-		return error_dict(ErrorCode.EMAIL_VERIFICATION_FAILED)
+		return render_template("mail_check_complete.html", message="驗證失敗，驗證碼無效。")
 
 	username = verification_code_dict[verification_code]
 	put_data_str = json.dumps({"email_verification": True})
 	resp = database.put_data(("/users/%s" % username), {}, put_data_str)
-	
-	return Response(json.dumps(resp), mimetype="application/json")
+
+	del verification_code_dict[verification_code]
+	return render_template("mail_check_complete.html", message="驗證成功！")
 
 @auth.route("/mail_check", methods=["GET"])
 def mail_check_page():

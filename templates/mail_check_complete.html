@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html>
 	<head>
-        <title> NuOJ - 404 </title>
+        <title> NuOJ - 帳號驗證 </title>
         <link rel="icon" href="/static/logo_min.png" sizes="16x16" type="image/png">
 		<meta charset="utf-8">
         <meta content="#f7b068" data-react-helmet="true" name="theme-color">
-        <meta property="og:title" content="NuOJ - 404">
+        <meta property="og:title" content="NuOJ - 帳號驗證">
         <meta property="og:site_name" content="NuOJ">
         <meta property="og:type" content="website">
         <meta property="og:url" content="https://nuoj.ntut-xuan.net/dev_progress">
@@ -20,9 +20,12 @@
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 	</head>
     <body class="bg-orange-300 p-10 overflow-y-clip">
-        <div class="absolute left-[50%] top-[50%] translate-x-[-50%] translate-y-[-50%] w-[40vh] text-center">
-            <img class="w-[50%] mx-auto" src="/static/logo_min.png">
-            <p class="m-5 p-2 w-fit mx-auto text-2xl font-mono bg-purple-400 rounded-lg"> 404 Not Found :(</p>
+        <div class="absolute left-[50%] top-[50%] translate-x-[-50%] translate-y-[-50%] w-[40vh] text-center bg-white rounded-lg p-5">
+            <a href="/"><img class="w-[50%] mx-auto" src="/static/logo_min.png"></a>
+            <div class="pt-5 w-full h-full">
+                <p class="w-fit mx-auto py-5 text-2xl font-mono rounded-lg"> 信箱驗證 </p>
+                <p class="w-fit mx-auto font-bold text-lg font-mono rounded-lg"> {{message}} </p>
+            </div>
         </div>
     </body>
 </html>
