@@ -24,9 +24,6 @@ jobs:
     
     - name: Install
       run: make install
-    
-    - name: Deploy Database (Socket)
-      run: make db-socket
       
     - name: Check NuOJ status
       run: sudo python3 test.py
