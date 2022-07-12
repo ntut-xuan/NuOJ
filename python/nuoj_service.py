@@ -338,6 +338,10 @@ def progressPage():
 	
 	return render_template("progress.html", **locals())
 
+@app.route("/about", methods=["GET"])
+def getAboutIndex():
+	return render_template("about_us.html", **locals())
+
 if __name__ == "__main__":
 	
 	# Initilize isolate

@@ -698,10 +698,6 @@ video {
   margin-top: 2.5rem;
 }
 
-.mt-5 {
-  margin-top: 1.25rem;
-}
-
 .block {
   display: block;
 }
@@ -766,6 +762,42 @@ video {
 
 .h-\[50px\] {
   height: 50px;
+}
+
+.h-\[50vh\] {
+  height: 50vh;
+}
+
+.h-\[80vh\] {
+  height: 80vh;
+}
+
+.h-\[60vh\] {
+  height: 60vh;
+}
+
+.h-\[30\%\] {
+  height: 30%;
+}
+
+.h-\[30vh\] {
+  height: 30vh;
+}
+
+.h-48 {
+  height: 12rem;
+}
+
+.h-64 {
+  height: 16rem;
+}
+
+.h-52 {
+  height: 13rem;
+}
+
+.h-56 {
+  height: 14rem;
 }
 
 .min-h-full {
@@ -846,6 +878,50 @@ video {
   width: 90%;
 }
 
+.w-\[30\%\] {
+  width: 30%;
+}
+
+.w-\[60\%\] {
+  width: 60%;
+}
+
+.w-\[75\%\] {
+  width: 75%;
+}
+
+.w-\[70\%\] {
+  width: 70%;
+}
+
+.w-\[68\%\] {
+  width: 68%;
+}
+
+.w-\[65\%\] {
+  width: 65%;
+}
+
+.w-48 {
+  width: 12rem;
+}
+
+.w-\[8\%\] {
+  width: 8%;
+}
+
+.w-64 {
+  width: 16rem;
+}
+
+.w-52 {
+  width: 13rem;
+}
+
+.w-56 {
+  width: 14rem;
+}
+
 .table-auto {
   table-layout: auto;
 }
@@ -902,6 +978,10 @@ video {
 
 .grid-rows-3 {
   grid-template-rows: repeat(3, minmax(0, 1fr));
+}
+
+.flex-row {
+  flex-direction: row;
 }
 
 .flex-col {
@@ -1049,14 +1129,24 @@ video {
   background-color: rgb(255 255 255 / var(--tw-bg-opacity));
 }
 
-.bg-purple-300 {
+.bg-orange-300 {
   --tw-bg-opacity: 1;
-  background-color: rgb(216 180 254 / var(--tw-bg-opacity));
+  background-color: rgb(253 186 116 / var(--tw-bg-opacity));
 }
 
-.bg-purple-400 {
+.bg-orange-400 {
   --tw-bg-opacity: 1;
-  background-color: rgb(192 132 252 / var(--tw-bg-opacity));
+  background-color: rgb(251 146 60 / var(--tw-bg-opacity));
+}
+
+.bg-green-300 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(134 239 172 / var(--tw-bg-opacity));
+}
+
+.bg-orange-100 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(255 237 213 / var(--tw-bg-opacity));
 }
 
 .bg-gray-50 {
@@ -1072,11 +1162,6 @@ video {
 .bg-orange-600 {
   --tw-bg-opacity: 1;
   background-color: rgb(234 88 12 / var(--tw-bg-opacity));
-}
-
-.bg-orange-300 {
-  --tw-bg-opacity: 1;
-  background-color: rgb(253 186 116 / var(--tw-bg-opacity));
 }
 
 .bg-orange-500 {
@@ -1114,11 +1199,6 @@ video {
   background-color: rgb(29 78 216 / var(--tw-bg-opacity));
 }
 
-.bg-orange-400 {
-  --tw-bg-opacity: 1;
-  background-color: rgb(251 146 60 / var(--tw-bg-opacity));
-}
-
 .bg-green-400 {
   --tw-bg-opacity: 1;
   background-color: rgb(74 222 128 / var(--tw-bg-opacity));
@@ -1127,6 +1207,11 @@ video {
 .bg-blue-400 {
   --tw-bg-opacity: 1;
   background-color: rgb(96 165 250 / var(--tw-bg-opacity));
+}
+
+.bg-purple-400 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(192 132 252 / var(--tw-bg-opacity));
 }
 
 .bg-teal-400 {
@@ -1173,6 +1258,16 @@ video {
      object-fit: contain;
 }
 
+.object-fill {
+  -o-object-fit: fill;
+     object-fit: fill;
+}
+
+.object-scale-down {
+  -o-object-fit: scale-down;
+     object-fit: scale-down;
+}
+
 .p-10 {
   padding: 2.5rem;
 }
@@ -1193,6 +1288,11 @@ video {
   padding: 0.25rem;
 }
 
+.py-10 {
+  padding-top: 2.5rem;
+  padding-bottom: 2.5rem;
+}
+
 .py-5 {
   padding-top: 1.25rem;
   padding-bottom: 1.25rem;
@@ -1201,11 +1301,6 @@ video {
 .px-4 {
   padding-left: 1rem;
   padding-right: 1rem;
-}
-
-.py-10 {
-  padding-top: 2.5rem;
-  padding-bottom: 2.5rem;
 }
 
 .px-3 {
@@ -1231,6 +1326,16 @@ video {
 .px-10 {
   padding-left: 2.5rem;
   padding-right: 2.5rem;
+}
+
+.py-16 {
+  padding-top: 4rem;
+  padding-bottom: 4rem;
+}
+
+.py-8 {
+  padding-top: 2rem;
+  padding-bottom: 2rem;
 }
 
 .pt-24 {
@@ -1277,6 +1382,10 @@ video {
   font-family: 'Noto Serif TC';
 }
 
+.font-serif {
+  font-family: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
+}
+
 .text-2xl {
   font-size: 1.5rem;
   line-height: 2rem;
@@ -1285,6 +1394,11 @@ video {
 .text-5xl {
   font-size: 3rem;
   line-height: 1;
+}
+
+.text-4xl {
+  font-size: 2.25rem;
+  line-height: 2.5rem;
 }
 
 .text-3xl {
@@ -1302,9 +1416,9 @@ video {
   line-height: 1.75rem;
 }
 
-.text-4xl {
-  font-size: 2.25rem;
-  line-height: 2.5rem;
+.text-sm {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
 }
 
 .text-xl {
@@ -1312,13 +1426,12 @@ video {
   line-height: 1.75rem;
 }
 
-.text-sm {
-  font-size: 0.875rem;
-  line-height: 1.25rem;
-}
-
 .font-medium {
   font-weight: 500;
+}
+
+.font-thin {
+  font-weight: 100;
 }
 
 .font-bold {
@@ -1400,6 +1513,11 @@ video {
 .text-teal-400 {
   --tw-text-opacity: 1;
   color: rgb(45 212 191 / var(--tw-text-opacity));
+}
+
+.underline {
+  -webkit-text-decoration-line: underline;
+          text-decoration-line: underline;
 }
 
 .opacity-20 {
