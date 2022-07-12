@@ -1,7 +1,8 @@
 all: install db-tcp
 
 install:
-	sudo apt-get install -y python3 python3-pip mariadb-server git build-essential asciidoc-base libcap-dev sysfsutils
+	sudo apt-get install -y python3 python3-pip mariadb-server git build-essential asciidoc-base libcap-dev
+	sudo apt-get install -y sysfsutils
 	# clone Isolate repository on github 
 	sudo mkdir ~/isolate
 	sudo git clone https://github.com/ioi/isolate.git ~/isolate
