@@ -1,4 +1,4 @@
-all: install db-tcp
+all: install
 
 install:
 	sudo apt-get install -y python3 python3-pip git build-essential asciidoc-base libcap-dev sysfsutils
@@ -54,7 +54,10 @@ cert:
 	-sudo ln -s /snap/bin/certbot /usr/bin/certbot
 	sudo certbot certonly --manual --preferred-challenge dns
 
-clean: clean-file db-tcp-clean
+update:
+	sudo git -C /opt/nuoj pull
+
+clean: clean-file
 
 clean-file:
 	-sudo pip3 uninstall -y flask_session
