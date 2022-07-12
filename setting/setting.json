@@ -25,5 +25,11 @@
         "port": "",
         "mailname": "",
         "password": ""
-    }
+    },
+    "database-master": {
+        "url": "",
+        "port": "",
+        "secret": ""
+    },
+    "database-slave": []
 }
