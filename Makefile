@@ -10,12 +10,12 @@ install:
 	# clone NuOJ repository on github
 	sudo mkdir /opt/nuoj
 	sudo mkdir /opt/nuoj-sandbox
-	sudo mkdir /opt/nuoj-sandbox/result
-	sudo mkdir /opt/nuoj-sandbox/submission
 	sudo mkdir /opt/nuoj-database
 	sudo git clone --recursive https://github.com/ntut-xuan/NuOJ.git /opt/nuoj
 	sudo git clone --recursive https://github.com/ntut-xuan/NuOJ-Sandbox.git /opt/nuoj-sandbox
 	sudo git clone --recursive https://github.com/ntut-xuan/NuOJ-Database.git /opt/nuoj-database
+	sudo mkdir /opt/nuoj-sandbox/result
+	sudo mkdir /opt/nuoj-sandbox/submission
 	sudo chmod -R 647 /opt/nuoj/*
 	sudo chmod -R 647 /opt/nuoj-sandbox/*
 	sudo chmod -R 647 /opt/nuoj-database/*
