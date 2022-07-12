@@ -1,7 +1,7 @@
 all: install db-tcp
 
 install:
-	sudo apt-get install -y python3 python3-pip mariadb-server git build-essential asciidoc-base libcap-dev
+	sudo apt-get install -y python3 python3-pip mariadb-server git build-essential asciidoc-base libcap-dev sysfsutils
 	# clone Isolate repository on github 
 	sudo mkdir ~/isolate
 	sudo git clone https://github.com/ioi/isolate.git ~/isolate
@@ -30,6 +30,7 @@ install:
 	sudo pip3 install asana
 	sudo pip3 install python-dateutil
 	sudo pip3 install pytz
+	sudo pip3 install redis
 	# load service 
 	sudo systemctl daemon-reload
 	sudo systemctl enable nuoj
