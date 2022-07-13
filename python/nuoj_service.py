@@ -13,7 +13,6 @@ from flask_session import Session
 from datetime import datetime, timedelta
 from dateutil import parser
 import time;
-import add_problem
 import githubLogin
 import googleLogin
 import asanaUtil
@@ -147,18 +146,47 @@ def returnEditProblemPage(PID):
 	data = session[SID]
 	username = data["username"]
 
-	if(username not in add_problem_map):
-		return redirect("/")
-
-	if(add_problem_map[username] != PID):
-		return redirect("/")
-
 	if(request.method == "GET"):
+		print(PID)
+		response = database.get_data("/problems/%s/" % (PID), {})
+
+		print(response)
+
+		if response["status"] == "Failed":
+			return redirect("/")
+
+		problem_data = response["data"]
+
+		if(username != problem_data["problem_author"]):
+			return redirect("/")
+
+		title = ""
+		description = ""
+		input = ""
+		output = ""
+		note = ""
+		memory_limit = ""
+		time_limit = ""
+		permission = ""
+
+		if "problem_content" in problem_data:
+			title = problem_data["problem_content"]["title"]
+			description = problem_data["problem_content"]["description"]
+			input = problem_data["problem_content"]["input"]
+			output = problem_data["problem_content"]["output"]
+			note = problem_data["problem_content"]["note"]
+			memory_limit = problem_data["basic_setting"]["memory_limit"]
+			time_limit = problem_data["basic_setting"]["time_limit"]
+			permission = problem_data["basic_setting"]["permission"]
 		return render_template("add_problem_bs.html", **locals())
 
-	result = add_problem.post(conn, request.json, PID, username)
+	problem_data = json.loads(request.data)
+	response = database.put_data("/problems/%s/" % (PID), {}, json.dumps(problem_data))
+	
+	if response["status"] == "Failed":
+		return Response(json.dumps({"status": "Failed", "message": response["message"]}))
 
-	return result
+	return Response(json.dumps({"status": "OK"}))
 
 @app.route("/add_problem", methods=["GET", "POST"])
 def returnAddProblemPage():
@@ -171,11 +199,12 @@ def returnAddProblemPage():
 	data = session[SID]
 	username = data["username"]
 
-	global add_problem_map
-	
-	add_problem_map[username] = os.urandom(10).hex()
+	n = len(database.get_data("/problems/", {})["data"])
 
-	return redirect("/edit_problem/" + add_problem_map[username] + "/basicSetting")
+	data_dict = {"problem_pid": os.urandom(10).hex(), "problem_author": username, "index": n+1}
+
+	database.post_data("/problems/", {}, json.dumps(data_dict))
+	return redirect("/edit_problem/" + data_dict["problem_pid"] + "/basicSetting")
 
 @app.route("/submit", methods=["GET"], strict_slashes=False)
 def returnSubmitPage():
@@ -186,16 +215,13 @@ def returnSubmitPage():
 def returnProblemPage():
 
 	problem = []
-	login = False
-	username = None
 
-	SID = request.cookies.get("SID")
-	if(SID in session):
-		login = True
-		username = session[SID]["username"]
+	problem_db = database.get_data("/problems/", {})["data"]
 
-	for i in range(90):
-		problem_dict = {"problem_ID": i+1, "problem_name": "A. 夏日祭", "problem_author": "ntut-xuan", "problem_tag": ["實作", "數學", "很難的題目", "week8", "星爆氣流斬 orz"]}
+	for i in range(len(problem_db)):
+		problem_content = problem_db[i]["problem_content"]
+		problem_author = problem_db[i]["problem_author"]
+		problem_dict = {"problem_ID": i+1, "problem_name": problem_content["title"], "problem_author": problem_author, "problem_tag": []}
 		problem.append(problem_dict)
 
 	return render_template("problem.html", **locals())
@@ -217,38 +243,16 @@ def logout():
 	resp = Response(response=json.dumps(data), status=code)
 	return resp
 
-@app.route("/problemList", methods=["GET"])
-def returnProblemList():
-	
-	with conn.cursor() as cursor:
-		cursor.execute("SELECT ID,name,author from `problem`")
-		datas = cursor.fetchall()
-		cursor.close()
-	
-	result = {"status": "OK", "result": []}
-
-	for data in datas:
-		problem_data = {}
-		problem_data["ID"] = data[0]
-		problem_data["name"] = data[1]
-		problem_data["author"] = data[2]
-		result["result"].append(problem_data)
-	
-	return Response(json.dumps(result), mimetype="application/json")
-
-@app.route("/problem/<PID>", methods=["GET", "POST"])
-def returnProblemIDPage(PID):
-	with conn.cursor() as cursor:
-		cursor.execute("SELECT token FROM `problem` where ID=%s", PID)
-		token = cursor.fetchone()[0]
-	problemJsonObject = json.loads(open("/opt/nuoj/problem/" + token + "/problem.json", "r").read())
-	title = problemJsonObject["problemContent"]["title"]
-	description = problemJsonObject["problemContent"]["description"].replace("\n", "<br>")
-	input_description = problemJsonObject["problemContent"]["input"].replace("\n", "<br>")
-	output_description = problemJsonObject["problemContent"]["output"].replace("\n", "<br>")
-	note = problemJsonObject["problemContent"]["note"].replace("\n", "<br>")
-	TL = problemJsonObject["basicSetting"]["timeLimit"]
-	ML = problemJsonObject["basicSetting"]["memoryLimit"]
+@app.route("/problem/<ID>", methods=["GET", "POST"])
+def returnProblemIDPage(ID):
+	problemJsonObject = database.get_data("/problems/", {"index": ID})["data"][0]
+	title = problemJsonObject["problem_content"]["title"]
+	description = problemJsonObject["problem_content"]["description"].replace("\n", "<br>")
+	input_description = problemJsonObject["problem_content"]["input"].replace("\n", "<br>")
+	output_description = problemJsonObject["problem_content"]["output"].replace("\n", "<br>")
+	note = problemJsonObject["problem_content"]["note"].replace("\n", "<br>")
+	TL = problemJsonObject["basic_setting"]["time_limit"]
+	ML = problemJsonObject["basic_setting"]["memory_limit"]
 	return render_template("problem_page.html", **locals())
 
 @app.route("/profile/<name>", methods=["GET"])

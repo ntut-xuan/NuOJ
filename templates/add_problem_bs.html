@@ -31,11 +31,11 @@
                 <div class="p-10">
                     <p class="font-bold text-5xl m-5 text-left"> 題目敘述 </p>
                     <div class="flex flex-col gap-5 p-5 text-left">
-                        <input type="text" class="w-full bg-slate-100 text-base p-2 px-4 border-gray-600 appearance-none border-2 rounded focus:outline-none focus:border-orange-500 focus:bg-white" placeholder="題目名稱">
-                        <textarea class="h-[200px] bg-slate-100 p-2 text-base px-4 border-2 border-gray-600 appearance-none resize-none overflow-y-hidden rounded focus:outline-none focus:border-orange-500 focus:bg-white" placeholder="題目敘述"></textarea>
-                        <textarea class="h-[200px] bg-slate-100 p-2 text-base px-4 border-2 border-gray-600 appearance-none resize-none overflow-y-hidden rounded focus:outline-none focus:border-orange-500 focus:bg-white" placeholder="輸入說明"></textarea>
-                        <textarea class="h-[200px] bg-slate-100 p-2 text-base px-4 border-2 border-gray-600 appearance-none resize-none overflow-y-hidden rounded focus:outline-none focus:border-orange-500 focus:bg-white" placeholder="輸出說明"></textarea>
-                        <textarea class="h-[200px] bg-slate-100 p-2 text-base px-4 border-2 border-gray-600 appearance-none resize-none overflow-y-hidden rounded focus:outline-none focus:border-orange-500 focus:bg-white" placeholder="備注"></textarea>
+                        <input type="text" class="w-full bg-slate-100 text-base p-2 px-4 border-gray-600 appearance-none border-2 rounded focus:outline-none focus:border-orange-500 focus:bg-white" value="{{title}}" placeholder="題目名稱">
+                        <textarea class="h-[200px] bg-slate-100 p-2 text-base px-4 border-2 border-gray-600 appearance-none resize-none overflow-y-hidden rounded focus:outline-none focus:border-orange-500 focus:bg-white" placeholder="題目敘述">{{description}}</textarea>
+                        <textarea class="h-[200px] bg-slate-100 p-2 text-base px-4 border-2 border-gray-600 appearance-none resize-none overflow-y-hidden rounded focus:outline-none focus:border-orange-500 focus:bg-white" placeholder="輸入說明">{{input}}</textarea>
+                        <textarea class="h-[200px] bg-slate-100 p-2 text-base px-4 border-2 border-gray-600 appearance-none resize-none overflow-y-hidden rounded focus:outline-none focus:border-orange-500 focus:bg-white" placeholder="輸出說明">{{output}}</textarea>
+                        <textarea class="h-[200px] bg-slate-100 p-2 text-base px-4 border-2 border-gray-600 appearance-none resize-none overflow-y-hidden rounded focus:outline-none focus:border-orange-500 focus:bg-white" placeholder="備注">{{note}}</textarea>
                     </div>
                 </div>
             </div>
@@ -45,7 +45,7 @@
                     <div class="flex flex-col gap-5 p-5">
                         <div class="w-full flex items-center">
                             <label class="text-right w-1/6"> 觀看權限 </label>
-                            <select class="ml-10 w-3/5 bg-slate-100 p-2 text-base px-4 border-2 border-gray-600">
+                            <select class="ml-10 w-3/5 bg-slate-100 p-2 text-base px-4 border-2 border-gray-600" value="{{permission}}">
                                 <option value="1"> 僅限自己 </option>
                                 <option value="2"> 公開 </option>
                             </select>
@@ -53,12 +53,12 @@
                         <div class="w-full flex items-center">
                             <label class="text-right w-1/6"> 題目限時(秒) 
                             </label>
-                            <input type="text" class="ml-10 w-3/5 bg-slate-100 p-2 text-base px-4 border-2 border-gray-600 appearance-none resize-none overflow-y-hidden rounded focus:outline-none focus:border-orange-500 focus:bg-white">
+                            <input type="text" class="ml-10 w-3/5 bg-slate-100 p-2 text-base px-4 border-2 border-gray-600 appearance-none resize-none overflow-y-hidden rounded focus:outline-none focus:border-orange-500 focus:bg-white" value="{{time_limit}}">
                         </div>
                         <div class="w-full flex items-center">
                             <label class="text-right w-1/6"> 題目記憶體(MB) 
                             </label>
-                            <input type="text" class="ml-10 w-3/5 bg-slate-100 p-2 text-base px-4 border-2 border-gray-600 appearance-none resize-none overflow-y-hidden rounded focus:outline-none focus:border-orange-500 focus:bg-white">
+                            <input type="text" class="ml-10 w-3/5 bg-slate-100 p-2 text-base px-4 border-2 border-gray-600 appearance-none resize-none overflow-y-hidden rounded focus:outline-none focus:border-orange-500 focus:bg-white" value="{{memory_limit}}">
                         </div>
                         <div>
                             <button id="submit" class="w-full text-lg bg-orange-600 rounded text-white p-2 hover:bg-orange-400 active:translate-y-1"> 存檔 </button>
@@ -73,21 +73,23 @@
     </body>
     <script>
         function save(){
-            dataJson = {}
-            dataJson["problemContent"] = {}
-            dataJson["basicSetting"] = {}
-            dataJson["problemContent"]["title"] = document.getElementsByTagName("input")[0].value
-            dataJson["problemContent"]["description"] = document.getElementsByTagName("textarea")[0].value
-            dataJson["problemContent"]["input"] = document.getElementsByTagName("textarea")[1].value
-            dataJson["problemContent"]["output"] = document.getElementsByTagName("textarea")[2].value
-            dataJson["problemContent"]["note"] = document.getElementsByTagName("textarea")[3].value
-            dataJson["basicSetting"]["permission"] = document.getElementsByTagName("select")[0].value
-            dataJson["basicSetting"]["timeLimit"] = document.getElementsByTagName("input")[1].value
-            dataJson["basicSetting"]["memoryLimit"] = document.getElementsByTagName("input")[2].value
-            
+
             let PID = document.getElementById("PID").innerText
 
-            if(dataJson["problemContent"]["title"].length == ""){
+            dataJson = {}
+            dataJson["problem_content"] = {}
+            dataJson["basic_setting"] = {}
+            dataJson["problem_pid"] = PID
+            dataJson["problem_content"]["title"] = document.getElementsByTagName("input")[0].value
+            dataJson["problem_content"]["description"] = document.getElementsByTagName("textarea")[0].value
+            dataJson["problem_content"]["input"] = document.getElementsByTagName("textarea")[1].value
+            dataJson["problem_content"]["output"] = document.getElementsByTagName("textarea")[2].value
+            dataJson["problem_content"]["note"] = document.getElementsByTagName("textarea")[3].value
+            dataJson["basic_setting"]["permission"] = document.getElementsByTagName("select")[0].value
+            dataJson["basic_setting"]["time_limit"] = document.getElementsByTagName("input")[1].value
+            dataJson["basic_setting"]["memory_limit"] = document.getElementsByTagName("input")[2].value
+
+            if(dataJson["problem_content"]["title"].length == ""){
                 Swal.fire({
                     icon: "error",
                     title: "標題不能為空",
@@ -96,7 +98,7 @@
                 }).then(() => {
                     return;
                 })
-            }else if(dataJson["basicSetting"]["timeLimit"].length == ""){
+            }else if(dataJson["basic_setting"]["time_limit"].length == ""){
                 Swal.fire({
                     icon: "error",
                     title: "題目限時不能為空",
@@ -105,10 +107,10 @@
                 }).then(() => {
                     return;
                 })
-            }else if(dataJson["basicSetting"]["memoryLimit"].length == ""){
+            }else if(dataJson["basic_setting"]["memory_limit"].length == ""){
                 Swal.fire({
                     icon: "error",
-                    title: "題目限時不能為空",
+                    title: "記憶體限制不能為空",
                     timer: 2000,
                     showConfirmButton: false
                 }).then(() => {

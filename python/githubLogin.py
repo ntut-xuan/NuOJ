@@ -14,7 +14,6 @@ from flask_session import Session
 from datetime import timedelta
 import time;
 import requests
-import add_problem
 
 def githubLogin(conn, code, settingJsonObject):
 

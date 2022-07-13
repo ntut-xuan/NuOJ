@@ -42,7 +42,12 @@ def login(data):
 
     setting = open("/opt/nuoj/setting.json", "r").read()
     data = {"email": account} if '@' in account else {"username": account}
-    userdata = database.get_data("/users/", data)["data"][0]
+    userdata_set = database.get_data("/users/", data)["data"]
+
+    if len(userdata_set) == 0:
+        return error_dict(ErrorCode.USERNAME_NOT_FOUND)
+
+    userdata = userdata_set[0]
 
     if userdata == None or userdata["password"] != password:
         return error_dict(ErrorCode.PASSWORD_NOT_MATCH)
