@@ -18,5 +18,14 @@ jobs:
     - name: Install
       run: make
       
-    - name: Check NuOJ status
+    - name: NuOJ status
+      run: |
+        sudo systemctl start nuoj
+        sudo systemctl start nuoj-sandbox
+        sudo systemctl start nuoj-database
+        sudo systemctl status nuoj
+        sudo systemctl status nuoj-sandbox
+        sudo systemctl status nuoj-database
+
+    - name: Test
       run: make test-all

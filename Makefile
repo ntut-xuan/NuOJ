@@ -60,6 +60,9 @@ clean:
 	-sudo rm -rf /etc/systemd/system/nuoj.service
 
 test-all:
+	sudo systemctl start nuoj
+	sudo systemctl start nuoj-sandbox
+	sudo systemctl start nuoj-database
 	sudo python3 /opt/nuoj/test.py
 	sudo python3 /opt/nuoj-sandbox/test.py
 	sudo python3 /opt/nuoj-database/test.py
