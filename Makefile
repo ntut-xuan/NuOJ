@@ -58,3 +58,8 @@ clean:
 	-sudo rm -rf ~/isolate
 	-sudo systemctl stop nuoj
 	-sudo rm -rf /etc/systemd/system/nuoj.service
+
+test-all:
+	sudo python3 /opt/nuoj/test.py
+	sudo python3 /opt/nuoj-sandbox/test.py
+	sudo python3 /opt/nuoj-database/test.py
