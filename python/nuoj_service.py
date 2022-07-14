@@ -20,9 +20,11 @@ import pytz
 import requests
 import database
 from app_auth import auth
+from app_add_problem import problem
 
 app = Flask(__name__, static_url_path='', template_folder="/opt/nuoj/templates")
 app.register_blueprint(auth)
+app.register_blueprint(problem)
 
 asana_util = asanaUtil.AsanatUil(json.loads(open("/opt/nuoj/setting.json", "r").read())["asana"]["token"])
 app.config['JSON_SORT_KEYS'] = False
@@ -133,60 +135,6 @@ def returnIndex():
 	
 	SID = request.cookies.get("SID")
 	return veriCookie(SID)
-
-@app.route("/edit_problem/<PID>/", methods=["GET", "POST"])
-@app.route("/edit_problem/<PID>/basicSetting", methods=["GET", "POST"])
-def returnEditProblemPage(PID):
-	
-	SID = request.cookies.get("SID")
-
-	if(SID not in session):
-		return redirect("/")
-
-	data = session[SID]
-	username = data["username"]
-
-	if(request.method == "GET"):
-		print(PID)
-		response = database.get_data("/problems/%s/" % (PID), {})
-
-		print(response)
-
-		if response["status"] == "Failed":
-			return redirect("/")
-
-		problem_data = response["data"]
-
-		if(username != problem_data["problem_author"]):
-			return redirect("/")
-
-		title = ""
-		description = ""
-		input = ""
-		output = ""
-		note = ""
-		memory_limit = ""
-		time_limit = ""
-		permission = ""
-
-		if "problem_content" in problem_data:
-			title = problem_data["problem_content"]["title"]
-			description = problem_data["problem_content"]["description"]
-			input = problem_data["problem_content"]["input"]
-			output = problem_data["problem_content"]["output"]
-			note = problem_data["problem_content"]["note"]
-			memory_limit = problem_data["basic_setting"]["memory_limit"]
-			time_limit = problem_data["basic_setting"]["time_limit"]
-			permission = problem_data["basic_setting"]["permission"]
-		return render_template("add_problem_bs.html", **locals())
-
-	problem_data = json.loads(request.data)
-	response = database.put_data("/problems/%s/" % (PID), {}, json.dumps(problem_data))
-	
-	if response["status"] == "Failed":
-		return Response(json.dumps({"status": "Failed", "message": response["message"]}))
-
-	return Response(json.dumps({"status": "OK"}))
 
 @app.route("/add_problem", methods=["GET", "POST"])
 def returnAddProblemPage():
@@ -345,6 +293,10 @@ def progressPage():
 @app.route("/about", methods=["GET"])
 def getAboutIndex():
 	return render_template("about_us.html", **locals())
+
+@app.route("/debug", methods=["GET"])
+def getDebugPage():
+	return render_template("debug.html", **locals())
 
 if __name__ == "__main__":
 	
