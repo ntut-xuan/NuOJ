@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+	<head>
+        <title> NuOJ - 狀態 </title>
+        <link rel="icon" href="/static/logo_min.png" sizes="16x16" type="image/png">
+		<meta charset="utf-8">
+        <meta content="#f7b068" data-react-helmet="true" name="theme-color">
+        <meta property="og:title" content="NuOJ - 狀態">
+        <meta property="og:site_name" content="NuOJ">
+        <meta property="og:type" content="website">
+        <meta property="og:url" content="https://nuoj.ntut-xuan.net/status">
+        <meta property="og:description" content="一款來自國立臺北科技大學的線上評測系統">
+        <meta property="og:image" content="https://nuoj.ntut-xuan.net/static/logo_min.png">
+        <meta property="og:image:alt" content="NuOJ">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link href="../static/css/output.css" rel="stylesheet">
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@200;300;400;500;600;700;900&display=swap" rel="stylesheet">
+        <link rel="stylesheet" href="https://unpkg.com/flowbite@1.4.7/dist/flowbite.min.css" />
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+        <script src="https://unpkg.com/flowbite@1.4.7/dist/flowbite.js"></script>
+	</head>
+    <body class="bg-orange-200 p-10">
+        <div class="absolute left-[50%] top-[50%] translate-x-[-50%] translate-y-[-50%] w-[80%] h-fit p-5 bg-white rounded-xl block overflow-auto">
+            <div class=py-8>
+                <a href="/"><img class="w-[8%] mx-auto" src="/static/logo_min.png"></a>
+                <p class="text-4xl underline font-thin font-serif p-5 text-center"> Nu Online Judge Status </p>
+            </div>
+            <div class="block overflow-y-auto">
+                <div class="grid grid-flow-row grid-rows-3 grid-cols-1 lg:grid-flow-col lg:grid-cols-3 lg:grid-rows-1 gap-5">
+                    <div class="w-full p-5 rounded-lg border-2 shadow-lg gap-5 flex flex-col">
+                        <p class="text-center text-2xl font-bold"> 網頁應用程式 </p>
+                        {%- for data in web_app_heartbeat_info -%}
+                        <div class="w-full p-5 rounded-lg border-2 shadow-lg flex flex-col gap-5 hover:bg-gray-100">
+                            <div class="flex gap-5">
+                                <div class="p-1.5">
+                                    <div class="p-1.5 w-fit {{data.status_color}} rounded-full"></div>
+                                </div>
+                                <p> {{data.name}} </p>
+                            </div>
+                            <p> {{data.status}} </p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <div class="w-full p-5 rounded-lg border-2 shadow-lg flex gap-5 flex-col">
+                        <p class="text-center text-2xl font-bold"> 資料庫 </p>
+                        {%- for data in database_heartbeat_info -%}
+                        <div class="w-full p-5 rounded-lg border-2 shadow-lg flex flex-col gap-5 hover:bg-gray-100">
+                            <div class="flex gap-5">
+                                <div class="p-1.5">
+                                    <div class="p-1.5 w-fit {{data.status_color}} rounded-full"></div>
+                                </div>
+                                <p> {{data.name}} </p>
+                            </div>
+                            <div>
+                                <p> {{data.status}} </p>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <div class="w-full p-5 rounded-lg border-2 shadow-lg flex gap-5 flex-col">
+                        <p class="text-center text-2xl font-bold"> 裁判機 </p>
+                        {%- for data in judge_server_heartbeat_info -%}
+                        <div class="w-full p-5 rounded-lg border-2 shadow-lg flex flex-col gap-5 hover:bg-gray-100">
+                            <div class="flex gap-5">
+                                <div class="p-1.5">
+                                    <div class="p-1.5 w-fit {{data.status_color}} rounded-full"></div>
+                                </div>
+                                <p> {{data.name}} </p>
+                            </div>
+                            <div>
+                                <p> {{data.status}} </p>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>

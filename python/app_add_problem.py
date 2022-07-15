@@ -1,10 +1,30 @@
 from flask import *
 import database
+import os
 
-problem = Blueprint("problem", __name__, url_prefix="/edit_problem")
+problem = Blueprint("problem", __name__)
 
-@problem.route("/<PID>/", methods=["GET", "POST"])
-@problem.route("/<PID>/basic", methods=["GET", "POST"])
+@problem.route("/add_problem", methods=["GET", "POST"])
+def returnAddProblemPage():
+
+	SID = request.cookies.get("SID")
+
+	if(SID not in session):
+		return redirect("/")
+
+	data = session[SID]
+	username = data["username"]
+
+	n = len(database.get_data("/problems/", {})["data"])
+
+	data_dict = {"problem_pid": os.urandom(10).hex(), "problem_author": username, "index": n+1}
+
+	database.post_data("/problems/", {}, json.dumps(data_dict))
+	return redirect("/edit_problem/" + data_dict["problem_pid"] + "/basic")
+
+
+@problem.route("/edit_problem/<PID>/", methods=["GET", "POST"])
+@problem.route("/edit_problem/<PID>/basic", methods=["GET", "POST"])
 def returnEditProblemPage(PID):
 	
 	SID = request.cookies.get("SID")
@@ -50,13 +70,13 @@ def returnEditProblemPage(PID):
 		return render_template("add_problem_bs.html", **locals())
 
 	problem_data = json.loads(request.data)
-	response = database.put_data("/problems/%s/" % (PID), {}, json.dumps(problem_data))
+	response = database.post_data("/problems/%s/" % (PID), {}, json.dumps(problem_data))
 	
 	if response["status"] == "Failed":
 		return Response(json.dumps({"status": "Failed", "message": response["message"]}))
 
 	return Response(json.dumps({"status": "OK"}))
 
-@problem.route("/<PID>/solution", methods=["GET", "POST"])
+@problem.route("/edit_problem/<PID>/solution", methods=["GET", "POST"])
 def return_solution_page(PID):
     return render_template("add_problem_solution.html", **locals())

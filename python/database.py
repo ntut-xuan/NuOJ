@@ -1,10 +1,10 @@
 import json
 import requests
+import setting_util
 
 def connect_master_database():
     setting = json.loads(open("/opt/nuoj/setting.json", "r").read())
-    data = setting["database-master"]
-    url = data["url"] + ":" + data["port"]
+    url = setting_util.master_database_url()
     req = requests.get(url + "/heartbeat")
     if req.status_code == 200:
         return url
@@ -12,13 +12,11 @@ def connect_master_database():
 
 def connect_slave_database():
     setting = json.loads(open("/opt/nuoj/setting.json", "r").read())
-    database_list = setting["database-slave"]
+    database_list = setting_util.slave_database_url()
     if len(database_list) != 0:
-        for data in database_list:
-            url = data["url"] + ":" + data["port"]
+        for url in database_list:
             req = requests.get(url + "/heartbeat")
-            if req.status_code == 200:
-                return url
+            return url
         return None
     else:
         return connect_master_database()

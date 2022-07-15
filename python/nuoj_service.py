@@ -19,6 +19,7 @@ import asanaUtil
 import pytz
 import requests
 import database
+import setting_util
 from app_auth import auth
 from app_add_problem import problem
 
@@ -34,76 +35,7 @@ app.secret_key = os.urandom(16).hex()
 
 CORS(app)
 isolate_path = ""
-
 add_problem_map = {}
-
-def init_isolate():
-	
-	# clean up isolate
-	result = subprocess.run("isolate --cleanup".split(), stdout=subprocess.PIPE)
-	logger.debug(result.stdout.decode("utf-8").replace('\n',''))
-	logger.info("ISOLATE_INIT (1/2) CLEANUP")
-
-	# init isolate
-	result = subprocess.run("isolate --init".split(), stdout=subprocess.PIPE)
-	isolate_path = result.stdout.decode("utf-8").replace('\n','')
-	logger.debug(isolate_path)
-	logger.info("ISOLATE_INIT (2/2) INIT")
-
-def init_verifycode():
-	
-	# init verifycode
-	code = {}
-	file = open("/tmp/verify_code", "w")
-	json.dump(code, file)
-	file.close()
-	
-
-def connect_mysql():
-	
-	# connect NuOJ Database
-	db_setting = {
-		"host": "localhost",
-		"port": 3306,
-		"user": "NuOJService",
-		"password": "Nu0JS!@#$",
-		"db": "NuOJ",
-		"charset": "utf8"
-	}
-	conn = None
-	try:
-		conn = pymysql.connect(**db_setting)
-		logger.info("MYSQL_INIT (1/1) INIT")
-	except Exception as ex:
-		print(ex)
-	finally:
-		return conn
-
-def connect_database():
-	setting = json.loads(open("/opt/nuoj/setting.json", "r").read())
-	database_list = setting["database"]
-	for data in database_list:
-		url = data["url"] + ":" + data["port"] 
-		print(url)
-		req = requests.get(url + "/heartbeat")
-		if req.status_code == 200:
-			return url
-	return None
-
-def nuoj_getID(conn):
-	reuslt = ""
-	try:
-		with conn.cursor() as cursor:
-			command = "select COUNT(*) from submission"
-			cursor.execute(command)
-			result = str(cursor.fetchone()[0])
-			logger.info(result) # fetch result
-			cursor.close()
-			conn.close()
-	except Exception as ex:
-		logger.error(ex)
-	finally:
-		return int(result)
 
 @app.errorhandler(404)
 def page_not_found(error):
@@ -136,24 +68,6 @@ def returnIndex():
 	SID = request.cookies.get("SID")
 	return veriCookie(SID)
 
-@app.route("/add_problem", methods=["GET", "POST"])
-def returnAddProblemPage():
-
-	SID = request.cookies.get("SID")
-
-	if(SID not in session):
-		return redirect("/")
-
-	data = session[SID]
-	username = data["username"]
-
-	n = len(database.get_data("/problems/", {})["data"])
-
-	data_dict = {"problem_pid": os.urandom(10).hex(), "problem_author": username, "index": n+1}
-
-	database.post_data("/problems/", {}, json.dumps(data_dict))
-	return redirect("/edit_problem/" + data_dict["problem_pid"] + "/basicSetting")
-
 @app.route("/submit", methods=["GET"], strict_slashes=False)
 def returnSubmitPage():
 	index_html = open("/opt/nuoj/html/submit.html", "r")
@@ -167,10 +81,11 @@ def returnProblemPage():
 	problem_db = database.get_data("/problems/", {})["data"]
 
 	for i in range(len(problem_db)):
-		problem_content = problem_db[i]["problem_content"]
-		problem_author = problem_db[i]["problem_author"]
-		problem_dict = {"problem_ID": i+1, "problem_name": problem_content["title"], "problem_author": problem_author, "problem_tag": []}
-		problem.append(problem_dict)
+		if "problem_content" in problem_db[i]:
+			problem_content = problem_db[i]["problem_content"]
+			problem_author = problem_db[i]["problem_author"]
+			problem_dict = {"problem_ID": i+1, "problem_name": problem_content["title"], "problem_author": problem_author, "problem_tag": []}
+			problem.append(problem_dict)
 
 	return render_template("problem.html", **locals())
 
@@ -298,14 +213,28 @@ def getAboutIndex():
 def getDebugPage():
 	return render_template("debug.html", **locals())
 
+@app.route("/status", methods=["GET"])
+def getStatusPage():
+	def status_to_plain_text(status: int) -> str:
+		return "工作中" if status == 200 else "連接失敗"
+	def status_to_color(status: int) -> str:
+		return "bg-green-500" if status == 200 else "bg-red-500"
+	def data_proc(data: dict) -> dict:
+		return {
+			"name": data["name"], 
+			"status": status_to_plain_text(data["status"]), 
+			"status_color": status_to_color(data["status"])
+		} 
+	web_app_heartbeat_info = [data_proc(data) for data in setting_util.web_app_heartbeat_check()]
+	database_heartbeat_info = [data_proc(data) for data in setting_util.database_heartbeat_check()]
+	judge_server_heartbeat_info = [data_proc(data) for data in setting_util.judge_server_heartbeat_check()]
+	return render_template("status.html", **locals())
+
+@app.route("/heartbeat", methods=["GET"])
+def getHeartbeat():
+	return Response(json.dumps({"status": "OK"}), mimetype="application/json")
+
 if __name__ == "__main__":
-	
-	# Initilize isolate
-	init_isolate()
-	# Initilize verifycode
-	init_verifycode()
-	# Initilize mariadb
-	conn = connect_mysql()
 
 	settingJsonObject = json.loads(open("/opt/nuoj/setting.json", "r").read())
 
