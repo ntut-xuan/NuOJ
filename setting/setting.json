@@ -26,10 +26,29 @@
         "mailname": "",
         "password": ""
     },
-    "database-master": {
-        "url": "",
-        "port": "",
-        "secret": ""
-    },
-    "database-slave": []
+    "architecture": {
+        "web_app": [
+            {
+                "name": "NuOJ Web Application",
+                "url": "http://localhost",
+                "port": "80"
+            }
+        ],
+        "database": [
+            {
+                "name": "NuOJ Database",
+                "url": "http://localhost",
+                "type": "master",
+                "port": "3349",
+                "secret": ""
+            }
+        ],
+        "judge_server": [
+            {
+                "name": "NuOJ Judge Server",
+                "url": "http://localhost",
+                "port": "4439"
+            }
+        ]
+    }
 }
