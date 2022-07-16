@@ -2,27 +2,16 @@
 <html>
     <head>
         <link href="../static/css/output.css" rel="stylesheet">
-        <link rel="icon" href="/static/logo_min.png" sizes="16x16" type="image/png">
-        <script src="https://code.jquery.com/jquery-3.1.1.min.js"
-            integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
+        <script src="https://code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     </head>
-    <body class="p-10 flex flex-col gap-10 bg-slate-100">
-        <div class="w-full">
-            <div class="w-fit mx-auto">
-                <a class="w-fit h-fit" href="/">
-                    <img class="h-20 w-auto" src="../static/logo-black.svg">
+    <body class="bg-slate-100" style="min-height: 600px;">
+        <!-- 選項欄位 -->
+        <div class="bg-gray-50 border-2 shadow-sm rounded flex p-5 px-10 items-center">
+            <div class="w-3/4 flex">
+                <a  href="/">
+                    <img style="height: 3rem;" src="../static/logo-black.svg">
                 </a>
-            </div>
-        </div>
-        <div class="w-3/4 bg-gray-50 border-2 shadow-sm rounded mx-auto flex p-5 px-10 items-center">
-            <div class="w-3/4 flex gap-10">
-                <div>
-                    <a id="profile_tag" class="text-2xl border-b-2 border-black border-opacity-0 duration-500  cursor-pointer hover:border-black hover:border-opacity-100"> 個人簡介 </a>
-                </div>
-                <div>
-                    <a id="setting_tag" class="text-2xl border-b-2 border-black border-opacity-0 duration-500 cursor-pointer hover:border-black hover:border-opacity-100"> 設定 </a>
-                </div>
             </div>
             <div class="w-1/4 flex justify-end">
                 <div>
@@ -30,74 +19,139 @@
                 </div>
             </div>
         </div>
-        <div id="profile" class="w-3/4 bg-gray-50 h-fit border-2 shadow-sm rounded p-10 flex gap-10 mx-auto">
-            <div class="w-full flex flex-col gap-10">
-                <div class="mx-auto">
-                    <p class="text-4xl font-mono"> {{username}} </p>
+        <!-- 主要介面 -->
+        <div id="profile" class="w-3/4 bg-gray-50 h-fit border-2 shadow-sm rounded p-10 flex gap-10 mx-auto flex-col " style="position: absolute; left: 50vw ;top: 50vh; transform: translate(-50%, -50%);">
+            <!-- 帳號名稱與頭像 -->
+            <div class="w-full flex">
+                <div class="w-1/3 flex flex-col" style="gap: 10px;">
+                    <div class="bg-slate-200 rounded-full mx-auto p-1" style="height: 15vw; width: 15vw;">
+                        <img style="height: inherit;width:inherit;overflow:hidden;" src="../static/logo-black.svg">
+                    </div>
+                    <div>
+                        <div class="flex justify-center w-full">
+                            <button id="main_change" class="bg-slate-200" style="border-radius: 2px;background-color: rgb(135, 171, 212);padding: 5px;">修改個人資料</button>
+                        </div>
+                    </div>
                 </div>
-                <div class="h-96 w-96 p-5 bg-slate-200 mx-auto">
-                    <img class="relative w-full h-auto left-1/2 top-1/2 -translate-x-[50%] -translate-y-[50%]" src="../static/logo-black.svg">
+                <div class="w-full flex justify-center flex-col items-center">
+                    <p class="text-2xl font-mono " style="color: rgb(39, 37, 49);"> {{accountType}} </p>
+                    <p id="username"class="text-5xl font-mono ">{{username}}</p>
                 </div>
             </div>
-            <div class="border-l-2 border-slate-200"></div>
-            <div class="w-full flex flex-col justify-start gap-10">
-                <div>
-                    <p class="text-2xl font-bold my-5"> 學校／機構 </p>
-                    <p class="text-xl font-medium my-5"> {{school}} </p>
+            <!-- 帳號email -->
+            <div class="w-full flex flex-col">
+                <p class="font-mono text-2xl" style="font-weight: 700;opacity: 0.6;">電子信箱</p>
+                <div class="flex w-2/3" style="padding-left:10px;">
+                    <div style="width: 80%;">
+                        <p id="email" style="width: 80%;">0000@gmail.com</p>
+                    </div>
+                    <div class="flex justify-end" style="width: 20%;">
+                        <button id="email_change" class="bg-slate-200" style="border-radius: 2px;background-color: rgb(210, 220, 233);padding: 5px;">修改</button>
+                    </div>
                 </div>
-                <div>
-                    <p class="text-2xl font-bold my-5"> 帳號類別 </p>
-                    <p class="text-xl font-medium my-5"> {{accountType}} </p>
+            </div>
+            <!-- 帳號學校 -->
+            <div class="w-full flex flex-col">
+                <p class="font-mono text-2xl" style="font-weight: 700;opacity: 0.6;">學校</p>
+                <div class="flex" style="padding-left:10px;">
+                    <div style="width: 80%;">
+                        <p id="school">{{school}}</p>
+                    </div>
+                    <div class="flex justify-end" style="width: 20%;">
+                        <button id="school_change"class="bg-slate-200" style="border-radius: 2px;background-color: rgb(210, 220, 233);padding: 5px;">修改</button>
+                    </div>
                 </div>
-                <div>
-                    <p class="text-2xl font-bold my-5"> 個人簡介 </p>
-                    <textarea class="text-xl font-medium my-5 w-full overflow-hidden resize-none h-96 outline-none cursor-default" readonly>{{Bio}}</textarea>
+            </div>
+            <!-- 個人介紹 -->
+            <div class="w-full flex flex-col">
+                <p class="font-mono text-2xl" style="font-weight: 700;opacity: 0.6;">個人簡介</p>
+                <div class="flex" style="padding-left:10px;">
+                    <div style="width: 80%;">
+                        <!-- <p type="text" style="border: 2px rgb(51, 55, 59) solid;" name="" id="" value="尚無資訊"> -->
+                        <p id="introduce">尚無資料</p>
+                    </div>
+                    <div class="flex justify-end" style="width: 20%;">
+                        <button id="introduce_change"class="bg-slate-200" style="border-radius: 2px;background-color: rgb(210, 220, 233);padding: 5px;">修改</button>
+                    </div>
                 </div>
+                
             </div>
         </div>
-        <div id="setting" class="w-3/4 bg-white h-fit border-2 shadow-sm rounded p-10 flex gap-10 mx-auto">
-            <div class="w-full flex flex-col gap-10">
-                <div>
-                    <p class="text-2xl font-bold my-5"> 更改圖片 </p>
-                    <input class="w-full bg-slate-100 p-2 text-base px-4 border-2 border-gray-600 appearance-none resize-none overflow-y-hidden rounded focus:outline-none focus:border-orange-500 focus:bg-white" placeholder="圖片連結">
-                </div>
-                <div>
-                    <p class="text-2xl font-bold my-5"> 學校／機構 </p>
-                    <input class="w-full bg-slate-100 p-2 text-base px-4 border-2 border-gray-600 appearance-none resize-none overflow-y-hidden rounded focus:outline-none focus:border-orange-500 focus:bg-white" placeholder="盡可能輸入全名，例如請勿輸入北科，以國立臺北科技大學來取代">
-                </div>
-                <div>
-                    <p class="text-2xl font-bold my-5"> 個人簡介修改 </p>
-                    <textarea class="w-full h-[200px] bg-slate-100 p-2 text-base px-4 border-2 border-gray-600 appearance-none resize-none overflow-y-hidden rounded focus:outline-none focus:border-orange-500 focus:bg-white" placeholder="支援 mathjax，字數不得超過 200 字"></textarea>
-                </div>
-                <button class="bg-blue-700 w-full delay-50 p-2 hover:bg-blue-500 rounded text-white text-2xl"> 修改完成 </button>
+        <!-- 修改介面--文字-->
+        <div id="change_interface" class="bg-gray-50 h-fit border-2 shadow-sm rounded p-10 flex mx-auto flex-col justify-center hidden"style=" gap: 10px;position: absolute; left: 50vw ;top: 50vh; transform: translate(-50%, -50%);z-index: 5;width:40vw;">
+            <p id="change_main_title"class="font-mono text-2xl" style="text-align: center;">main title</p>
+            <p id="change_subtitle"class="font-mono text-1xl" style="text-align: center;">second title</p>
+            <hr>
+            <p id="input_indecate" class="font-mono text-1xl">input indecate</p>
+            <input id="new" type="text" name="" id="">
+            <p class="font-mono text-1xl">password</p>
+            <input type="text" name="" id="">
+            <div class="flex justify-end" style="gap:20px">
+                <input type="button" value="取消" onclick="allHidden()"style="padding: 5px 10px;background-color: rgb(255, 88, 88); border-radius: 10px; color: rgb(236, 228, 228);">
+                <input type="button" value="確認" style="padding: 5px 10px;background-color: rgb(22, 114, 22); border-radius: 10px; color: rgb(236, 228, 228);">
             </div>
         </div>
+        <!-- 修改介面-- 圖片 -->
+        
+        <!-- 選擇修改模式 -->
+        <div id="chose"class="bg-gray-50 h-fit border-2 shadow-sm rounded  flex mx-auto justify-center hidden"style="padding :15px; gap: 10px;position: absolute; left: 50vw ;top: 50vh; transform: translate(-50%, -50%);z-index: 2;width:40vw;">
+            <div class="shadow-sm border-2 bg-gray-50" style="height: 10vw;width: 45%;justify-content: center;align-items: center;display: flex;">
+                <p class="font-mono text-1xl">改變圖片</p>
+            </div>
+            <div id="name_change" class="shadow-sm border-2 bg-gray-50" style="height: 10vw;width: 45%;justify-content: center;align-items: center;display: flex;">                
+                <p  class="font-mono text-1xl">改變名稱</p>
+            </div>
+        </div>
+        <div id="cover"class="hidden"style="height: 100vh;width: 100vw;background-color: black;opacity: 0.8;position: absolute;top:0;left: 0;"></div>
+
+
     </body>
     <script>
         function allHidden(){
-            let array = ["profile", "setting"]
+            let array = ["change_interface", "cover","chose"]
             for(let i = 0; i < array.length; i++){
                 let div = document.getElementById(array[i]);
                 div.classList.add("hidden");
             }
         }
         function init(){
-            
-            allHidden();
-            document.getElementById("profile").classList.remove("hidden");
-
-            document.getElementById("profile_tag").addEventListener("click", () => {
-                allHidden();
-                document.getElementById("profile").classList.remove("hidden");
+            document.getElementById("name_change").addEventListener("click", () => {
+                old=document.getElementById("username").innerText
+                show_interface(old,"編輯使用者名稱","請輸入新使用者名稱與密碼","使用者名稱")
+            })
+            document.getElementById("email_change").addEventListener("click", () => {
+                old=document.getElementById("email").innerText
+                show_interface(old,"編輯電子郵件","請輸入新電子郵件與密碼","電子郵件")
             })
 
-            document.getElementById("setting_tag").addEventListener("click", () => {
-                allHidden();
-                document.getElementById("setting").classList.remove("hidden");
+            document.getElementById("school_change").addEventListener("click", () => {
+                old=document.getElementById("school").innerText
+                show_interface(old,"編輯所屬學校","請輸入新所屬學校與密碼","所屬學校")
+            })
+
+            document.getElementById("introduce_change").addEventListener("click", () => {
+                old=document.getElementById("introduce").innerText
+                show_interface(old,"編輯個人簡介","請輸入新個人簡介與密碼","個人簡介")
+            })
+            document.getElementById("main_change").addEventListener("click", () => {
+                allHidden()
+                document.getElementById("chose").classList.remove("hidden")
+            })
+            document.getElementById("cover").addEventListener("click", () => {
+                allHidden()
             })
 
         }
-        init();
+        function show_interface(old,main_title,subtitle,indecate){
+            document.getElementById("change_main_title").innerText=main_title
+            document.getElementById("change_subtitle").innerText=subtitle
+            document.getElementById("input_indecate").innerText=indecate
+            document.getElementById("new").value=old
+            document.getElementById("change_interface").classList.remove("hidden")
+            document.getElementById("cover").classList.remove("hidden")
+        }
+
+        init()
     </script>
     <script>
         document.getElementById("logout").addEventListener("click", () => {

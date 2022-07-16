@@ -99,7 +99,7 @@
             document.getElementById("viaAccount").addEventListener("click", () => {Account()})
         }
         document.addEventListener('keyup', (e) => {
-            if(e.code=="Enter"){
+            if(e.code=="Enter" || e.code =="NumpadEnter"){
                 Account()
             }
         });
