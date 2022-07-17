@@ -92,27 +92,40 @@
             </div>
         </div>
         <!-- 修改介面-- 圖片 -->
-        
+        <div id="change_img"class="hidden bg-gray-50 h-fit border-2 shadow-sm rounded p-10 flex mx-auto flex-col justify-center"style=" gap: 10px;position: absolute; left: 50vw ;top: 50vh; transform: translate(-50%, -50%);z-index: 5;width:40vw;">   
+            <div class="bg-slate-200 rounded-full mx-auto p-1" style="height: 15vw; width: 15vw;">
+                <img id="img_show" class="rounded-full"style="object-fit: cover;height: inherit;width:inherit;overflow:hidden;">
+            </div>
+            <div class="flex justify-end" style="gap:20px">
+                <input type="button" value="取消" onclick="allHidden()"style="padding: 5px 10px;background-color: rgb(255, 88, 88); border-radius: 10px; color: rgb(236, 228, 228);">
+                <input type="button" value="確認" style="padding: 5px 10px;background-color: rgb(22, 114, 22); border-radius: 10px; color: rgb(236, 228, 228);">
+            </div>  
+        </div>
         <!-- 選擇修改模式 -->
         <div id="chose"class="bg-gray-50 h-fit border-2 shadow-sm rounded  flex mx-auto justify-center hidden"style="padding :15px; gap: 10px;position: absolute; left: 50vw ;top: 50vh; transform: translate(-50%, -50%);z-index: 2;width:40vw;">
             <div class="shadow-sm border-2 bg-gray-50" style="height: 10vw;width: 45%;justify-content: center;align-items: center;display: flex;">
                 <p class="font-mono text-1xl">改變圖片</p>
+                <label style="height: 10vw;width: inherit; position: absolute" for="input_file">
+                    <input type="file" id="input_file" style="position: absolute; height: 1px; width: 1px;">
+                </label>
             </div>
             <div id="name_change" class="shadow-sm border-2 bg-gray-50" style="height: 10vw;width: 45%;justify-content: center;align-items: center;display: flex;">                
                 <p  class="font-mono text-1xl">改變名稱</p>
             </div>
         </div>
+        
         <div id="cover"class="hidden"style="height: 100vh;width: 100vw;background-color: black;opacity: 0.8;position: absolute;top:0;left: 0;"></div>
 
 
     </body>
     <script>
         function allHidden(){
-            let array = ["change_interface", "cover","chose"]
+            let array = ["change_interface", "cover","chose","change_img"]
             for(let i = 0; i < array.length; i++){
                 let div = document.getElementById(array[i]);
                 div.classList.add("hidden");
             }
+            document.getElementById("input_file").value=""
         }
         function init(){
             document.getElementById("name_change").addEventListener("click", () => {
@@ -136,11 +149,21 @@
             document.getElementById("main_change").addEventListener("click", () => {
                 allHidden()
                 document.getElementById("chose").classList.remove("hidden")
+                document.getElementById("cover").classList.remove("hidden")
             })
             document.getElementById("cover").addEventListener("click", () => {
                 allHidden()
             })
-
+            document.getElementById("input_file").addEventListener("change", function(e){
+                const file = document.getElementById("input_file").files[0];
+                const fr = new FileReader();
+                fr.onload = function (e) {
+                    document.getElementById("img_show").setAttribute("src",e.target.result)
+                };
+                fr.readAsDataURL(file);
+                allHidden()
+                document.getElementById("change_img").classList.remove("hidden")
+            })
         }
         function show_interface(old,main_title,subtitle,indecate){
             document.getElementById("change_main_title").innerText=main_title
