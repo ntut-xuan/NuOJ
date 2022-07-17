@@ -1,15 +1,9 @@
 #!/usr/bin/env python3
 from flask import *
-import subprocess
 from flask.wrappers import Response
-import pymysql
 import os
 import json
-from flask_cors import cross_origin, CORS
-from datetime import datetime as dt
-from uuid import uuid4
-from loguru import logger
-from flask_session import Session
+from flask_cors import CORS
 from datetime import datetime, timedelta
 from dateutil import parser
 import time;
@@ -17,7 +11,6 @@ import githubLogin
 import googleLogin
 import asanaUtil
 import pytz
-import requests
 import database
 import setting_util
 from app_auth import auth
