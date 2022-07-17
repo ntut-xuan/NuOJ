@@ -70,8 +70,13 @@ def returnSubmitPage():
 def returnProblemPage():
 
 	problem = []
-
 	problem_db = database.get_data("/problems/", {})["data"]
+
+	SID = request.cookies.get("SID")
+	login = (SID in session)
+	
+	if login:
+		username = session[SID]["username"]
 
 	for i in range(len(problem_db)):
 		if "problem_content" in problem_db[i]:
