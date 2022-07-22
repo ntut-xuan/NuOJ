@@ -1,6 +1,7 @@
 import json
 import platform
 import requests
+import database_util
 
 setting = json.loads(open("/opt/nuoj/setting.json", "r").read())
 
@@ -88,8 +89,8 @@ def database_heartbeat_check() -> list:
     status_list = []
     for data in database_info():
         try:
-            req = requests.get(data["url"] + ":" + data["port"] + "/heartbeat")
-            status_list.append({"name": data["name"], "status": req.status_code})
+            database_util.connect_database()
+            status_list.append({"name": data["name"], "status": 200})
         except requests.exceptions.ConnectionError as e:
             status_list.append({"name": data["name"], "status": 502})
     return status_list

@@ -7,12 +7,13 @@ from flask_cors import CORS
 from datetime import datetime, timedelta
 from dateutil import parser
 import time;
-import githubLogin
-import googleLogin
-import asanaUtil
+import github_login_util as github_login_util
+import google_login_util as google_login_util
+import asana_util as asana_util
 import pytz
-import database
-import setting_util
+import database_util as database_util
+from tunnel_code import TunnelCode
+import setting_util as setting_util
 from app_auth import auth
 from app_add_problem import problem
 
@@ -20,7 +21,7 @@ app = Flask(__name__, static_url_path='', template_folder="/opt/nuoj/templates")
 app.register_blueprint(auth)
 app.register_blueprint(problem)
 
-asana_util = asanaUtil.AsanatUil(json.loads(open("/opt/nuoj/setting.json", "r").read())["asana"]["token"])
+asana_util = asana_util.AsanatUil(json.loads(open("/opt/nuoj/setting.json", "r").read())["asana"]["token"])
 app.config['JSON_SORT_KEYS'] = False
 app.config['SECRET_KEY'] = os.urandom(24)
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=31)
@@ -37,6 +38,10 @@ def page_not_found(error):
 @app.errorhandler(500)
 def internel_server_error(error):
     return render_template('500.html', error=error)
+
+@app.errorhandler(418)
+def im_a_teapot(error):
+	return render_template('418.html', error=error)
 
 @app.route("/veriCookie")
 def veriCookie(cookie):
@@ -70,7 +75,7 @@ def returnSubmitPage():
 def returnProblemPage():
 
 	problem = []
-	problem_db = database.get_data("/problems/", {})["data"]
+	problem_db = database_util.command_execute("SELECT * from `problem`", ())
 
 	SID = request.cookies.get("SID")
 	login = (SID in session)
@@ -79,8 +84,12 @@ def returnProblemPage():
 		username = session[SID]["username"]
 
 	for i in range(len(problem_db)):
-		if "problem_content" in problem_db[i]:
-			problem_content = problem_db[i]["problem_content"]
+		raw_problem_data = database_util.file_storage_tunnel_read(problem_db[i]["problem_pid"] + ".json", TunnelCode.PROBLEM)
+		if len(raw_problem_data) == 0:
+			continue
+		problem_data = json.loads(raw_problem_data)
+		if "problem_content" in problem_data:
+			problem_content = problem_data["problem_content"]
 			problem_author = problem_db[i]["problem_author"]
 			problem_dict = {"problem_ID": i+1, "problem_name": problem_content["title"], "problem_author": problem_author, "problem_tag": []}
 			problem.append(problem_dict)
@@ -106,7 +115,9 @@ def logout():
 
 @app.route("/problem/<ID>", methods=["GET", "POST"])
 def returnProblemIDPage(ID):
-	problemJsonObject = database.get_data("/problems/", {"index": ID})["data"][0]
+
+	problem_pid = database_util.command_execute("SELECT problem_pid FROM `problem` WHERE ID = %s", (ID))[0]["problem_pid"]
+	problemJsonObject = json.loads(database_util.file_storage_tunnel_read(problem_pid + ".json", TunnelCode.PROBLEM))
 	title = problemJsonObject["problem_content"]["title"]
 	description = problemJsonObject["problem_content"]["description"].replace("\n", "<br>")
 	input_description = problemJsonObject["problem_content"]["input"].replace("\n", "<br>")
@@ -118,8 +129,8 @@ def returnProblemIDPage(ID):
 
 @app.route("/profile/<name>", methods=["GET"])
 def returnProfilePageWithName(name):
-	user_db = database.get_data("/users/" + name, {})
-	admin = user_db["data"]["admin"]
+	user_data = database_util.command_execute("SELECT admin FROM `user` WHERE username=%s", (name))[0]
+	admin = user_data["admin"]
 	username = name
 	school = "未知"
 	accountType = "使用者" if admin == 0 else "管理員"
@@ -129,7 +140,7 @@ def returnProfilePageWithName(name):
 def processGithubLogin():
 	
 	settingJsonObject = json.loads(open("/opt/nuoj/setting.json", "r").read())
-	data = githubLogin.githubLogin(conn, request.args.get("code"), settingJsonObject)
+	data = github_login_util.githubLogin(conn, request.args.get("code"), settingJsonObject)
 
 	if(data["status"] == "OK"):
 		resp = redirect("/")
@@ -144,7 +155,7 @@ def processGithubLogin():
 def processGoogleLogin():
 
 	settingJsonObject = json.loads(open("/opt/nuoj/setting.json", "r").read())
-	data = googleLogin.googleLogin(conn, request.args, settingJsonObject)
+	data = google_login_util.googleLogin(conn, request.args, settingJsonObject)
 	
 	if(data["status"] == "OK"):
 		resp = redirect("/")
@@ -235,6 +246,9 @@ def getHeartbeat():
 if __name__ == "__main__":
 
 	settingJsonObject = json.loads(open("/opt/nuoj/setting.json", "r").read())
+
+	conn = database_util.connect_database()
+	database_util.command_execute("SELECT * FROM `user`", ())
 
 	app.debug = True
 

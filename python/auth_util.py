@@ -1,29 +1,15 @@
 #!/usr/bin/env python3
-from ast import arg
-from tabnanny import check, verbose
-from unicodedata import name
-import uuid
 from flask import *
-import subprocess
-from flask.wrappers import Response
-import pymysql
 import os
 import json
 import hashlib
 import re
-import string
-import random
-import time
 import smtplib
 import threading
-import database
-import setting_util
-from flask_cors import cross_origin, CORS
-from datetime import datetime as dt
+import sys
+import database_util as database_util
+import setting_util as setting_util
 from uuid import uuid4
-from loguru import logger
-from flask_session import Session
-from datetime import timedelta
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.mime.image import MIMEImage
@@ -40,9 +26,8 @@ def login(data):
     account = data["account"]
     password = password_cypto(data["password"])
 
-    setting = open("/opt/nuoj/setting.json", "r").read()
-    data = {"email": account} if '@' in account else {"username": account}
-    userdata_set = database.get_data("/users/", data)["data"]
+    command = "SELECT * FROM `user` WHERE `username` = %s OR `email` = %s;"
+    userdata_set = database_util.command_execute(command, (account, account))
 
     if len(userdata_set) == 0:
         return error_dict(ErrorCode.USERNAME_NOT_FOUND)
@@ -106,21 +91,24 @@ def register_db(data) -> dict:
     username_valid = bool(re.match("^[a-z\d](?:[a-z\d]|-(?=[a-z\d])){0,38}$", username))
     if not username_valid:
         return {"status": "Failed", "message": "Invalid username"}
-
-    user_data = database.get_data("/users", {})
-    for user in user_data["data"]:
-        if user["email"] == email:
-            return {"status": "Failed", "message": "Repeat Email"}
-        if user["username"] == username:
-            return {"status": "Failed", "message": "Repeat Username"}
+    
+    # Check repeat username
+    user_data = database_util.command_execute("SELECT * FROM `user` WHERE `username` = %s", (username))
+    if len(user_data):
+        return {"status": "Failed", "message": "Repeat Username"}
+    
+    # Check repeat email
+    user_data = database_util.command_execute("SELECT * FROM `user` WHERE `email` = %s", (email))
+    if len(user_data):
+        return {"status": "Failed", "message": "Repeat Email"}
 
     # Cypto
     password = password_cypto(password)
 
     # Write into database
+    database_util.command_execute("INSERT INTO `user`(username, password, email, admin, email_verification) VALUES(%s,%s,%s,%s,%s)", (username, password, email, admin, False))
     data_dict = {"user_id": str(uuid4()), "email": email, "username": username, 
                 "password": password, "admin": admin, "email_verification": False}
-    resp = database.post_data("/users", {}, json.dumps(data_dict))
 
     # Email verification
     mail_info = json.loads(open("/opt/nuoj/setting.json", "r").read())["mail"]
@@ -133,6 +121,4 @@ def register_db(data) -> dict:
 
     # Check write result
     response["data"] = data_dict
-    if resp["status"] == "OK":
-        return response
-    return {"status": "Failed", "message": resp["message"]}
+    return response

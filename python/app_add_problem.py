@@ -1,5 +1,6 @@
 from flask import *
-import database
+from tunnel_code import TunnelCode
+import database_util as database_util
 import os
 
 problem = Blueprint("problem", __name__)
@@ -14,13 +15,10 @@ def returnAddProblemPage():
 
 	data = session[SID]
 	username = data["username"]
+	problem_pid = os.urandom(10).hex()
 
-	n = len(database.get_data("/problems/", {})["data"])
-
-	data_dict = {"problem_pid": os.urandom(10).hex(), "problem_author": username, "index": n+1}
-
-	database.post_data("/problems/", {}, json.dumps(data_dict))
-	return redirect("/edit_problem/" + data_dict["problem_pid"] + "/basic")
+	database_util.command_execute("INSERT INTO `problem`(problem_pid, problem_author) VALUES(%s,%s)", (problem_pid, username))
+	return redirect("/edit_problem/" + problem_pid + "/basic")
 
 
 @problem.route("/edit_problem/<PID>/", methods=["GET", "POST"])
@@ -36,17 +34,11 @@ def returnEditProblemPage(PID):
 	username = data["username"]
 
 	if(request.method == "GET"):
-		print(PID)
-		response = database.get_data("/problems/%s/" % (PID), {})
 
-		print(response)
+		problem_mysql_data = database_util.command_execute("SELECT * from `problem` WHERE problem_pid = %s", (PID))[0]
+		problem_storage_raw_data = database_util.file_storage_tunnel_read("%s.json" % PID, TunnelCode.PROBLEM)
 
-		if response["status"] == "Failed":
-			return redirect("/")
-
-		problem_data = response["data"]
-
-		if(username != problem_data["problem_author"]):
+		if(username != problem_mysql_data["problem_author"]):
 			return redirect("/")
 
 		title = ""
@@ -58,22 +50,22 @@ def returnEditProblemPage(PID):
 		time_limit = ""
 		permission = ""
 
-		if "problem_content" in problem_data:
-			title = problem_data["problem_content"]["title"]
-			description = problem_data["problem_content"]["description"]
-			input = problem_data["problem_content"]["input"]
-			output = problem_data["problem_content"]["output"]
-			note = problem_data["problem_content"]["note"]
-			memory_limit = problem_data["basic_setting"]["memory_limit"]
-			time_limit = problem_data["basic_setting"]["time_limit"]
-			permission = problem_data["basic_setting"]["permission"]
+		if len(problem_storage_raw_data) != 0:
+			problem_data = json.loads(problem_storage_raw_data)
+			if "problem_content" in problem_data:
+				title = problem_data["problem_content"]["title"]
+				description = problem_data["problem_content"]["description"]
+				input = problem_data["problem_content"]["input"]
+				output = problem_data["problem_content"]["output"]
+				note = problem_data["problem_content"]["note"]
+				memory_limit = problem_data["basic_setting"]["memory_limit"]
+				time_limit = problem_data["basic_setting"]["time_limit"]
+				permission = problem_data["basic_setting"]["permission"]
+		
 		return render_template("add_problem_bs.html", **locals())
 
 	problem_data = json.loads(request.data)
-	response = database.post_data("/problems/%s/" % (PID), {}, json.dumps(problem_data))
-	
-	if response["status"] == "Failed":
-		return Response(json.dumps({"status": "Failed", "message": response["message"]}))
+	database_util.file_storage_tunnel_write("%s.json" % (PID), json.dumps(problem_data), TunnelCode.PROBLEM)
 
 	return Response(json.dumps({"status": "OK"}))
 

@@ -1,9 +1,9 @@
 from flask import *
-import auth_util
 import time
 import os
-import database
-from error_code import *
+import auth_util
+import database_util
+import setting_util
 
 auth = Blueprint('auth', __name__)
 
@@ -34,10 +34,8 @@ def returnLoginPage():
 
 @auth.route("/register", methods=["GET", "POST"])
 def returnRegisterPage():
-	settingJsonObject = json.loads(open("/opt/nuoj/setting.json", "r").read())
-	githubStatus = settingJsonObject["oauth"]["github"]["enable"]
-	googleStatus = settingJsonObject["oauth"]["google"]["enable"]
-	verifyStatus = settingJsonObject["mail"]["enable"]
+
+	verifyStatus = setting_util.mail_verification_enable();
 
 	if request.method == "GET":
 		return render_template("register.html", **locals())
@@ -49,12 +47,13 @@ def returnRegisterPage():
 	if result["status"] == "Failed":
 		return Response(json.dumps(result), mimetype="application/json")
 
-	verification_code = result["verification_code"]
-	del result["verification_code"]
+	if setting_util.mail_verification_enable():
+		verification_code = result["verification_code"]
+		del result["verification_code"]
 	
 	resp = Response(json.dumps(result), mimetype="application/json")
 
-	if verifyStatus == False:
+	if setting_util.mail_verification_enable() == False:
 		sessionID = os.urandom(16).hex()
 		resp.set_cookie("SID", value = sessionID, expires=time.time()+24*60*60)
 		session[sessionID] = {"username": result["data"]["username"], "email": result["data"]["email"]}
@@ -78,8 +77,7 @@ def mail_verification():
 		return render_template("mail_check_complete.html", message="驗證失敗，驗證碼無效。")
 
 	username = verification_code_dict[verification_code]
-	put_data_str = json.dumps({"email_verification": True})
-	resp = database.put_data(("/users/%s" % username), {}, put_data_str)
+	database_util.command_execute("UPDATE `user` SET `email_verification`=1 WHERE username=%s", (username))
 
 	del verification_code_dict[verification_code]
 	return render_template("mail_check_complete.html", message="驗證成功！")

@@ -29,7 +29,7 @@
     "architecture": {
         "web_app": [
             {
-                "name": "NuOJ Web Application",
+                "name": "NuOJ Web Application #1",
                 "url": "http://localhost",
                 "port": "80"
             }
