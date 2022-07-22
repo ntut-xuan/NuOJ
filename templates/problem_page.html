@@ -49,30 +49,30 @@
                 </div>
                 <div>
                     <p class="text-xl font-semibold my-5">題目敘述</p>
-                    {% autoescape false %}
-                    <p id="description"> {{ description }} </p>
-                    {% endautoescape %}
+                    {%- for line in description -%}
+                    <p id="description" class="py-1"> {{ line }} </p>
+                    {% endfor %}
                 </div>
                 <div>
                     <p class="text-xl font-semibold my-5">輸入說明</p>
-                    {% autoescape false %}
-                    <p id="input">  {{ input_description }} </p>
-                    {% endautoescape %}
+                    {%- for line in input_description -%}
+                    <p id="input" class="py-1">  {{ line }} </p>
+                    {% endfor %}
                 </div>
                 <div>
                     <p class="text-xl font-semibold my-5">輸出說明</p>
-                    {% autoescape false %}
-                    <p id="output"> {{ output_description }} </p>
-                    {% endautoescape %}
+                    {%- for line in output_description -%}
+                    <p id="output" class="py-1"> {{ line }} </p>
+                    {% endfor %}
                 </div>
                 <div>
                     <!-- 測試資料 -->
                 </div>
                 <div>
                     <p class="text-xl font-semibold my-5">備註</p>
-                    {% autoescape false %}
-                    <p id="note"> {{note}} </p>
-                    {% endautoescape %}
+                    {%- for line in note -%}
+                    <p id="note" class="py-1"> {{ line }} </p>
+                    {% endfor %}
                 </div>
             </div>
         </div>

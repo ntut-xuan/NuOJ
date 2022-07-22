@@ -119,10 +119,10 @@ def returnProblemIDPage(ID):
 	problem_pid = database_util.command_execute("SELECT problem_pid FROM `problem` WHERE ID = %s", (ID))[0]["problem_pid"]
 	problemJsonObject = json.loads(database_util.file_storage_tunnel_read(problem_pid + ".json", TunnelCode.PROBLEM))
 	title = problemJsonObject["problem_content"]["title"]
-	description = problemJsonObject["problem_content"]["description"].replace("\n", "<br>")
-	input_description = problemJsonObject["problem_content"]["input"].replace("\n", "<br>")
-	output_description = problemJsonObject["problem_content"]["output"].replace("\n", "<br>")
-	note = problemJsonObject["problem_content"]["note"].replace("\n", "<br>")
+	description = problemJsonObject["problem_content"]["description"].split("\n")
+	input_description = problemJsonObject["problem_content"]["input"].split("\n")
+	output_description = problemJsonObject["problem_content"]["output"].split("\n")
+	note = problemJsonObject["problem_content"]["note"].split("\n")
 	TL = problemJsonObject["basic_setting"]["time_limit"]
 	ML = problemJsonObject["basic_setting"]["memory_limit"]
 	return render_template("problem_page.html", **locals())
