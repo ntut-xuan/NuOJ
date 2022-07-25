@@ -4,9 +4,10 @@ install:
 	sudo apt-get install -y python3 python3-pip git build-essential asciidoc-base libcap-dev sysfsutils
 	# clone NuOJ repository on github
 	sudo mkdir /opt/nuoj
+	sudo git clone --recursive https://github.com/ntut-xuan/NuOJ.git /opt/nuoj
 	sudo mkdir /opt/nuoj/storage/
 	sudo mkdir /opt/nuoj/storage/problem/
-	sudo git clone --recursive https://github.com/ntut-xuan/NuOJ.git /opt/nuoj
+	sudo mkdir /opt/nuoj/storage/user_avater/
 	sudo chmod -R 647 /opt/nuoj/*
 	# clone setting file
 	sudo cp /opt/nuoj/setting/setting.json /opt/nuoj/
