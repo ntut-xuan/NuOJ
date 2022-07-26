@@ -1,4 +1,4 @@
-all: install sandbox-install database-install
+all: install sandbox-install db-tcp
 
 install:
 	sudo apt-get install -y python3 python3-pip git build-essential asciidoc-base libcap-dev sysfsutils
@@ -73,8 +73,8 @@ db-socket:
 	sudo mysql -u root -h '127.0.0.1' --execute="GRANT ALL PRIVILEGES ON *.* TO 'NuOJJudger'@'localhost';"
 	sudo mysql -u root -h '127.0.0.1' --execute="FLUSH PRIVILEGES;"
 	# create table
-	sudo mysql -u root -h '127.0.0.1' --database="NuOJ" --execute="CREATE TABLE \`user\` (\`user_id\` INT NOT NULL AUTO_INCREMENT, \`username\` VARCHAR(32) NOT NULL, \`password\` VARCHAR(32) NOT NULL, \`email\` VARCHAR(100	) NOT NULL, \`admin\` TINYINT(1) NOT NULL, PRIMARY KEY(user_id));"
-	sudo mysql -u root -h '127.0.0.1' --database="NuOJ" --execute="CREATE TABLE \`submission\` ( \`submissionID\` INT NOT NULL AUTO_INCREMENT, \`submissionTime\` VARCHAR(40) NOT NULL, \`submissionBy\` VARCHAR(40) NOT NULL, \`Language\` VARCHAR(20) NOT NULL, \`ProblemID\` VARCHAR(20) NOT NULL,  \`VerdictResult\` VARCHAR(20), \`VerdictTime\` VARCHAR(40), \`VerdictMemory\` VARCHAR(40), PRIMARY KEY(submissionID));"
+	sudo mysql -u root -h '127.0.0.1' --database="NuOJ" --execute="CREATE TABLE \`user\`(\`user_uid\` VARCHAR(36) NOT NULL,\`handle\` VARCHAR(32),\`password\` VARCHAR(128) NOT NULL,\`email\` VARCHAR(320) NOT NULL,\`role\` INT NOT NULL,\`email_verified\` TINYINT(1) NOT NULL,PRIMARY KEY(user_uid));"
+	sudo mysql -u root -h '127.0.0.1' --database="NuOJ" --execute="CREATE TABLE \`submission\`(\`solution_id\` VARCHAR(40) NOT NULL,\`problem_id\` VARCHAR(40) NOT NULL, \`user_uid\` VARCHAR(40) NOT NULL,\`language\` VARCHAR(20) NOT NULL,\`date\` VARCHAR(40) NOT NULL, \`result\` VARCHAR(20), \`time\` VARCHAR(40), \`memory\` VARCHAR(40), \`judger_id\` VARCHAR(40), PRIMARY KEY(solution_id));"
 	sudo mysql -u root -h '127.0.0.1' --database="NuOJ" --execute="CREATE TABLE \`problem\` (\`ID\` int NOT NULL AUTO_INCREMENT, \`name\` VARCHAR(20) NOT NULL, \`visibility\` VARCHAR(20) NOT NULL, \`token\` VARCHAR(40) NOT NULL, \`author\` VARCHAR(20) NOT NULL, PRIMARY KEY(ID));"
 	# create a new admin account
 	sudo mysql -u root -h '127.0.0.1' --database="NuOJ" --execute="INSERT INTO \`user\` (username, password, email, admin) VALUES ('NuOJ', 'ff9c3cc1cd8a2cb0ffd4059a4717cdf1', 'NuOJ@ntut.edu.tw', 1);"
@@ -90,8 +90,8 @@ db-tcp:
 	sudo mysql -u root --execute="GRANT ALL PRIVILEGES ON *.* TO 'NuOJJudger'@'localhost';"
 	sudo mysql -u root --execute="FLUSH PRIVILEGES;"
 	# create table
-	sudo mysql -u root --database="NuOJ" --execute="CREATE TABLE \`user\` (\`user_id\` INT NOT NULL AUTO_INCREMENT, \`username\` VARCHAR(32) NOT NULL, \`password\` VARCHAR(32) NOT NULL, \`email\` VARCHAR(100	) NOT NULL, \`admin\` TINYINT(1) NOT NULL, \`email_verification\` TINYINT(1) NOT NULL, PRIMARY KEY(user_id));"
-	sudo mysql -u root --database="NuOJ" --execute="CREATE TABLE \`submission\` ( \`submissionID\` INT NOT NULL AUTO_INCREMENT, \`submissionTime\` VARCHAR(40) NOT NULL, \`submissionBy\` VARCHAR(40) NOT NULL, \`Language\` VARCHAR(20) NOT NULL, \`ProblemID\` VARCHAR(20) NOT NULL,  \`VerdictResult\` VARCHAR(20), \`VerdictTime\` VARCHAR(40), \`VerdictMemory\` VARCHAR(40), PRIMARY KEY(submissionID));"
+	sudo mysql -u root --database="NuOJ" --execute="CREATE TABLE \`user\`(\`user_uid\` VARCHAR(36) NOT NULL,\`handle\` VARCHAR(32),\`password\` VARCHAR(128) NOT NULL,\`email\` VARCHAR(320) NOT NULL,\`role\` INT NOT NULL,\`email_verified\` TINYINT(1) NOT NULL,PRIMARY KEY(user_uid));"
+	sudo mysql -u root --database="NuOJ" --execute="CREATE TABLE \`submission\`(\`solution_id\` VARCHAR(40) NOT NULL,\`problem_id\` VARCHAR(40) NOT NULL, \`user_uid\` VARCHAR(40) NOT NULL,\`language\` VARCHAR(20) NOT NULL,\`date\` VARCHAR(40) NOT NULL, \`result\` VARCHAR(20), \`time\` VARCHAR(40), \`memory\` VARCHAR(40), \`judger_id\` VARCHAR(40), PRIMARY KEY(solution_id));"
 	sudo mysql -u root --database="NuOJ" --execute="CREATE TABLE \`problem\` (\`ID\` int NOT NULL AUTO_INCREMENT, \`name\` VARCHAR(20) NOT NULL, \`visibility\` VARCHAR(20) NOT NULL, \`token\` VARCHAR(40) NOT NULL, \`author\` VARCHAR(20) NOT NULL, PRIMARY KEY(ID));"
 	# create a new admin account
 	sudo mysql -u root --database="NuOJ" --execute="INSERT INTO \`user\` (username, password, email, admin) VALUES ('NuOJ', 'ff9c3cc1cd8a2cb0ffd4059a4717cdf1', 'NuOJ@ntut.edu.tw', 1);"
