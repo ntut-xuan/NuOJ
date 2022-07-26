@@ -122,6 +122,7 @@ def returnProfilePageWithName(name):
 	username = name
 	school = "未知"
 	accountType = "使用者" if admin == 0 else "管理員"
+	problems=[{"color":"green","state":"公開","title":"hellow"} for i in range(2)]
 	return render_template("profile.html", **locals())
 
 @app.route("/github_login", methods=["GET", "POST"])

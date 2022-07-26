@@ -1,0 +1,85 @@
+p,button{
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+
+}
+.select{
+    font-weight: bolder ;
+    border-bottom-style: solid;
+    border-bottom-width:medium;
+    border-bottom-left-radius: 1.5px;
+    border-bottom-right-radius: 1.5px;
+    border-bottom-color: black;
+    
+}
+.unselect{
+    font-weight: normal ;
+    border-bottom-style: solid;
+    border-bottom-width:medium;
+    border-bottom-left-radius: 1.5px;
+    border-bottom-right-radius: 1.5px;
+    border-bottom-color: rgb(0 0 0 / 0);
+}
+
+.middel{
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%,-50%);
+}
+
+.containter{
+    /* display: flex; */
+    height: fit-content;
+    gap: 2.5rem;
+    padding: 2.5rem;
+    border-width: 2px;
+    border-radius: 0.25rem;
+    box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    background-color: rgb(249 250 251 / 1);
+}
+
+.all_page_cover{
+    height: 100vh;
+    width: 100vw;
+    position: absolute;
+    top:0;
+    left: 0;
+    background-color: black;
+    opacity: 0.8;
+}
+
+
+/* 頁面轉換動換 */
+.page_changhe{
+    animation-duration: 1s;
+    animation-name: ch;
+    animation-iteration-count: infinite;
+    animation-timing-function: ease-in-out;
+    animation-fill-mode: both;
+}
+.animationStop{
+    animation-play-state: paused;
+}
+.animationStart{
+    animation-play-state: running;
+}
+.animationDiralternate{
+    animation-direction: alternate;
+}
+.animationDiralternateRe{
+    animation-direction: alternate-reverse;
+}
+.left-150{
+    left: 150%;
+}
+@keyframes ch {
+    0% {
+        left: 50%;
+        /* left: 20px; */
+    }
+    100%{
+        left: 150%;
+        /* left: 120px; */
+    }
+}
+
