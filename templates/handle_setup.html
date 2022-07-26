@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+	<head>
+        <title> NuOJ - 404 </title>
+        <link rel="icon" href="/static/logo_min.png" sizes="16x16" type="image/png">
+		<meta charset="utf-8">
+        <meta content="#f7b068" data-react-helmet="true" name="theme-color">
+        <meta property="og:title" content="NuOJ - 404">
+        <meta property="og:site_name" content="NuOJ">
+        <meta property="og:type" content="website">
+        <meta property="og:url" content="https://nuoj.ntut-xuan.net/">
+        <meta property="og:description" content="一款來自國立臺北科技大學的線上評測系統">
+        <meta property="og:image" content="https://nuoj.ntut-xuan.net/static/logo_min.png">
+        <meta property="og:image:alt" content="NuOJ">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link href="/static/css/output.css" rel="stylesheet">
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@200;300;400;500;600;700;900&display=swap" rel="stylesheet">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+	</head>
+    <body class="bg-slate-200 p-10 overflow-y-clip">
+        <div class="absolute left-[50%] top-[50%] translate-x-[-50%] translate-y-[-50%] w-[50vw] text-center rounded-lg bg-white p-5">
+            <img class="w-[10%] mx-auto" src="/static/logo_min.png">
+            <p class="mt-5 w-fit mx-auto text-2xl"> 設定你的 Handle </p>
+            <p class="text-sm font-bold mt-10"> Handle 是什麼 </p>
+            <p class="pt-1 w-fit mx-auto"> Handle 是在 Nu Online Judge 的使用者名稱 </p>
+            <p class="pt-1 w-fit mx-auto"> 你只能設定一次 Handle，為自己的帳號想個 Handle 吧 </p>
+            <p class="text-sm font-bold mt-10"> Handle 規範</p>
+            <p class="pt-1 w-fit mx-auto"> Handle 只能是英文、數字與連字符 (-) </p>
+            <p class="pt-1 w-fit mx-auto"> 不能以連字符為開頭或結尾，只能有一個連字符 </p>
+            <p class="text-sm font-bold mt-10"> Handle </p>
+            <input id="handle" class="w-full text-xl text-center mt-1 p-1 rounded border-slate-200 border-2 font-mono">
+            <button class="mt-10 w-full p-2 bg-blue-500 rounded-lg text-white" onclick="handle_setup()"> 提交 </button>
+        </div>
+    </body>
+    <script src="/static/js/error_code.js"></script>
+    <script>
+        function handle_setup(){
+            handle = document.getElementById("handle").value;
+            dataJson = {}
+            dataJson["handle"] = handle;
+            console.log(handle)
+            $.ajax({
+                    url: "./handle-setup",
+                    type: "POST",
+                    data: JSON.stringify(dataJson),
+                    dataType: "json",
+                    contentType: "application/json",
+                    success: function(data, status, xhr){
+                        console.log(data)
+                        if(data["status"] == "OK"){
+                            Swal.fire({
+                                icon: 'success',
+                                title: "設置成功！",
+                                showConfirmButton: false,
+                                timer: 1500
+                            }).then((result) => {
+                                window.location.href = "./";
+                            });
+                        }else if(data["status"] == "Failed" && data["code"] == ERROR_CODE["HANDLE_INVALID"]){
+                            Swal.fire({
+                                icon: 'error',
+                                title: "設置失敗",
+                                text: "Handle 不符合命名規則",
+                                showConfirmButton: false,
+                                timer: 1500
+                            })
+                        }else if(data["status"] == "Failed" && data["code"] == ERROR_CODE["HANDLE_REPEAT"]){
+                            Swal.fire({
+                                icon: 'error',
+                                title: "設置失敗",
+                                text: "此 Handle 已被其他人設置",
+                                showConfirmButton: false,
+                                timer: 1500
+                            })
+                        }
+                    }
+            });
+        }
+        document.addEventListener('keyup', (e) => {
+            if(e.code=="Enter" || e.code =="NumpadEnter"){
+                handle_setup()
+            }
+        });
+    </script>
+</html>

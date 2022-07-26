@@ -1,19 +1,10 @@
 #!/usr/bin/env python3
 from flask import *
-import subprocess
-from flask.wrappers import Response
-import pymysql
 import os
 import json
-from flask_cors import cross_origin, CORS
-from datetime import datetime as dt
-from uuid import uuid4
-from loguru import logger
-from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
-from flask_session import Session
-from datetime import timedelta
-import time;
 import requests
+import database_util
+from uuid import uuid4
 
 def googleLogin(conn, args, settingJsonObject):
     
@@ -36,33 +27,20 @@ def googleLogin(conn, args, settingJsonObject):
     jsonObject = json.loads(req.text)
 
     email = jsonObject["email"]
-    username = jsonObject["name"]
 
     data = {}
     data["status"] = "OK"
 
-    try:
-        with conn.cursor() as cursor:
-            cursor.execute("SELECT COUNT(*) from `user` where username=%s", username)
-            count = cursor.fetchone()[0]
-            cursor.close()
-    except Exception as e:
-        data["status"] = "Failed"
-        data["message"] = str(e)
-        return data
+    result = database_util.command_execute("SELECT COUNT(*) FROM `user` WHERE email=%s", (email))[0]
+    count = result["COUNT(*)"]
 
     if count == 0:
-        try:
-            with conn.cursor() as cursor:
-                cursor.execute("INSERT INTO `user` (username, email, password, admin) values (%s, %s, %s, 0)", (username, email, os.urandom(16).hex()))
-                conn.commit()
-                cursor.close()
-        except Exception as e:
-            data["status"] = "Failed"
-            data["message"] = str(e)
-            return data
+        user_uid = str(uuid4())
+        database_util.command_execute("INSERT INTO `user`(user_uid, password, email, role, email_verified) VALUES(%s, %s, %s, %s, %s)", (user_uid, str(uuid4()), email, 0, True))
+    else:
+        result = database_util.command_execute("SELECT handle FROM `user` WHERE email=%s", (email))[0]
+        data["handle"] = result["handle"]
 
-    data["user"] = username
     data["email"] = email
 
     return data

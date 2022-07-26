@@ -110,7 +110,7 @@
                 success: function (data, status, xhr) {
                     console.log(data)
                     if (data["status"] == "OK") {
-                        isLogin(data["result"]["cookie"]["username"]);
+                        isLogin(data["result"]["cookie"]["handle"]);
                     } else {
                         isnLogin();
                     }

@@ -81,7 +81,7 @@ def returnProblemPage():
 	login = (SID in session)
 	
 	if login:
-		username = session[SID]["username"]
+		username = session[SID]["handle"]
 
 	for i in range(len(problem_db)):
 		raw_problem_data = database_util.file_storage_tunnel_read(problem_db[i]["problem_pid"] + ".json", TunnelCode.PROBLEM)
@@ -129,8 +129,8 @@ def returnProblemIDPage(ID):
 
 @app.route("/profile/<name>", methods=["GET"])
 def returnProfilePageWithName(name):
-	user_data = database_util.command_execute("SELECT admin FROM `user` WHERE username=%s", (name))[0]
-	admin = user_data["admin"]
+	user_data = database_util.command_execute("SELECT role FROM `user` WHERE handle=%s", (name))[0]
+	admin = user_data["role"]
 	username = name
 	school = "未知"
 	accountType = "使用者" if admin == 0 else "管理員"
@@ -143,10 +143,16 @@ def processGithubLogin():
 	data = github_login_util.githubLogin(conn, request.args.get("code"), settingJsonObject)
 
 	if(data["status"] == "OK"):
-		resp = redirect("/")
-		sessionID = os.urandom(16).hex()
-		resp.set_cookie("SID", value = sessionID, expires=time.time()+24*60*60)
-		session[sessionID] = {"username": data["user"], "email": data["email"]}
+		if "handle" not in data or data["handle"] == None:
+			resp = redirect("/handle-setup")
+			sessionID = os.urandom(16).hex()
+			resp.set_cookie("HS", value = sessionID, expires=time.time()+24*60*60)
+			session[sessionID] = {"email": data["email"]}
+		else:
+			resp = redirect("/")
+			sessionID = os.urandom(16).hex()
+			resp.set_cookie("SID", value = sessionID, expires=time.time()+24*60*60)
+			session[sessionID] = {"handle": data["handle"], "email": data["email"]}
 		return resp
 	else:
 		return Response(json.dumps(data), mimetype="application/json")
@@ -156,12 +162,19 @@ def processGoogleLogin():
 
 	settingJsonObject = json.loads(open("/opt/nuoj/setting.json", "r").read())
 	data = google_login_util.googleLogin(conn, request.args, settingJsonObject)
-	
+	resp = None
+
 	if(data["status"] == "OK"):
-		resp = redirect("/")
-		sessionID = os.urandom(16).hex()
-		resp.set_cookie("SID", value = sessionID, expires=time.time()+24*60*60)
-		session[sessionID] = {"username": data["user"], "email": data["email"]}
+		if "handle" not in data or data["handle"] == None:
+			resp = redirect("/handle-setup")
+			sessionID = os.urandom(16).hex()
+			resp.set_cookie("HS", value = sessionID, expires=time.time()+24*60*60)
+			session[sessionID] = {"email": data["email"]}
+		else:
+			resp = redirect("/")
+			sessionID = os.urandom(16).hex()
+			resp.set_cookie("SID", value = sessionID, expires=time.time()+24*60*60)
+			session[sessionID] = {"handle": data["handle"], "email": data["email"]}
 		return resp
 	else:
 		return Response(json.dumps(data), mimetype="application/json")

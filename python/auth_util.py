@@ -26,7 +26,7 @@ def login(data):
     account = data["account"]
     password = password_cypto(data["password"])
 
-    command = "SELECT * FROM `user` WHERE `username` = %s OR `email` = %s;"
+    command = "SELECT * FROM `user` WHERE `handle` = %s OR `email` = %s;"
     userdata_set = database_util.command_execute(command, (account, account))
 
     if len(userdata_set) == 0:
@@ -37,10 +37,10 @@ def login(data):
     if userdata == None or userdata["password"] != password:
         return error_dict(ErrorCode.PASSWORD_NOT_MATCH)
     
-    if setting_util.mail_verification_enable() and userdata["email_verification"] == False:
+    if setting_util.mail_verification_enable() and userdata["email_verified"] == False:
         return error_dict(ErrorCode.EMAIL_NOT_VERIFICATION)
 
-    response_data = {"status": "OK", "data": {"username": userdata["username"], "email": userdata["email"]}}
+    response_data = {"status": "OK", "data": {"handle": userdata["handle"], "email": userdata["email"]}}
     return response_data
 
 def send_email(email, username, verification_code):
@@ -82,20 +82,20 @@ def register_db(data) -> dict:
 
     # User Data
     email = data["email"]
-    username = data["username"]
+    handle = data["handle"]
     password = data["password"]
     admin = 0
     response = {"status": "OK"}
 
     # Check Data Valid
-    username_valid = bool(re.match("^[a-z\d](?:[a-z\d]|-(?=[a-z\d])){0,38}$", username))
-    if not username_valid:
-        return {"status": "Failed", "message": "Invalid username"}
+    handle_valid = bool(re.match("^[a-z\d](?:[a-z\d]|-(?=[a-z\d])){0,38}$", handle))
+    if not handle_valid:
+        return {"status": "Failed", "message": "Invalid handle"}
     
     # Check repeat username
-    user_data = database_util.command_execute("SELECT * FROM `user` WHERE `username` = %s", (username))
+    user_data = database_util.command_execute("SELECT * FROM `user` WHERE `handle` = %s", (handle))
     if len(user_data):
-        return {"status": "Failed", "message": "Repeat Username"}
+        return {"status": "Failed", "message": "Repeat Handle"}
     
     # Check repeat email
     user_data = database_util.command_execute("SELECT * FROM `user` WHERE `email` = %s", (email))
@@ -106,9 +106,10 @@ def register_db(data) -> dict:
     password = password_cypto(password)
 
     # Write into database
-    database_util.command_execute("INSERT INTO `user`(username, password, email, admin, email_verification) VALUES(%s,%s,%s,%s,%s)", (username, password, email, admin, False))
-    data_dict = {"user_id": str(uuid4()), "email": email, "username": username, 
-                "password": password, "admin": admin, "email_verification": False}
+    user_uid = str(uuid4())
+    database_util.command_execute("INSERT INTO `user`(user_uid, handle, password, email, role, email_verified) VALUES(%s, %s, %s, %s, %s, %s)", (user_uid, handle, password, email, admin, False))
+    data_dict = {"user_id": user_uid, "email": email, "handle": handle, 
+                "password": password, "admin": admin, "email_verified": False}
 
     # Email verification
     mail_info = json.loads(open("/opt/nuoj/setting.json", "r").read())["mail"]
@@ -117,8 +118,32 @@ def register_db(data) -> dict:
         # Make email with verification link:
         verification_code = str(uuid4())
         response["verification_code"] = verification_code
-        send_email(email, username, verification_code)
+        send_email(email, handle, verification_code)
 
     # Check write result
     response["data"] = data_dict
     return response
+
+def handle_exist(email) -> bool:
+    result = database_util.command_execute("SELECT handle FROM `user` WHERE email=%s", (email))[0]
+    return result["handle"] != None
+
+def handle_setup(data, email) -> dict:
+
+    # User Data
+    handle = data["handle"]
+
+    # Validate handle
+    handle_valid = bool(re.match("^[a-z\d](?:[a-z\d]|-(?=[a-z\d])){0,38}$", handle))
+    if not handle_valid:
+        return error_dict(ErrorCode.HANDLE_INVALID)
+    
+    # Check handle repeat or not
+    result = database_util.command_execute("SELECT COUNT(*) FROM `user` WHERE handle=%s", (handle))[0]
+    if result["COUNT(*)"] > 0:
+        return error_dict(ErrorCode.HANDLE_REPEAT)
+
+    # Setup Handle
+    database_util.command_execute("UPDATE `user` SET handle=%s WHERE email=%s", (handle, email))
+
+    return {"status": "OK", "data": {"email": email, "handle": handle}}

@@ -14,6 +14,7 @@ from flask_session import Session
 from datetime import timedelta
 import time;
 import requests
+import database_util
 
 def githubLogin(conn, code, settingJsonObject):
 
@@ -35,37 +36,20 @@ def githubLogin(conn, code, settingJsonObject):
     req = requests.get("https://api.github.com/user", headers=header)
     jsonObject = json.loads(req.text)
     data["status"] = "OK"
-    count = 0
 
     # Fetch data
     username = jsonObject["login"]
     email = jsonObject["email"]
 
     if(email == None):
-        email = "github" + str(jsonObject["id"]) + "@github.noreply.com"
+        email = username + "@github.com"
 
-    try:
-        with conn.cursor() as cursor:
-            cursor.execute("SELECT COUNT(*) from `user` where username=%s", jsonObject["login"])
-            count = cursor.fetchone()[0]
-            cursor.close()
-    except Exception as e:
-        data["status"] = "Failed"
-        data["message"] = str(e)
-        return data
+    result = database_util.command_execute("SELECT COUNT(*) from `user` where email=%s", (email))[0]
 
-    if count == 0:
-        try:
-            with conn.cursor() as cursor:
-                cursor.execute("INSERT INTO `user` (username, email, password, admin) values (%s, %s, %s, 0)", (username, email, os.urandom(16).hex()))
-                conn.commit()
-                cursor.close()
-        except Exception as e:
-            data["status"] = "Failed"
-            data["message"] = str(e)
-            return data
+    if int(result["COUNT(*)"]) == 0:
+        user_uid = str(uuid4())
+        database_util.command_execute("INSERT INTO `user`(user_uid, password, email, role, email_verified) VALUES(%s, %s, %s, %s, %s)", (user_uid, str(uuid4()), email, 0, True))
     
-    data["user"] = username
     data["email"] = email
 
     return data
