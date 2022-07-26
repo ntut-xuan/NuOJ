@@ -29,10 +29,8 @@ jobs:
       run: |
         sudo systemctl start nuoj
         sudo systemctl start nuoj-sandbox
-        sudo systemctl start nuoj-database
         sudo systemctl status nuoj
         sudo systemctl status nuoj-sandbox
-        sudo systemctl status nuoj-database
       
-    - name: Tesy
+    - name: Test
       run: make test-all
