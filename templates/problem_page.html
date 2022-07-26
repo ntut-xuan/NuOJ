@@ -98,7 +98,7 @@
     <script>
         async function submit_code(){
             code = editor.getValue();
-            problem_id = window.location.pathname.substring(9)
+            problem_id = Integer.parse(window.location.pathname.substring(9))   
             data = await submit(code, problem_id)
             console.log(data)
         }

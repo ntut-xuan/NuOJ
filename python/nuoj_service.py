@@ -33,6 +33,10 @@ CORS(app)
 isolate_path = ""
 add_problem_map = {}
 
+@app.before_request
+def before_req():
+    session["IF_YOU_WANT_TO_TEST_YOU_CAN_USE_THIS_TOKEN"] = {"username": "ntut-xuan", "email": "nuoj@test.net"}
+
 @app.errorhandler(404)
 def page_not_found(error):
     return render_template('404.html', error=error)

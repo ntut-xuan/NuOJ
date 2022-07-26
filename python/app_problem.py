@@ -27,28 +27,39 @@ def returnProblemIDPage(ID):
 @problem_page.route("/submit/", methods=["POST"])
 def submitCode():
 
-	# Check session valid
-	SID = request.cookies.get("SID")
-	login = SID in session
+	try:
 
-	if not login:
-		return Response(json.dumps(error_dict(ErrorCode.REQUIRE_AUTHORIZATION)), mimetype="application.json")
+		# Check session valid
+		SID = request.cookies.get("SID")
+		login = SID in session
 
-	session_data = session[SID]
-	data = request.json
-	
-	# Create submission infomation
-	code = data["code"]
-	problem_id = data["problem_id"]
-	submission_id = str(uuid4())
-	user_uid = database_util.command_execute("SELECT user_uid from `user` WHERE email=%s", (session_data["email"]))[0]["user_uid"]
-	language = "C++"
-	date = datetime.now()
+		if not login:
+			return Response(json.dumps(error_dict(ErrorCode.REQUIRE_AUTHORIZATION)), mimetype="application/json")
 
-	# Save code to storage
-	database_util.file_storage_tunnel_write(submission_id + ".cpp", code, TunnelCode.SUBMISSION)
+		session_data = session[SID]
+		data = request.json
+		
+		# Create submission infomation
+		code = data["code"]
+		problem_id = data["problem_id"]
+		submission_id = str(uuid4())
+		user_uid = database_util.command_execute("SELECT user_uid FROM `user` WHERE email=%s", (session_data["email"]))[0]["user_uid"]
+		language = "C++"
+		date = datetime.now()
 
-	# Save info to SQL
-	database_util.command_execute("INSERT INTO `submission`(solution_id, problem_id, user_uid, language, date) VALUE(%s, %s, %s, %s, %s)", (submission_id, problem_id, user_uid, language, date))
+		# Check problem exist
+		problem_count = database_util.command_execute("SELECT COUNT(*) FROM `problem` WHERE ID=%d", (data["problem_id"]))[0]["COUNT(*)"]
+		
+		if problem_count == 0:
+			return Response(json.dumps(error_dict(ErrorCode.INVALID_DATA)), mimetype="application/json")
 
-	return Response(json.dumps({"status": "OK"}), mimetype="application/json")
+		# Save code to storage
+		database_util.file_storage_tunnel_write(submission_id + ".cpp", code, TunnelCode.SUBMISSION)
+
+		# Save info to SQL
+		database_util.command_execute("INSERT INTO `submission`(solution_id, problem_id, user_uid, language, date) VALUE(%s, %s, %s, %s, %s)", (submission_id, problem_id, user_uid, language, date))
+
+		return Response(json.dumps({"status": "OK"}), mimetype="application/json")
+
+	except Exception as e:
+		return Response(json.dumps(error_dict(ErrorCode.UNEXCEPT_ERROR)), mimetype="application/json")

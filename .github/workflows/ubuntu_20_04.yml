@@ -15,6 +15,10 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v3
     
+    - uses: shogo82148/actions-setup-mysql@v1
+      with:
+        mysql-version: 'mariadb-10.6'
+
     - name: Install
       run: |
         make install
