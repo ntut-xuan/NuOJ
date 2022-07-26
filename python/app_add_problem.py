@@ -31,7 +31,7 @@ def returnEditProblemPage(PID):
 		return redirect("/")
 
 	data = session[SID]
-	username = data["username"]
+	username = data["handle"]
 
 	if(request.method == "GET"):
 

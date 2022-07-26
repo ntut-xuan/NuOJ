@@ -35,6 +35,12 @@ def returnLoginPage():
 
 @auth.route("/register", methods=["GET", "POST"])
 def returnRegisterPage():
+	settingJsonObject = json.loads(open("/opt/nuoj/setting.json", "r").read())
+	githubStatus = settingJsonObject["oauth"]["github"]["enable"]
+	googleStatus = settingJsonObject["oauth"]["google"]["enable"]
+	github_client_id = settingJsonObject["oauth"]["github"]["client_id"]
+	google_client_id = settingJsonObject["oauth"]["google"]["client_id"]
+	google_redirect_url = settingJsonObject["oauth"]["google"]["redirect_url"]
 
 	verifyStatus = setting_util.mail_verification_enable();
 
@@ -115,10 +121,7 @@ def handle_setup():
 
 		return resp
 		
-
-	'''	
 	if handle_exist:
 		return redirect("/")
-	'''
 
 	return render_template("handle_setup.html", **locals())

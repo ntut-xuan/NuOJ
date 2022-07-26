@@ -135,8 +135,8 @@
         }
         if(document.getElementById("viaGoogle") != undefined){
             document.getElementById("viaGoogle").addEventListener("click", () => {
-                let client_id = "434328667842-4pqp3g8snef36jvf41g0ciu58rtek555.apps.googleusercontent.com"
-                let redirect_url = "https://nuoj.ntut-xuan.net/google_login"
+                let client_id = "{{google_client_id}}"
+                let redirect_url = "{{google_redirect_url}}"
                 let response_type = "code"
                 let scope = "https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email"
                 window.location.href = "https://accounts.google.com/o/oauth2/v2/auth?client_id=" + client_id + "&redirect_uri=" + redirect_url + "&response_type=" + response_type + "&scope=" + scope;

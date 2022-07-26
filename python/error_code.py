@@ -11,6 +11,7 @@ class ErrorCode(Enum):
     EMAIL_VERIFICATION_FAILED = 305
     PASSWORD_NOT_MATCH = 401
     REQUIRE_PAPRMETER = 501
+    REQUIRE_AUTHORIZATION = 601
     UNEXCEPT_ERROR = 999
 
 def error_dict(code: ErrorCode) -> dict:

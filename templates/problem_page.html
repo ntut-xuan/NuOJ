@@ -78,10 +78,12 @@
         </div>
         <div class="w-3/4 mx-auto border-2 text-lg flex flex-col gap-10 p-10 shadow bg-white">
             <textarea id="code_area" class="resize-none w-full h-20\"></textarea>
-            <button class="bg-blue-700 w-full delay-50 p-2 hover:bg-blue-500 rounded text-white text-2xl"> 提交 </button>
+            <button class="bg-blue-700 w-full delay-50 p-2 hover:bg-blue-500 rounded text-white text-2xl" onclick="submit_code()"> 提交 </button>
         </div>
     </body>
+    <script src="/static/js/problem_submit.js"></script>
     <script>
+        let editor = null;
         function draw(){
 			let textarea = document.getElementById("code_area");
 			editor = CodeMirror.fromTextArea(textarea, {
@@ -92,5 +94,13 @@
 			});
 		}
         draw();
+    </script>
+    <script>
+        async function submit_code(){
+            code = editor.getValue();
+            problem_id = window.location.pathname.substring(9)
+            data = await submit(code, problem_id)
+            console.log(data)
+        }
     </script>
 </html>

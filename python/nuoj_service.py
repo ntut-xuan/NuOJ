@@ -16,10 +16,12 @@ from tunnel_code import TunnelCode
 import setting_util as setting_util
 from app_auth import auth
 from app_add_problem import problem
+from app_problem import problem_page
 
 app = Flask(__name__, static_url_path='', template_folder="/opt/nuoj/templates")
 app.register_blueprint(auth)
 app.register_blueprint(problem)
+app.register_blueprint(problem_page)
 
 asana_util = asana_util.AsanatUil(json.loads(open("/opt/nuoj/setting.json", "r").read())["asana"]["token"])
 app.config['JSON_SORT_KEYS'] = False
@@ -112,20 +114,6 @@ def logout():
 		code = 500
 	resp = Response(response=json.dumps(data), status=code)
 	return resp
-
-@app.route("/problem/<ID>", methods=["GET", "POST"])
-def returnProblemIDPage(ID):
-
-	problem_pid = database_util.command_execute("SELECT problem_pid FROM `problem` WHERE ID = %s", (ID))[0]["problem_pid"]
-	problemJsonObject = json.loads(database_util.file_storage_tunnel_read(problem_pid + ".json", TunnelCode.PROBLEM))
-	title = problemJsonObject["problem_content"]["title"]
-	description = problemJsonObject["problem_content"]["description"].split("\n")
-	input_description = problemJsonObject["problem_content"]["input"].split("\n")
-	output_description = problemJsonObject["problem_content"]["output"].split("\n")
-	note = problemJsonObject["problem_content"]["note"].split("\n")
-	TL = problemJsonObject["basic_setting"]["time_limit"]
-	ML = problemJsonObject["basic_setting"]["memory_limit"]
-	return render_template("problem_page.html", **locals())
 
 @app.route("/profile/<name>", methods=["GET"])
 def returnProfilePageWithName(name):
@@ -261,7 +249,7 @@ if __name__ == "__main__":
 	settingJsonObject = json.loads(open("/opt/nuoj/setting.json", "r").read())
 
 	conn = database_util.connect_database()
-	database_util.command_execute("SELECT * FROM `user`", ())
+	result = database_util.command_execute("SELECT * FROM `user`", ())
 
 	app.debug = True
 

@@ -44,12 +44,14 @@ def githubLogin(conn, code, settingJsonObject):
     if(email == None):
         email = username + "@github.com"
 
-    result = database_util.command_execute("SELECT COUNT(*) from `user` where email=%s", (email))[0]
+    result = database_util.command_execute("SELECT handle, COUNT(*) from `user` where email=%s", (email))[0]
 
     if int(result["COUNT(*)"]) == 0:
         user_uid = str(uuid4())
         database_util.command_execute("INSERT INTO `user`(user_uid, password, email, role, email_verified) VALUES(%s, %s, %s, %s, %s)", (user_uid, str(uuid4()), email, 0, True))
-    
+    else:
+        data["handle"] = result["handle"]
+
     data["email"] = email
 
     return data
