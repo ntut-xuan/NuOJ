@@ -11,6 +11,7 @@ import github_login_util as github_login_util
 import google_login_util as google_login_util
 import asana_util as asana_util
 import pytz
+from error_code import error_dict, ErrorCode 
 import database_util as database_util
 from tunnel_code import TunnelCode
 import setting_util as setting_util
@@ -67,7 +68,7 @@ def returnStaticFile(path):
 def returnIndex():
 	SID = request.cookies.get("SID")
 	login = (SID in session)
-	
+
 	if login:
 		handle = session[SID]["handle"]
 
@@ -93,7 +94,7 @@ def returnProblemPage():
 		if "problem_content" in problem_data:
 			problem_content = problem_data["problem_content"]
 			problem_author = problem_db[i]["problem_author"]
-			problem_dict = {"problem_ID": i+1, "problem_name": problem_content["title"], "problem_author": problem_author, "problem_tag": []}
+			problem_dict = {"problem_ID": problem_db[i]["ID"], "problem_name": problem_content["title"], "problem_author": problem_author, "problem_tag": []}
 			problem.append(problem_dict)
 
 	return render_template("problem.html", **locals())
@@ -117,12 +118,27 @@ def logout():
 
 @app.route("/profile/<name>", methods=["GET"])
 def returnProfilePageWithName(name):
+
+	# Check user exist
+	count = database_util.command_execute("SELECT COUNT(*) FROM `user` WHERE handle=%s", (name))[0]["COUNT(*)"]
+
+	if count == 0:
+		abort(404)
+
+	# Fetch user infomation
 	user_data = database_util.command_execute("SELECT role FROM `user` WHERE handle=%s", (name))[0]
 	admin = user_data["role"]
-	username = name
+	handle = name
 	school = "未知"
 	accountType = "使用者" if admin == 0 else "管理員"
-	problems=[{"color":"green","state":"公開","title":"hellow"} for i in range(2)]
+	
+	problem_data = database_util.command_execute("SELECT * FROM `problem` WHERE problem_author=%s", (handle))
+	problems = []
+
+	for data in problem_data:
+		problem_storage_data = json.loads(database_util.file_storage_tunnel_read(data["problem_pid"] + ".json", TunnelCode.PROBLEM))
+		problems.append({"color": "green", "state": "公開", "title": problem_storage_data["problem_content"]["title"], "token": data["problem_pid"]})
+	
 	return render_template("profile.html", **locals())
 
 @app.route("/github_login", methods=["GET", "POST"])

@@ -631,6 +631,10 @@ video {
   margin: 1.25rem;
 }
 
+.m-10 {
+  margin: 2.5rem;
+}
+
 .mx-auto {
   margin-left: auto;
   margin-right: auto;
@@ -779,6 +783,14 @@ video {
   min-height: 7vh;
 }
 
+.min-h-\[9vh\] {
+  min-height: 9vh;
+}
+
+.min-h-\[15vh\] {
+  min-height: 15vh;
+}
+
 .w-\[40vh\] {
   width: 40vh;
 }
@@ -873,6 +885,10 @@ video {
   width: 16rem;
 }
 
+.w-\[200\%\] {
+  width: 200%;
+}
+
 .table-auto {
   table-layout: auto;
 }
@@ -957,6 +973,10 @@ video {
 
 .justify-between {
   justify-content: space-between;
+}
+
+.justify-evenly {
+  justify-content: space-evenly;
 }
 
 .gap-5 {

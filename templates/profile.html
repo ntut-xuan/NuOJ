@@ -43,7 +43,7 @@
                     </div>
                     <div class="w-full flex justify-center flex-col items-center">
                         <p class="text-2xl font-mono " style="color: rgb(39, 37, 49);"> {{accountType}} </p>
-                        <p id="username"class="text-5xl font-mono ">{{username}}</p>
+                        <p id="username"class="text-5xl font-mono ">{{handle}}</p>
                     </div>
                 </div>
                 <!-- 帳號email -->
@@ -90,7 +90,7 @@
             <div id="problem"class="containter flex flex-col  middel page_changhe animationStop animationDiralternateRe left-150" style="width: 500px; margin:0px;height: 600px;justify-content: space-between;">
                 <div style="display: flex;flex-direction: column;gap:10px;">
                     {% for problem in problems %}
-                    <a href="{{problem.href}}">
+                    <a href="/edit_problem/{{problem.token}}/">
                         <div style="border:2px black solid;padding: 10px;border-radius: 20px;">
                             <div style="display:flex;gap: 10px;align-items: center" >
                                 <div style="width: 20px;height:20px; background-color: {{problem.color}}; border-radius: 10px;"> </div>
@@ -98,7 +98,7 @@
                             </div>
                             <hr>
                             <p class="text-2xl">{{problem.title}}</p>
-                            <p class="text-1xl">some information</p>
+                            <p class="text-1xl">{{problem.token}}</p>
                         </div>
                     </a>
                     {% endfor %}
