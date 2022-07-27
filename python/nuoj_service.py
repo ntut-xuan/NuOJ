@@ -63,19 +63,15 @@ def veriCookie(cookie):
 def returnStaticFile(path):
 	return send_from_directory('../static', path)
 
-@app.route("/", methods=["GET", "POST"])
+@app.route("/", methods=["GET"])
 def returnIndex():
-	index_html = open("/opt/nuoj/html/index.html", "r")
-	if request.method == "GET":
-		return index_html.read()
-	
 	SID = request.cookies.get("SID")
-	return veriCookie(SID)
+	login = (SID in session)
+	
+	if login:
+		handle = session[SID]["handle"]
 
-@app.route("/submit", methods=["GET"], strict_slashes=False)
-def returnSubmitPage():
-	index_html = open("/opt/nuoj/html/submit.html", "r")
-	return index_html.read()
+	return render_template("index.html", **locals())
 
 @app.route("/problem", methods=["GET"])
 def returnProblemPage():
