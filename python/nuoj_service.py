@@ -36,7 +36,7 @@ add_problem_map = {}
 
 @app.before_request
 def before_req():
-    session["IF_YOU_WANT_TO_TEST_YOU_CAN_USE_THIS_TOKEN"] = {"username": "ntut-xuan", "email": "nuoj@test.net"}
+    session["IF_YOU_WANT_TO_TEST_YOU_CAN_USE_THIS_TOKEN"] = {"handle": "ntut-xuan", "email": "nuoj@test.net"}
 
 @app.errorhandler(404)
 def page_not_found(error):
@@ -88,13 +88,15 @@ def returnProblemPage():
 
 	for i in range(len(problem_db)):
 		raw_problem_data = database_util.file_storage_tunnel_read(problem_db[i]["problem_pid"] + ".json", TunnelCode.PROBLEM)
+		problem_id = problem_db[i]["ID"]
+		problem_author = problem_db[i]["problem_author"]
 		if len(raw_problem_data) == 0:
 			continue
 		problem_data = json.loads(raw_problem_data)
 		if "problem_content" in problem_data:
 			problem_content = problem_data["problem_content"]
-			problem_author = problem_db[i]["problem_author"]
-			problem_dict = {"problem_ID": problem_db[i]["ID"], "problem_name": problem_content["title"], "problem_author": problem_author, "problem_tag": []}
+			problem_title = problem_content["title"]
+			problem_dict = {"problem_ID": problem_id, "problem_name": problem_title, "problem_author": problem_author, "problem_tag": []}
 			problem.append(problem_dict)
 
 	return render_template("problem.html", **locals())
@@ -136,6 +138,9 @@ def returnProfilePageWithName(name):
 	problems = []
 
 	for data in problem_data:
+		if not database_util.file_storage_tunnel_exist(data["problem_pid"] + ".json", TunnelCode.PROBLEM):
+			problems.append({"color": "green", "state": "公開", "title": "---", "token": data["problem_pid"]})
+			continue
 		problem_storage_data = json.loads(database_util.file_storage_tunnel_read(data["problem_pid"] + ".json", TunnelCode.PROBLEM))
 		problems.append({"color": "green", "state": "公開", "title": problem_storage_data["problem_content"]["title"], "token": data["problem_pid"]})
 	

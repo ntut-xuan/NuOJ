@@ -10,44 +10,6 @@
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
         <script src="https://apis.google.com/js/platform.js?onload=init" async defer></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jsSHA/3.1.2/sha.js"></script>
-        <script>
-            function onClick(){
-                var requestURL = window.location.protocol + '//' + window.location.hostname + "/login";
-                var dataJson = {};
-                dataJson["account"] = document.getElementById("account").value;
-                dataJson["password"] = document.getElementById("password").value;
-                $.ajax({
-                    url: requestURL,
-                    data: JSON.stringify(dataJson),
-                    type: "POST",
-                    dataType: "json",
-                    contentType: "application/json;charset=utf-8",
-                    success: function(data, status, xhr){
-                        if(data["status"] == "OK"){
-                            Swal.fire({
-                                icon: 'success',
-                                title: data["message"],
-                                showConfirmButton: false,
-                                timer: 1500
-                            }).then((result) => {
-                                window.location.href = "./";
-                            });
-                        }else{
-                            Swal.fire({
-                                icon: 'error',
-                                title: data["message"],
-                                showConfirmButton: false,
-                                timer: 1500
-                            })
-                        }
-                    },
-                    error: function(xhr, ajaxOptions, thrownError){
-                        console.log(xhr.status);
-                        console.log(thrownError);
-                    }
-                });
-            }
-        </script>
     </head>
     <body>
         <div class="w-full h-screen flex">
@@ -79,50 +41,9 @@
             </div>
         </div>
     </body>
+    <script src="/static/js/register.js"></script>
+    <script src="/static/js/error_code.js"></script>
     <script>
-        function Account(){
-            let username = document.getElementsByTagName("input")[0].value
-            let email = document.getElementsByTagName("input")[1].value
-            let password = document.getElementsByTagName("input")[2].value
-            
-            const shaObj = new jsSHA("SHA-512", "TEXT", { encoding: "UTF8" });
-            shaObj.update(password)
-            dataJson = {}
-            dataJson["handle"] = username
-            dataJson["email"] = email
-            dataJson["password"] = shaObj.getHash("HEX")
-            dataJson["check"] = true
-            $.ajax({
-                url: "./register",
-                type: "POST",
-                data: JSON.stringify(dataJson),
-                dataType: "json",
-                contentType: "application/json",
-                success(data, status, xhr){
-                    let message = ""
-                    if(data["message"] == "Invalid username"){
-                        message = "無效的使用者名稱"
-                    }
-                    if(data["message"] == "Repeat Email"){
-                        message = "信箱已被註冊"
-                    }
-                    if(data["message"] == "Repeat Username"){
-                        message = "使用者名稱已被註冊"
-                    }
-                    if(data["status"] == "OK"){
-                        success_dialog("註冊成功！", "", "")
-                    }else{
-                        Swal.fire({
-                            icon: "error",
-                            title: "註冊失敗",
-                            text: message,
-                            timer: 1500,
-                            showConfirmButton: false
-                        })
-                    }
-                }
-            })
-        }
         if(document.getElementById("viaAccount") != undefined){
             document.getElementById("viaAccount").addEventListener("click", () => {
                 Account()
@@ -142,11 +63,6 @@
                 window.location.href = "https://accounts.google.com/o/oauth2/v2/auth?client_id=" + client_id + "&redirect_uri=" + redirect_url + "&response_type=" + response_type + "&scope=" + scope;
             })
         }
-        document.addEventListener('keyup', (e) => {
-            if(e.code=="Enter" || e.code =="NumpadEnter"){
-                Account()
-            }
-        });
     </script>
     {% if verifyStatus == true %}
     <script>

@@ -90,17 +90,25 @@ def register_db(data) -> dict:
     # Check Data Valid
     handle_valid = bool(re.match("^[a-z\d](?:[a-z\d]|-(?=[a-z\d])){0,38}$", handle))
     if not handle_valid:
-        return {"status": "Failed", "message": "Invalid handle"}
+        return error_dict(ErrorCode.HANDLE_INVALID)
     
+    email_valid = bool(re.match("^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$", email))
+    if not email_valid:
+        return error_dict(ErrorCode.EMAIL_INVALID)
+
+    password_valid = bool(re.match("(?=.*?[a-zA-Z])(?=.*?[0-9]).{8,}$", password))
+    if not password_valid:
+        return error_dict(ErrorCode.PASSWORD_INVALID)
+
     # Check repeat username
     user_data = database_util.command_execute("SELECT * FROM `user` WHERE `handle` = %s", (handle))
     if len(user_data):
-        return {"status": "Failed", "message": "Repeat Handle"}
+        return error_dict(ErrorCode.HANDLE_EXIST)
     
     # Check repeat email
     user_data = database_util.command_execute("SELECT * FROM `user` WHERE `email` = %s", (email))
     if len(user_data):
-        return {"status": "Failed", "message": "Repeat Email"}
+        return error_dict(ErrorCode.EMAIL_EXIST)
 
     # Cypto
     password = password_cypto(password)

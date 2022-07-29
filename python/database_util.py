@@ -33,9 +33,13 @@ def command_execute(command: str, param: tuple) -> dict:
         else:
             return {}
 
+def file_storage_tunnel_exist(filename: str, tunnel: TunnelCode) -> bool:
+    path = "/opt/nuoj/storage/%s/%s" % (tunnel.value, filename)
+    return os.path.exists(path)
+
 def file_storage_tunnel_read(filename: str, tunnel: TunnelCode) -> str:
     path = "/opt/nuoj/storage/%s/%s" % (tunnel.value, filename)
-    if os.path.exists(path):
+    if file_storage_tunnel_exist(filename, tunnel):
         with open(path, "r") as file:
             return file.read()
     else:

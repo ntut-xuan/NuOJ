@@ -1,3 +1,4 @@
+import traceback
 from flask import *
 import time
 import os
@@ -48,7 +49,7 @@ def submitCode():
 		date = datetime.now()
 
 		# Check problem exist
-		problem_count = database_util.command_execute("SELECT COUNT(*) FROM `problem` WHERE ID=%d", (data["problem_id"]))[0]["COUNT(*)"]
+		problem_count = database_util.command_execute("SELECT COUNT(*) FROM `problem` WHERE ID=%s", (data["problem_id"]))[0]["COUNT(*)"]
 		
 		if problem_count == 0:
 			return Response(json.dumps(error_dict(ErrorCode.INVALID_DATA)), mimetype="application/json")
@@ -62,4 +63,5 @@ def submitCode():
 		return Response(json.dumps({"status": "OK"}), mimetype="application/json")
 
 	except Exception as e:
+		print(e)
 		return Response(json.dumps(error_dict(ErrorCode.UNEXCEPT_ERROR)), mimetype="application/json")
