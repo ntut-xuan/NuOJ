@@ -10,6 +10,34 @@ auth = Blueprint('auth', __name__)
 
 verification_code_dict = {}
 
+@auth.route("/session_verification", methods=["POST"])
+def session_veri():
+	SID = request.cookies.get("SID")
+	login = (SID in session)
+	if login == True:
+		return {"status": "OK", "handle": session[SID]["handle"]}
+	else:
+		return error_dict(ErrorCode.REQUIRE_AUTHORIZATION)
+
+@auth.route("/oauth_info", methods=["GET"])
+def oauth_info():
+	github_status = setting_util.github_oauth_enable()
+	google_status = setting_util.github_oauth_enable()
+	github_client_id = setting_util.github_oauth_client_id()
+	google_client_id = setting_util.google_oauth_client_id()
+	google_redirect_url = setting_util.google_oauth_redirect_url()
+	google_oauth_scope = "https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email"
+
+	response = {"status": "OK"}
+
+	if github_status:
+		response["github_oauth_url"] = "https://github.com/login/oauth/authorize?client_id=%s&scope=repo" % (github_client_id) 
+
+	if google_status:
+		response["google_oauth_url"] = "https://accounts.google.com/o/oauth2/v2/auth?client_id=%s&redirect_uri=%s&response_type=code&scope=%s;" % (google_client_id, google_redirect_url, google_oauth_scope)
+
+	return Response(json.dumps(response), mimetype="application/json")
+
 @auth.route("/login", methods=["GET", "POST"])
 def returnLoginPage():
 	settingJsonObject = json.loads(open("/opt/nuoj/setting.json", "r").read())

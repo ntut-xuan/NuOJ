@@ -16,41 +16,11 @@
         <script src="https://code.jquery.com/jquery-3.1.1.min.js"
             integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-        <script>
-            function logout() {
-                var requestURL = window.location.protocol + '//' + window.location.hostname + "/logout";
-                $.ajax({
-                    url: requestURL,
-                    type: "POST",
-                    dataType: "json",
-                    contentType: "application/json;charset=utf-8",
-                    success: function (data, status, xhr) {
-                        Swal.fire({
-                            icon: 'success',
-                            title: "登出成功",
-                            showConfirmButton: false,
-                            timer: 1500
-                        }).then((result) => {
-                            window.location.href = "./";
-                        });
-                    },
-                    error: function (xhr, ajaxOptions, thrownError) {
-                        Swal.fire({
-                            icon: 'error',
-                            title: "登出失敗",
-                            text: '請聯繫管理員 QQ',
-                            showConfirmButton: false,
-                            timer: 1500
-                        })
-                    }
-                });
-            }
-        </script>
     </head>
     <body>
         <div class="absolute h-full w-full bg-cover bg-[url('../index.jpg')]">
             <div class="absolute h-full w-full bg-gray-900 bg-opacity-80">
-                <div class="absolute p-10 w-full flex justify-between">
+                <div id="toolbar_div" class="absolute p-10 w-full flex justify-between">
                     <div class="flex gap-10 items-center min-h-[7vh] justify-start">
                         <div class="w-full text-center">
                             <a href="#">
@@ -67,19 +37,8 @@
                             <a class="text-white text-2xl border-b-2 border-white border-opacity-0 duration-500 hover:border-white hover:border-opacity-100" href="/status"> 狀態 </a>
                         </div>
                     </div>
-                    <div class="flex gap-20 items-center min-h-[7vh] justify-end">
-                        {%- if not login -%}
-                        <div>
-                            <a class="text-white text-2xl border-b-2 border-white border-opacity-0 duration-500 hover:border-white hover:border-opacity-100" href="/login"> 登入 </a>
-                        </div>
-                        <div>
-                            <a class="text-white text-2xl border-b-2 border-white border-opacity-0 duration-500 hover:border-white hover:border-opacity-100" href="/register"> 註冊 </a>
-                        </div>
-                        {% else %}
-                        <div>
-                            <a class="text-white text-2xl border-b-2 border-white border-opacity-0 duration-500 hover:border-white hover:border-opacity-100" href="/profile/{{handle}}"> {{handle}} </a>
-                        </div>
-                        {% endif %}
+                    <div id="login_div" class="flex gap-20 items-center min-h-[7vh] justify-end">
+                        
                     </div>
                 </div>
                 <div class="absolute left-[50%] top-[50%] -translate-x-[50%] -translate-y-[50%] text-center w-[80%]">
@@ -102,4 +61,7 @@
             </div>
         </div>
     </body>
+    <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+    <script src="/static/js/index.js"></script> 
 </html>

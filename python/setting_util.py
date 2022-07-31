@@ -11,11 +11,29 @@ def github_oauth_enable() -> bool:
     '''
     return setting["oauth"]["github"]["enable"]
 
+def github_oauth_client_id() -> str:
+    '''
+    回傳使用者 Github OAuth 的 client ID
+    '''
+    return setting["oauth"]["github"]["client_id"]
+
 def google_oauth_enable() -> bool:
     '''
     回傳使用者是否開啟 Google OAuth 功能
     '''
     return setting["oauth"]["google"]["enable"]
+
+def google_oauth_client_id() -> str:
+    '''
+    回傳使用者 Google OAuth 的 client ID
+    '''
+    return setting["oauth"]["google"]["client_id"]
+
+def google_oauth_redirect_url() -> str:
+    '''
+    回傳使用者 Google OAuth 的 client ID
+    '''
+    return setting["oauth"]["google"]["redirect_url"]
 
 def mail_verification_enable() -> bool:
     '''
