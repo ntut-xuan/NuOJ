@@ -51,12 +51,12 @@ var LoginButton = function (_React$Component) {
                 " \u767B\u5165 "
             );
             var github_submit = React.createElement(
-                "button",
+                "a",
                 { id: "viaGithub", href: github_oauth_url, className: "w-full bg-black text-white text-lg p-2 rounded my-2 duration-150 hover:bg-gray-800" },
                 " \u4F7F\u7528 Github OAuth \u9032\u884C\u767B\u5165 "
             );
             var google_submit = React.createElement(
-                "button",
+                "a",
                 { id: "viaGoogle", href: google_oauth_url, className: "w-full bg-gray-300 text-black text-lg p-2 rounded my-2 duration-150 hover:bg-gray-200" },
                 " \u4F7F\u7528 Google OAuth \u9032\u884C\u767B\u5165 "
             );
@@ -153,7 +153,7 @@ var LoginForm = function (_React$Component2) {
                 ),
                 React.createElement(
                     "div",
-                    { className: "mt-10" },
+                    { className: "mt-10 flex flex-col text-center" },
                     React.createElement(LoginButton, null)
                 ),
                 React.createElement(

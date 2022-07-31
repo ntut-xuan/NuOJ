@@ -34,7 +34,7 @@ def oauth_info():
 		response["github_oauth_url"] = "https://github.com/login/oauth/authorize?client_id=%s&scope=repo" % (github_client_id) 
 
 	if google_status:
-		response["google_oauth_url"] = "https://accounts.google.com/o/oauth2/v2/auth?client_id=%s&redirect_uri=%s&response_type=code&scope=%s;" % (google_client_id, google_redirect_url, google_oauth_scope)
+		response["google_oauth_url"] = "https://accounts.google.com/o/oauth2/v2/auth?client_id=%s&redirect_uri=%s&response_type=code&scope=%s" % (google_client_id, google_redirect_url, google_oauth_scope)
 
 	return Response(json.dumps(response), mimetype="application/json")
 
@@ -84,8 +84,11 @@ def returnRegisterPage():
 
 	if setting_util.mail_verification_enable():
 		verification_code = result["verification_code"]
+		result["mail_verification_redirect"] = True
 		del result["verification_code"]
-	
+	else:
+		result["mail_verification_redirect"] = False
+
 	resp = Response(json.dumps(result), mimetype="application/json")
 
 	if setting_util.mail_verification_enable() == False:

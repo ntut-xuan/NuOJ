@@ -23,8 +23,8 @@ class LoginButton extends React.Component {
     render() {
         let {status, github_oauth_url, google_oauth_url} = this.state 
         let normal_submit = <button type="submit" id="viaAccount" className="w-full bg-orange-500 text-white text-lg p-2 rounded my-2 duration-150 hover:bg-orange-300"> 登入 </button>
-        let github_submit = <button id="viaGithub" href={github_oauth_url} className="w-full bg-black text-white text-lg p-2 rounded my-2 duration-150 hover:bg-gray-800"> 使用 Github OAuth 進行登入 </button>
-        let google_submit = <button id="viaGoogle" href={google_oauth_url} className="w-full bg-gray-300 text-black text-lg p-2 rounded my-2 duration-150 hover:bg-gray-200"> 使用 Google OAuth 進行登入 </button>
+        let github_submit = <a id="viaGithub" href={github_oauth_url} className="w-full bg-black text-white text-lg p-2 rounded my-2 duration-150 hover:bg-gray-800"> 使用 Github OAuth 進行登入 </a>
+        let google_submit = <a id="viaGoogle" href={google_oauth_url} className="w-full bg-gray-300 text-black text-lg p-2 rounded my-2 duration-150 hover:bg-gray-200"> 使用 Google OAuth 進行登入 </a>
         let render_component = [normal_submit]
         if(github_oauth_url != null){
             render_component.push(github_submit)
@@ -86,7 +86,7 @@ class LoginForm extends React.Component {
                     <input type="text" className="w-full bg-slate-100 p-2 text-base px-4 border-2 border-gray-600 appearance-none resize-none overflow-y-hidden rounded focus:outline-none focus:border-orange-500 focus:bg-white" placeholder="帳號或電子信箱" onChange={this.handleAccountChange}/>
                     <input type="password" className="w-full bg-slate-100 p-2 text-base px-4 border-2 border-gray-600 appearance-none resize-none overflow-y-hidden rounded focus:outline-none focus:border-orange-500 focus:bg-white" placeholder="密碼" onChange={this.handlePasswordChange} />
                 </div>
-                <div className="mt-10">
+                <div className="mt-10 flex flex-col text-center">
                     <LoginButton />
                 </div>
                 <div>
