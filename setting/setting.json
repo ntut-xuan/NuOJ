@@ -13,7 +13,8 @@
         "google": {
             "enable": false,
             "ID": "",
-            "secret": ""
+            "secret": "",
+            "redirect_url": ""
         }
     },
     "asana": {
