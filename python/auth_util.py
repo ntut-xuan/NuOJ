@@ -32,7 +32,7 @@ def login(data):
         if not email_valid:
             return error_dict(ErrorCode.EMAIL_INVALID)
     else:
-        handle_valid = bool(re.match("[a-zA-Z\d](?:[a-zA-Z\d]|_(?=[a-zA-Z\d])){0,38}$", account))
+        handle_valid = bool(re.match("[a-zA-Z\\d](?:[a-zA-Z\\d]|[_-](?=[a-zA-Z\\d])){3,38}$", account))
         if not handle_valid:
             return error_dict(ErrorCode.HANDLE_INVALID)
 
@@ -156,7 +156,7 @@ def handle_setup(data, email) -> dict:
     handle = data["handle"]
 
     # Validate handle
-    handle_valid = bool(re.match("^[a-z\d](?:[a-z\d]|-(?=[a-z\d])){0,38}$", handle))
+    handle_valid = bool(re.match("[a-zA-Z\\d](?:[a-zA-Z\\d]|[_-](?=[a-zA-Z\\d])){3,38}$", handle))
     if not handle_valid:
         return error_dict(ErrorCode.HANDLE_INVALID)
     
