@@ -6,6 +6,15 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
+function AccountValidNotice(prop) {
+    var account = prop.account;
+    if (account.includes("@")) {
+        return React.createElement(EmailValidNotice, { email: account });
+    } else {
+        return React.createElement(HandleValidNotice, { handle: account });
+    }
+}
+
 var LoginButton = function (_React$Component) {
     _inherits(LoginButton, _React$Component);
 
@@ -137,9 +146,13 @@ var LoginForm = function (_React$Component2) {
     }, {
         key: "render",
         value: function render() {
+            var _state3 = this.state,
+                account = _state3.account,
+                password = _state3.password;
+
             var login_form = React.createElement(
                 "form",
-                { className: "absolute left-[50%] top-[50%] -translate-x-[50%] -translate-y-[50%] w-1/3 bg-white bg-opacity-100 rounded p-10 pb-3", onSubmit: this.handleSubmit },
+                { className: "absolute left-[50%] top-[50%] -translate-x-[50%] -translate-y-[50%] w-[40%] bg-white bg-opacity-100 rounded p-10 pb-3", onSubmit: this.handleSubmit },
                 React.createElement(
                     "p",
                     { className: "text-4xl text-center mb-10" },
@@ -148,8 +161,18 @@ var LoginForm = function (_React$Component2) {
                 React.createElement(
                     "div",
                     { className: "mt-10 flex flex-col gap-5" },
-                    React.createElement("input", { type: "text", className: "w-full bg-slate-100 p-2 text-base px-4 border-2 border-gray-600 appearance-none resize-none overflow-y-hidden rounded focus:outline-none focus:border-orange-500 focus:bg-white", placeholder: "\u5E33\u865F\u6216\u96FB\u5B50\u4FE1\u7BB1", onChange: this.handleAccountChange }),
-                    React.createElement("input", { type: "password", className: "w-full bg-slate-100 p-2 text-base px-4 border-2 border-gray-600 appearance-none resize-none overflow-y-hidden rounded focus:outline-none focus:border-orange-500 focus:bg-white", placeholder: "\u5BC6\u78BC", onChange: this.handlePasswordChange })
+                    React.createElement(
+                        "div",
+                        { className: "flex gap-1 flex-col" },
+                        React.createElement("input", { type: "text", className: "w-full bg-slate-100 p-2 text-base px-4 border-2 border-gray-600 appearance-none resize-none overflow-y-hidden rounded focus:outline-none focus:border-orange-500 focus:bg-white", placeholder: "\u5E33\u865F\u6216\u96FB\u5B50\u4FE1\u7BB1", onChange: this.handleAccountChange }),
+                        React.createElement(AccountValidNotice, { account: account })
+                    ),
+                    React.createElement(
+                        "div",
+                        { className: "flex gap-1 flex-col" },
+                        React.createElement("input", { type: "password", className: "w-full bg-slate-100 p-2 text-base px-4 border-2 border-gray-600 appearance-none resize-none overflow-y-hidden rounded focus:outline-none focus:border-orange-500 focus:bg-white", placeholder: "\u5BC6\u78BC", onChange: this.handlePasswordChange }),
+                        React.createElement(PasswordValidNotice, { password: password })
+                    )
                 ),
                 React.createElement(
                     "div",

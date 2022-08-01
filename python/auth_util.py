@@ -26,11 +26,25 @@ def login(data):
     account = data["account"]
     password = password_cypto(data["password"])
 
+    # Check Data Valid
+    if '@' in account:
+        email_valid = bool(re.match("^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$", account))
+        if not email_valid:
+            return error_dict(ErrorCode.EMAIL_INVALID)
+    else:
+        handle_valid = bool(re.match("[a-zA-Z\d](?:[a-zA-Z\d]|_(?=[a-zA-Z\d])){0,38}$", account))
+        if not handle_valid:
+            return error_dict(ErrorCode.HANDLE_INVALID)
+
+    password_valid = bool(re.match("(?=.*?[a-zA-Z])(?=.*?[0-9]).{8,}$", password))
+    if not password_valid:
+        return error_dict(ErrorCode.PASSWORD_INVALID)
+
     command = "SELECT * FROM `user` WHERE `handle` = %s OR `email` = %s;"
     userdata_set = database_util.command_execute(command, (account, account))
 
     if len(userdata_set) == 0:
-        return error_dict(ErrorCode.USERNAME_NOT_FOUND)
+        return error_dict(ErrorCode.HANDLE_NOT_FOUND)
 
     userdata = userdata_set[0]
 
@@ -88,7 +102,7 @@ def register_db(data) -> dict:
     response = {"status": "OK"}
 
     # Check Data Valid
-    handle_valid = bool(re.match("^[a-z\d](?:[a-z\d]|-(?=[a-z\d])){0,38}$", handle))
+    handle_valid = bool(re.match("[a-zA-Z\d](?:[a-zA-Z\d]|_(?=[a-zA-Z\d])){0,38}$", handle))
     if not handle_valid:
         return error_dict(ErrorCode.HANDLE_INVALID)
     

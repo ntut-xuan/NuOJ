@@ -86,7 +86,7 @@ var RegisterForm = function (_React$Component2) {
 
         var _this2 = _possibleConstructorReturn(this, (RegisterForm.__proto__ || Object.getPrototypeOf(RegisterForm)).call(this, props));
 
-        _this2.state = { handle: null, email: null, password: null };
+        _this2.state = { handle: "", email: "", password: "" };
         _this2.handleAccountChange = _this2.handleAccountChange.bind(_this2);
         _this2.handleEmailChange = _this2.handleEmailChange.bind(_this2);
         _this2.handlePasswordChange = _this2.handlePasswordChange.bind(_this2);
@@ -142,9 +142,14 @@ var RegisterForm = function (_React$Component2) {
     }, {
         key: "render",
         value: function render() {
+            var _state3 = this.state,
+                handle = _state3.handle,
+                email = _state3.email,
+                password = _state3.password;
+
             var register_form = React.createElement(
                 "form",
-                { className: "absolute left-[50%] top-[50%] -translate-x-[50%] -translate-y-[50%] w-1/3 bg-white bg-opacity-100 rounded p-10 pb-3", onSubmit: this.handleSubmit },
+                { className: "absolute left-[50%] top-[50%] -translate-x-[50%] -translate-y-[50%] w-[40%] bg-white bg-opacity-100 rounded p-10 pb-3", onSubmit: this.handleSubmit },
                 React.createElement(
                     "p",
                     { className: "text-4xl text-center mb-10" },
@@ -153,9 +158,24 @@ var RegisterForm = function (_React$Component2) {
                 React.createElement(
                     "div",
                     { className: "mt-10 flex flex-col gap-5" },
-                    React.createElement("input", { type: "text", className: "w-full bg-slate-100 p-2 text-base px-4 border-2 border-gray-600 appearance-none resize-none overflow-y-hidden rounded focus:outline-none focus:border-orange-500 focus:bg-white", placeholder: "\u4F7F\u7528\u8005\u540D\u7A31", onChange: this.handleAccountChange }),
-                    React.createElement("input", { type: "text", className: "w-full bg-slate-100 p-2 text-base px-4 border-2 border-gray-600 appearance-none resize-none overflow-y-hidden rounded focus:outline-none focus:border-orange-500 focus:bg-white", placeholder: "\u4FE1\u7BB1", onChange: this.handleEmailChange }),
-                    React.createElement("input", { type: "password", className: "w-full bg-slate-100 p-2 text-base px-4 border-2 border-gray-600 appearance-none resize-none overflow-y-hidden rounded focus:outline-none focus:border-orange-500 focus:bg-white", placeholder: "\u5BC6\u78BC", onChange: this.handlePasswordChange })
+                    React.createElement(
+                        "div",
+                        { className: "flex flex-col gap-1" },
+                        React.createElement("input", { type: "text", className: "w-full bg-slate-100 p-2 text-base px-4 border-2 border-gray-600 appearance-none resize-none overflow-y-hidden rounded focus:outline-none focus:border-orange-500 focus:bg-white", placeholder: "\u4F7F\u7528\u8005\u540D\u7A31", onChange: this.handleAccountChange }),
+                        React.createElement(HandleValidNotice, { handle: handle })
+                    ),
+                    React.createElement(
+                        "div",
+                        { className: "flex flex-col gap-1" },
+                        React.createElement("input", { type: "text", className: "w-full bg-slate-100 p-2 text-base px-4 border-2 border-gray-600 appearance-none resize-none overflow-y-hidden rounded focus:outline-none focus:border-orange-500 focus:bg-white", placeholder: "\u4FE1\u7BB1", onChange: this.handleEmailChange }),
+                        React.createElement(EmailValidNotice, { email: email })
+                    ),
+                    React.createElement(
+                        "div",
+                        { className: "flex flex-col gap-1" },
+                        React.createElement("input", { type: "password", className: "w-full bg-slate-100 p-2 text-base px-4 border-2 border-gray-600 appearance-none resize-none overflow-y-hidden rounded focus:outline-none focus:border-orange-500 focus:bg-white", placeholder: "\u5BC6\u78BC", onChange: this.handlePasswordChange }),
+                        React.createElement(PasswordValidNotice, { password: password })
+                    )
                 ),
                 React.createElement(
                     "div",

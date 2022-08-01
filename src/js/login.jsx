@@ -1,3 +1,12 @@
+function AccountValidNotice(prop){
+    let account = prop.account
+    if (account.includes("@")){
+        return <EmailValidNotice email={account} />
+    }else{
+        return <HandleValidNotice handle={account} />
+    }
+}
+
 class LoginButton extends React.Component {
     constructor(props){
         super(props)
@@ -79,12 +88,19 @@ class LoginForm extends React.Component {
         })
     }
     render() {
+        let {account, password} = this.state
         let login_form = (
-            <form className="absolute left-[50%] top-[50%] -translate-x-[50%] -translate-y-[50%] w-1/3 bg-white bg-opacity-100 rounded p-10 pb-3" onSubmit={this.handleSubmit}>
+            <form className="absolute left-[50%] top-[50%] -translate-x-[50%] -translate-y-[50%] w-[40%] bg-white bg-opacity-100 rounded p-10 pb-3" onSubmit={this.handleSubmit}>
                 <p className="text-4xl text-center mb-10"> 登入 </p>
                 <div className="mt-10 flex flex-col gap-5">
-                    <input type="text" className="w-full bg-slate-100 p-2 text-base px-4 border-2 border-gray-600 appearance-none resize-none overflow-y-hidden rounded focus:outline-none focus:border-orange-500 focus:bg-white" placeholder="帳號或電子信箱" onChange={this.handleAccountChange}/>
-                    <input type="password" className="w-full bg-slate-100 p-2 text-base px-4 border-2 border-gray-600 appearance-none resize-none overflow-y-hidden rounded focus:outline-none focus:border-orange-500 focus:bg-white" placeholder="密碼" onChange={this.handlePasswordChange} />
+                    <div className="flex gap-1 flex-col">
+                        <input type="text" className="w-full bg-slate-100 p-2 text-base px-4 border-2 border-gray-600 appearance-none resize-none overflow-y-hidden rounded focus:outline-none focus:border-orange-500 focus:bg-white" placeholder="帳號或電子信箱" onChange={this.handleAccountChange}/>
+                        <AccountValidNotice account={account}/>
+                    </div>
+                    <div className="flex gap-1 flex-col">
+                        <input type="password" className="w-full bg-slate-100 p-2 text-base px-4 border-2 border-gray-600 appearance-none resize-none overflow-y-hidden rounded focus:outline-none focus:border-orange-500 focus:bg-white" placeholder="密碼" onChange={this.handlePasswordChange} />
+                        <PasswordValidNotice password={password}/>
+                    </div>
                 </div>
                 <div className="mt-10 flex flex-col text-center">
                     <LoginButton />

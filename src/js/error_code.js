@@ -13,6 +13,7 @@ const ERROR_CODE = Object.freeze({
     "REQUIRE_PAPRMETER": {"code": 501, "message": "缺少參數"},
     "REQUIRE_AUTHORIZATION": {"code": 502, "message": "需要驗證"},
     "INVALID_DATA": {"code": 601, "message": "資料無效"},
+    "ACCOUNT_INVALID": {"code": 701, "message": "Handle 或信箱無效"},
     "UNEXCEPT_ERROR": {"code": 999, "message": "未預期的錯誤發生"},
 })
 

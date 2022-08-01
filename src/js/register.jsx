@@ -43,7 +43,7 @@ class RegisterButton extends React.Component {
 class RegisterForm extends React.Component {
     constructor(props){
         super(props)
-        this.state = {handle: null, email: null, password: null}
+        this.state = {handle: "", email: "", password: ""}
         this.handleAccountChange = this.handleAccountChange.bind(this);
         this.handleEmailChange = this.handleEmailChange.bind(this);
         this.handlePasswordChange = this.handlePasswordChange.bind(this);
@@ -81,12 +81,22 @@ class RegisterForm extends React.Component {
         })
     }
     render() {
-        let register_form = <form className="absolute left-[50%] top-[50%] -translate-x-[50%] -translate-y-[50%] w-1/3 bg-white bg-opacity-100 rounded p-10 pb-3" onSubmit={this.handleSubmit}>
+        let {handle, email, password} = this.state
+        let register_form = <form className="absolute left-[50%] top-[50%] -translate-x-[50%] -translate-y-[50%] w-[40%] bg-white bg-opacity-100 rounded p-10 pb-3" onSubmit={this.handleSubmit}>
             <p className="text-4xl text-center mb-10"> 註冊 </p>
             <div className="mt-10 flex flex-col gap-5">
-                <input type="text" className="w-full bg-slate-100 p-2 text-base px-4 border-2 border-gray-600 appearance-none resize-none overflow-y-hidden rounded focus:outline-none focus:border-orange-500 focus:bg-white" placeholder="使用者名稱" onChange={this.handleAccountChange} />
-                <input type="text" className="w-full bg-slate-100 p-2 text-base px-4 border-2 border-gray-600 appearance-none resize-none overflow-y-hidden rounded focus:outline-none focus:border-orange-500 focus:bg-white" placeholder="信箱" onChange={this.handleEmailChange} />
-                <input type="password" className="w-full bg-slate-100 p-2 text-base px-4 border-2 border-gray-600 appearance-none resize-none overflow-y-hidden rounded focus:outline-none focus:border-orange-500 focus:bg-white" placeholder="密碼" onChange={this.handlePasswordChange} />
+                <div className="flex flex-col gap-1">
+                    <input type="text" className="w-full bg-slate-100 p-2 text-base px-4 border-2 border-gray-600 appearance-none resize-none overflow-y-hidden rounded focus:outline-none focus:border-orange-500 focus:bg-white" placeholder="使用者名稱" onChange={this.handleAccountChange} />
+                    <HandleValidNotice handle={handle}/>
+                </div>
+                <div className="flex flex-col gap-1">
+                    <input type="text" className="w-full bg-slate-100 p-2 text-base px-4 border-2 border-gray-600 appearance-none resize-none overflow-y-hidden rounded focus:outline-none focus:border-orange-500 focus:bg-white" placeholder="信箱" onChange={this.handleEmailChange} />
+                    <EmailValidNotice email={email} />
+                </div>
+                <div className="flex flex-col gap-1">
+                    <input type="password" className="w-full bg-slate-100 p-2 text-base px-4 border-2 border-gray-600 appearance-none resize-none overflow-y-hidden rounded focus:outline-none focus:border-orange-500 focus:bg-white" placeholder="密碼" onChange={this.handlePasswordChange} />
+                    <PasswordValidNotice password={password}/>
+                </div>
             </div>
             <div className="mt-10 flex flex-col text-center">
                 <RegisterButton />
