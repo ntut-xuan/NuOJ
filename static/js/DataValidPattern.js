@@ -22,7 +22,7 @@ function HandleValidNotice(prop) {
         React.createElement(
             "p",
             null,
-            " \uFF0E\u6700\u9577\u9577\u5EA6 38 \u500B\u5B57\uFF0C\u6700\u77ED\u9577\u5EA6 4 \u500B\u5B57\u3002 "
+            " \uFF0E\u6700\u9577\u9577\u5EA6 39 \u500B\u5B57\uFF0C\u6700\u77ED\u9577\u5EA6 4 \u500B\u5B57\u3002 "
         ),
         React.createElement(
             "p",

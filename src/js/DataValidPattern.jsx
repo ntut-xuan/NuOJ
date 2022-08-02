@@ -10,7 +10,7 @@ function HandleValidNotice(prop){
         <div id="account_valid_notice" className={test ? valid_classname : invalid_classname}>
             <p> Handle 不合法 </p>
             <p> ．Handle 僅能使用大小寫英文、數字與特殊符號（底線與連接號）　</p>
-            <p> ．最長長度 38 個字，最短長度 4 個字。 </p>
+            <p> ．最長長度 39 個字，最短長度 4 個字。 </p>
             <p> ．特殊符號不能當做 handle 字首或字尾，特殊符號不能連續。 </p>
         </div>
     )
