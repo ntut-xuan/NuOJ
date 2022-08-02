@@ -7,12 +7,12 @@
     "oauth": {
         "github": {
             "enable": true,
-            "ID": "",
+            "client_id": "",
             "secret": ""
         },
         "google": {
             "enable": false,
-            "ID": "",
+            "client_id": "",
             "secret": "",
             "redirect_url": ""
         }

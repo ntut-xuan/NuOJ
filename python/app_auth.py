@@ -41,11 +41,6 @@ def oauth_info():
 @auth.route("/login", methods=["GET", "POST"])
 def returnLoginPage():
 	settingJsonObject = json.loads(open("/opt/nuoj/setting.json", "r").read())
-	githubStatus = settingJsonObject["oauth"]["github"]["enable"]
-	googleStatus = settingJsonObject["oauth"]["google"]["enable"]
-	github_client_id = settingJsonObject["oauth"]["github"]["client_id"]
-	google_client_id = settingJsonObject["oauth"]["google"]["client_id"]
-	google_redirect_url = settingJsonObject["oauth"]["google"]["redirect_url"]
 
 	if request.method == "GET":
 		return render_template("login.html", **locals())
@@ -64,11 +59,6 @@ def returnLoginPage():
 @auth.route("/register", methods=["GET", "POST"])
 def returnRegisterPage():
 	settingJsonObject = json.loads(open("/opt/nuoj/setting.json", "r").read())
-	githubStatus = settingJsonObject["oauth"]["github"]["enable"]
-	googleStatus = settingJsonObject["oauth"]["google"]["enable"]
-	github_client_id = settingJsonObject["oauth"]["github"]["client_id"]
-	google_client_id = settingJsonObject["oauth"]["google"]["client_id"]
-	google_redirect_url = settingJsonObject["oauth"]["google"]["redirect_url"]
 
 	verifyStatus = setting_util.mail_verification_enable()
 
