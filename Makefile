@@ -8,6 +8,7 @@ install:
 	sudo mkdir /opt/nuoj/storage/
 	sudo mkdir /opt/nuoj/storage/problem/
 	sudo mkdir /opt/nuoj/storage/user_avater/
+	sudo mkdir /opt/nuoj/storage/user_profile/
 	sudo chmod -R 647 /opt/nuoj/*
 	# clone setting file
 	sudo cp /opt/nuoj/setting/setting.json /opt/nuoj/
