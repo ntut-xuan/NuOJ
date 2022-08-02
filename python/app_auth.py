@@ -70,7 +70,7 @@ def returnRegisterPage():
 	google_client_id = settingJsonObject["oauth"]["google"]["client_id"]
 	google_redirect_url = settingJsonObject["oauth"]["google"]["redirect_url"]
 
-	verifyStatus = setting_util.mail_verification_enable();
+	verifyStatus = setting_util.mail_verification_enable()
 
 	if request.method == "GET":
 		return render_template("register.html", **locals())

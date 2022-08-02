@@ -95,6 +95,10 @@ def send_email(email, username, verification_code):
 
 def register_db(data) -> dict:
 
+    # Check Data Valid
+    if ("email" not in data) or ("handle" not in data) or ("password" not in data):
+        return error_dict(ErrorCode.INVALID_DATA)
+
     # User Data
     email = data["email"]
     handle = data["handle"]

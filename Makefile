@@ -96,4 +96,5 @@ test-all:
 	sudo systemctl start nuoj
 	sudo systemctl start nuoj-sandbox
 	sudo python3 /opt/nuoj/test.py
+	sudo python3 /opt/nuoj/python/webapp_test.py
 	sudo python3 /opt/nuoj-sandbox/test.py

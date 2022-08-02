@@ -8,13 +8,13 @@ problem = Blueprint("problem", __name__)
 
 def require_session_or_redirect_index(func):
 	@wraps(func)
-	def decorator(PID):
+	def decorator(*args, **kwargs):
 		SID = request.cookies.get("SID")
 		login = SID in session
 
 		if not login:
 			return redirect("/")
-		return func(PID)
+		return func(*args, **kwargs)
 	return decorator
 
 def session_name_auth(func):
@@ -91,5 +91,7 @@ def returnEditProblemPage(PID):
 	return Response(json.dumps({"status": "OK"}))
 
 @problem.route("/edit_problem/<PID>/solution", methods=["GET", "POST"])
+@require_session_or_redirect_index
+@session_name_auth
 def return_solution_page(PID):
     return render_template("add_problem_solution.html", **locals())
