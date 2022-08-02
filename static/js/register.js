@@ -181,9 +181,6 @@ var RegisterForm = function (_React$Component2) {
             var register_form = React.createElement(
                 "div",
                 { className: "w-full h-screen flex" },
-                React.createElement("div", { className: "bg-blue-500 bg-blue-300 bg-orange-500 bg-orange-300 bg-purple-500 bg-purple-300 bg-red-500 bg-red-300" }),
-                React.createElement("div", { className: "hover:bg-blue-300  hover:bg-orange-300 hover:bg-purple-300 hover:bg-red-300" }),
-                React.createElement("div", { className: "focus:border-blue-500 focus:border-orange-500 focus:border-purple-500 focus:border-red-500" }),
                 React.createElement(
                     "div",
                     { id: "register_background", className: "w-full h-screen bg-cover" },
@@ -196,7 +193,7 @@ var RegisterForm = function (_React$Component2) {
                             React.createElement(
                                 "a",
                                 { href: "/" },
-                                React.createElement("img", { className: "w-[18%] mx-auto", src: "/static/logo_min.png" })
+                                React.createElement("img", { className: "w-[18%] mx-auto hover:bg-slate-200 rounded-lg p-3 transition-all duration-500", "data-tooltip": "hello world", src: "/static/logo_min.png" })
                             )
                         ),
                         React.createElement(

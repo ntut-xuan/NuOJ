@@ -105,13 +105,10 @@ class RegisterForm extends React.Component {
         let {handle, email, password, random_color} = this.state
         let register_form = (
             <div className="w-full h-screen flex">
-                <div className="bg-blue-500 bg-blue-300 bg-orange-500 bg-orange-300 bg-purple-500 bg-purple-300 bg-red-500 bg-red-300"></div>
-                <div className="hover:bg-blue-300  hover:bg-orange-300 hover:bg-purple-300 hover:bg-red-300"></div>
-                <div className="focus:border-blue-500 focus:border-orange-500 focus:border-purple-500 focus:border-red-500"></div>
                 <div id="register_background" className="w-full h-screen bg-cover">
                     <form className="absolute left-[50%] top-[50%] -translate-x-[50%] -translate-y-[50%] w-[40%] bg-white bg-opacity-100 rounded p-10 pb-3" onSubmit={this.handleSubmit}>
                         <div className="pb-5">
-                            <a href="/"><img className="w-[18%] mx-auto" src="/static/logo_min.png" /></a>
+                            <a href="/"><img className="w-[18%] mx-auto hover:bg-slate-200 rounded-lg p-3 transition-all duration-500" data-tooltip="hello world" src="/static/logo_min.png" /></a>
                         </div>
                         <p className="text-4xl text-center mb-10"> 註冊 </p>
                         <div className="mt-10 flex flex-col gap-5">

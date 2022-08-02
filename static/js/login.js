@@ -166,8 +166,11 @@ var LoginForm = function (_React$Component2) {
         key: "componentDidMount",
         value: function componentDidMount() {
             var random_color = this.state.random_color;
-            /* Update Background and button color */
 
+            var use_bg = "bg-blue-500 bg-blue-300 bg-orange-500 bg-orange-300 bg-purple-500 bg-purple-300 bg-red-500 bg-red-300";
+            var use_hover_bg = "hover:bg-blue-300  hover:bg-orange-300 hover:bg-purple-300 hover:bg-red-300";
+            var use_focus_bg = "focus:border-blue-500 focus:border-orange-500 focus:border-purple-500 focus:border-red-500";
+            /* Update Background and button color */
             document.getElementById("login_background").classList.add("bg-" + random_color + "-300");
             var input_field_array = document.getElementsByTagName("input");
             for (var i = 0; i < input_field_array.length; i++) {
@@ -185,9 +188,6 @@ var LoginForm = function (_React$Component2) {
             var login_form = React.createElement(
                 "div",
                 { className: "w-full h-screen flex" },
-                React.createElement("div", { className: "bg-blue-500 bg-blue-300 bg-orange-500 bg-orange-300 bg-purple-500 bg-purple-300 bg-red-500 bg-red-300" }),
-                React.createElement("div", { className: "hover:bg-blue-300  hover:bg-orange-300 hover:bg-purple-300 hover:bg-red-300" }),
-                React.createElement("div", { className: "focus:border-blue-500 focus:border-orange-500 focus:border-purple-500 focus:border-red-500" }),
                 React.createElement(
                     "div",
                     { id: "login_background", className: "w-full h-screen bg-cover" },
@@ -199,14 +199,14 @@ var LoginForm = function (_React$Component2) {
                             { className: "w-full h-full" },
                             React.createElement(
                                 "form",
-                                { className: "absolute left-[50%] top-[50%] -translate-x-[50%] -translate-y-[50%] w-[40%] bg-white bg-opacity-100 rounded p-10 pb-3", onSubmit: this.handleSubmit },
+                                { className: "absolute left-[50%] top-[50%] -translate-x-[50%] -translate-y-[50%] w-[40%] bg-white bg-opacity-100 rounded p-10 pb-3 h-fit", onSubmit: this.handleSubmit },
                                 React.createElement(
                                     "div",
                                     { className: "pb-5" },
                                     React.createElement(
                                         "a",
                                         { href: "/" },
-                                        React.createElement("img", { className: "w-[18%] mx-auto", src: "/static/logo_min.png" })
+                                        React.createElement("img", { className: "w-[18%] mx-auto hover:bg-slate-200 rounded-lg p-3 transition-all duration-500", "data-tooltip": "hello world", src: "/static/logo_min.png" })
                                     )
                                 ),
                                 React.createElement(
