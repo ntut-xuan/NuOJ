@@ -77,7 +77,7 @@ function PasswordValidNotice(prop) {
         React.createElement(
             "p",
             null,
-            " \uFF0E\u5BC6\u78BC\u9700\u8981\u5305\u542B\u81F3\u5C11\u4E00\u500B\u82F1\u6587\u5B57\u6BCD "
+            " \uFF0E\u5BC6\u78BC\u9700\u8981\u5305\u542B\u81F3\u5C11\u4E00\u500B\u82F1\u6587\u5B57\u6BCD\u8207\u81F3\u5C11\u4E00\u500B\u6578\u5B57 "
         )
     );
     return render;

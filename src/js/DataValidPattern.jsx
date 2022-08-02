@@ -45,7 +45,7 @@ function PasswordValidNotice(prop){
         <div id="password_valid_notice" className={test ? valid_classname : invalid_classname}>
             <p> 密碼不合法 </p>
             <p> ．密碼需要長達 8 個字，最多 32 個字 </p>
-            <p> ．密碼需要包含至少一個英文字母 </p>
+            <p> ．密碼需要包含至少一個英文字母與至少一個數字 </p>
         </div>
     )
     return render;

@@ -6,6 +6,10 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
+function getRandomInt(max) {
+    return Math.floor(Math.random() * max);
+}
+
 var RegisterButton = function (_React$Component) {
     _inherits(RegisterButton, _React$Component);
 
@@ -14,7 +18,7 @@ var RegisterButton = function (_React$Component) {
 
         var _this = _possibleConstructorReturn(this, (RegisterButton.__proto__ || Object.getPrototypeOf(RegisterButton)).call(this, props));
 
-        _this.state = { status: null, github_oauth_url: null, google_oauth_url: null };
+        _this.state = { status: null, github_oauth_url: null, google_oauth_url: null, random_color: props.random_color };
         return _this;
     }
 
@@ -38,16 +42,29 @@ var RegisterButton = function (_React$Component) {
             });
         }
     }, {
-        key: "render",
-        value: function render() {
+        key: "componentDidUpdate",
+        value: function componentDidUpdate() {
             var _state = this.state,
                 status = _state.status,
-                github_oauth_url = _state.github_oauth_url,
-                google_oauth_url = _state.google_oauth_url;
+                random_color = _state.random_color;
+
+            if (status != null) {
+                document.getElementById("viaAccount").classList.add("bg-" + random_color + "-500");
+                document.getElementById("viaAccount").classList.add("hover:bg-" + random_color + "-300");
+            }
+        }
+    }, {
+        key: "render",
+        value: function render() {
+            var _state2 = this.state,
+                status = _state2.status,
+                github_oauth_url = _state2.github_oauth_url,
+                google_oauth_url = _state2.google_oauth_url,
+                color = _state2.color;
 
             var normal_submit = React.createElement(
                 "button",
-                { type: "submit", id: "viaAccount", className: "w-full bg-orange-500 text-white text-lg p-2 rounded my-2 duration-150 hover:bg-orange-300" },
+                { type: "submit", id: "viaAccount", className: "w-full text-white text-lg p-2 rounded my-2 duration-150" },
                 " \u8A3B\u518A "
             );
             var github_submit = React.createElement(
@@ -86,7 +103,8 @@ var RegisterForm = function (_React$Component2) {
 
         var _this2 = _possibleConstructorReturn(this, (RegisterForm.__proto__ || Object.getPrototypeOf(RegisterForm)).call(this, props));
 
-        _this2.state = { handle: "", email: "", password: "" };
+        var color_array = ["blue", "orange", "purple", "red"];
+        _this2.state = { handle: "", email: "", password: "", random_color: color_array[getRandomInt(4)] };
         _this2.handleAccountChange = _this2.handleAccountChange.bind(_this2);
         _this2.handleEmailChange = _this2.handleEmailChange.bind(_this2);
         _this2.handlePasswordChange = _this2.handlePasswordChange.bind(_this2);
@@ -112,10 +130,10 @@ var RegisterForm = function (_React$Component2) {
     }, {
         key: "handleSubmit",
         value: function handleSubmit(event) {
-            var _state2 = this.state,
-                handle = _state2.handle,
-                email = _state2.email,
-                password = _state2.password;
+            var _state3 = this.state,
+                handle = _state3.handle,
+                email = _state3.email,
+                password = _state3.password;
 
             event.preventDefault();
             var shaObj = new jsSHA("SHA-512", "TEXT", { encoding: "UTF8" });
@@ -140,58 +158,91 @@ var RegisterForm = function (_React$Component2) {
             });
         }
     }, {
+        key: "componentDidMount",
+        value: function componentDidMount() {
+            var random_color = this.state.random_color;
+            /* Update Background and button color */
+
+            document.getElementById("register_background").classList.add("bg-" + random_color + "-300");
+            var input_field_array = document.getElementsByTagName("input");
+            for (var i = 0; i < input_field_array.length; i++) {
+                input_field_array[i].classList.add("focus:border-" + random_color + "-500");
+            }
+        }
+    }, {
         key: "render",
         value: function render() {
-            var _state3 = this.state,
-                handle = _state3.handle,
-                email = _state3.email,
-                password = _state3.password;
+            var _state4 = this.state,
+                handle = _state4.handle,
+                email = _state4.email,
+                password = _state4.password,
+                random_color = _state4.random_color;
 
             var register_form = React.createElement(
-                "form",
-                { className: "absolute left-[50%] top-[50%] -translate-x-[50%] -translate-y-[50%] w-[40%] bg-white bg-opacity-100 rounded p-10 pb-3", onSubmit: this.handleSubmit },
-                React.createElement(
-                    "p",
-                    { className: "text-4xl text-center mb-10" },
-                    " \u8A3B\u518A "
-                ),
+                "div",
+                { className: "w-full h-screen flex" },
+                React.createElement("div", { className: "bg-blue-500 bg-blue-300 bg-orange-500 bg-orange-300 bg-purple-500 bg-purple-300 bg-red-500 bg-red-300" }),
+                React.createElement("div", { className: "hover:bg-blue-300  hover:bg-orange-300 hover:bg-purple-300 hover:bg-red-300" }),
+                React.createElement("div", { className: "focus:border-blue-500 focus:border-orange-500 focus:border-purple-500 focus:border-red-500" }),
                 React.createElement(
                     "div",
-                    { className: "mt-10 flex flex-col gap-5" },
+                    { id: "register_background", className: "w-full h-screen bg-cover" },
                     React.createElement(
-                        "div",
-                        { className: "flex flex-col gap-1" },
-                        React.createElement("input", { type: "text", className: "w-full bg-slate-100 p-2 text-base px-4 border-2 border-gray-600 appearance-none resize-none overflow-y-hidden rounded focus:outline-none focus:border-orange-500 focus:bg-white", placeholder: "\u4F7F\u7528\u8005\u540D\u7A31", onChange: this.handleAccountChange }),
-                        React.createElement(HandleValidNotice, { handle: handle })
-                    ),
-                    React.createElement(
-                        "div",
-                        { className: "flex flex-col gap-1" },
-                        React.createElement("input", { type: "text", className: "w-full bg-slate-100 p-2 text-base px-4 border-2 border-gray-600 appearance-none resize-none overflow-y-hidden rounded focus:outline-none focus:border-orange-500 focus:bg-white", placeholder: "\u4FE1\u7BB1", onChange: this.handleEmailChange }),
-                        React.createElement(EmailValidNotice, { email: email })
-                    ),
-                    React.createElement(
-                        "div",
-                        { className: "flex flex-col gap-1" },
-                        React.createElement("input", { type: "password", className: "w-full bg-slate-100 p-2 text-base px-4 border-2 border-gray-600 appearance-none resize-none overflow-y-hidden rounded focus:outline-none focus:border-orange-500 focus:bg-white", placeholder: "\u5BC6\u78BC", onChange: this.handlePasswordChange }),
-                        React.createElement(PasswordValidNotice, { password: password })
-                    )
-                ),
-                React.createElement(
-                    "div",
-                    { className: "mt-10 flex flex-col text-center" },
-                    React.createElement(RegisterButton, null)
-                ),
-                React.createElement(
-                    "div",
-                    null,
-                    React.createElement(
-                        "a",
-                        { className: "w-full text-center", href: "/login" },
+                        "form",
+                        { className: "absolute left-[50%] top-[50%] -translate-x-[50%] -translate-y-[50%] w-[40%] bg-white bg-opacity-100 rounded p-10 pb-3", onSubmit: this.handleSubmit },
+                        React.createElement(
+                            "div",
+                            { className: "pb-5" },
+                            React.createElement(
+                                "a",
+                                { href: "/" },
+                                React.createElement("img", { className: "w-[18%] mx-auto", src: "/static/logo_min.png" })
+                            )
+                        ),
                         React.createElement(
                             "p",
-                            { className: "text-gray-500 mt-10" },
-                            "\u5DF2\u7D93\u6709\u5E33\u865F\u4E86\u55CE\uFF1F\u9EDE\u6B64\u767B\u5165"
+                            { className: "text-4xl text-center mb-10" },
+                            " \u8A3B\u518A "
+                        ),
+                        React.createElement(
+                            "div",
+                            { className: "mt-10 flex flex-col gap-5" },
+                            React.createElement(
+                                "div",
+                                { className: "flex flex-col gap-1" },
+                                React.createElement("input", { type: "text", className: "w-full bg-slate-100 p-2 text-base px-4 border-2 border-gray-600 appearance-none resize-none overflow-y-hidden rounded focus:outline-none focus:bg-white", placeholder: "\u4F7F\u7528\u8005\u540D\u7A31", onChange: this.handleAccountChange }),
+                                React.createElement(HandleValidNotice, { handle: handle })
+                            ),
+                            React.createElement(
+                                "div",
+                                { className: "flex flex-col gap-1" },
+                                React.createElement("input", { type: "text", className: "w-full bg-slate-100 p-2 text-base px-4 border-2 border-gray-600 appearance-none resize-none overflow-y-hidden rounded focus:outline-none focus:bg-white", placeholder: "\u4FE1\u7BB1", onChange: this.handleEmailChange }),
+                                React.createElement(EmailValidNotice, { email: email })
+                            ),
+                            React.createElement(
+                                "div",
+                                { className: "flex flex-col gap-1" },
+                                React.createElement("input", { type: "password", className: "w-full bg-slate-100 p-2 text-base px-4 border-2 border-gray-600 appearance-none resize-none overflow-y-hidden rounded focus:outline-none focus:bg-white", placeholder: "\u5BC6\u78BC", onChange: this.handlePasswordChange }),
+                                React.createElement(PasswordValidNotice, { password: password })
+                            )
+                        ),
+                        React.createElement(
+                            "div",
+                            { className: "mt-10 flex flex-col text-center" },
+                            React.createElement(RegisterButton, { random_color: random_color })
+                        ),
+                        React.createElement(
+                            "div",
+                            null,
+                            React.createElement(
+                                "a",
+                                { className: "w-full text-center", href: "/login" },
+                                React.createElement(
+                                    "p",
+                                    { className: "text-gray-500 mt-10" },
+                                    "\u5DF2\u7D93\u6709\u5E33\u865F\u4E86\u55CE\uFF1F\u9EDE\u6B64\u767B\u5165"
+                                )
+                            )
                         )
                     )
                 )

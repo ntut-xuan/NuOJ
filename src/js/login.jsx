@@ -1,3 +1,7 @@
+function getRandomInt(max) {
+    return Math.floor(Math.random() * max);
+}
+
 function AccountValidNotice(prop){
     let account = prop.account
     if (account.includes("@")){
@@ -10,9 +14,10 @@ function AccountValidNotice(prop){
 class LoginButton extends React.Component {
     constructor(props){
         super(props)
-        this.state = {status: null, github_oauth_url: null, google_oauth_url: null}
+        this.state = {status: null, github_oauth_url: null, google_oauth_url: null, random_color: props.color}
     }
     componentDidMount() {
+        let {random_color} = this.state
         $.ajax({
             url: "./oauth_info",
             type: "GET",
@@ -29,9 +34,16 @@ class LoginButton extends React.Component {
             }.bind(this)
         })
     }
+    componentDidUpdate(){
+        let {status, random_color} = this.state
+        if(status != null){
+            document.getElementById("viaAccount").classList.add("bg-" + random_color + "-500")
+            document.getElementById("viaAccount").classList.add("hover:bg-" + random_color + "-300")
+        }
+    }
     render() {
-        let {status, github_oauth_url, google_oauth_url} = this.state 
-        let normal_submit = <button type="submit" id="viaAccount" className="w-full bg-orange-500 text-white text-lg p-2 rounded my-2 duration-150 hover:bg-orange-300"> 登入 </button>
+        let {status, github_oauth_url, google_oauth_url} = this.state
+        let normal_submit = <button type="submit" id="viaAccount" className="w-full text-white text-lg p-2 rounded my-2 duration-150"> 登入 </button>
         let github_submit = <a id="viaGithub" href={github_oauth_url} className="w-full bg-black text-white text-lg p-2 rounded my-2 duration-150 hover:bg-gray-800"> 使用 Github OAuth 進行登入 </a>
         let google_submit = <a id="viaGoogle" href={google_oauth_url} className="w-full bg-gray-300 text-black text-lg p-2 rounded my-2 duration-150 hover:bg-gray-200"> 使用 Google OAuth 進行登入 </a>
         let render_component = [normal_submit]
@@ -52,7 +64,8 @@ class LoginButton extends React.Component {
 class LoginForm extends React.Component {
     constructor(props){
         super(props)
-        this.state = {account: "", password: ""}
+        color_array = ["blue", "orange", "purple", "red"]
+        this.state = {account: "", password: "", random_color: color_array[getRandomInt(4)]}
         this.handleAccountChange = this.handleAccountChange.bind(this);
         this.handlePasswordChange = this.handlePasswordChange.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
@@ -87,30 +100,53 @@ class LoginForm extends React.Component {
             }
         })
     }
+    componentDidMount(){
+        let {random_color} = this.state
+        /* Update Background and button color */
+        document.getElementById("login_background").classList.add("bg-" + random_color + "-300")
+        let input_field_array = document.getElementsByTagName("input")
+        for(let i = 0; i < input_field_array.length; i++){
+            input_field_array[i].classList.add("focus:border-" + random_color + "-500")
+        }
+    }
     render() {
-        let {account, password} = this.state
+        let {account, password, random_color} = this.state
         let login_form = (
-            <form className="absolute left-[50%] top-[50%] -translate-x-[50%] -translate-y-[50%] w-[40%] bg-white bg-opacity-100 rounded p-10 pb-3" onSubmit={this.handleSubmit}>
-                <p className="text-4xl text-center mb-10"> 登入 </p>
-                <div className="mt-10 flex flex-col gap-5">
-                    <div className="flex gap-1 flex-col">
-                        <input type="text" className="w-full bg-slate-100 p-2 text-base px-4 border-2 border-gray-600 appearance-none resize-none overflow-y-hidden rounded focus:outline-none focus:border-orange-500 focus:bg-white" placeholder="帳號或電子信箱" onChange={this.handleAccountChange}/>
-                        <AccountValidNotice account={account}/>
+            <div className="w-full h-screen flex">
+                <div className="bg-blue-500 bg-blue-300 bg-orange-500 bg-orange-300 bg-purple-500 bg-purple-300 bg-red-500 bg-red-300"></div>
+                <div className="hover:bg-blue-300  hover:bg-orange-300 hover:bg-purple-300 hover:bg-red-300"></div>
+                <div className="focus:border-blue-500 focus:border-orange-500 focus:border-purple-500 focus:border-red-500"></div>
+                <div id="login_background" className="w-full h-screen bg-cover">
+                    <div className="w-full h-screen bg-cover">
+                        <div className="w-full h-full">
+                            <form className="absolute left-[50%] top-[50%] -translate-x-[50%] -translate-y-[50%] w-[40%] bg-white bg-opacity-100 rounded p-10 pb-3" onSubmit={this.handleSubmit}>
+                                <div className="pb-5">
+                                    <a href="/"><img className="w-[18%] mx-auto" src="/static/logo_min.png" /></a>
+                                </div>
+                                <p className="text-4xl text-center mb-10"> 登入 </p>
+                                <div className="mt-10 flex flex-col gap-5">
+                                    <div className="flex gap-1 flex-col">
+                                        <input type="text" className="w-full bg-slate-100 p-2 text-base px-4 border-2 border-gray-600 appearance-none resize-none overflow-y-hidden rounded focus:outline-none focus:bg-white" placeholder="帳號或電子信箱" onChange={this.handleAccountChange}/>
+                                        <AccountValidNotice account={account}/>
+                                    </div>
+                                    <div className="flex gap-1 flex-col">
+                                        <input type="password" className="w-full bg-slate-100 p-2 text-base px-4 border-2 border-gray-600 appearance-none resize-none overflow-y-hidden rounded focus:outline-none focus:bg-white" placeholder="密碼" onChange={this.handlePasswordChange} />
+                                        <PasswordValidNotice password={password}/>
+                                    </div>
+                                </div>
+                                <div className="mt-10 flex flex-col text-center">
+                                    <LoginButton color={random_color}/>
+                                </div>
+                                <div>
+                                    <a className="w-full text-center" href="/register">  
+                                        <p className="text-gray-500 mt-10">沒有帳號嗎？點此註冊</p>
+                                    </a>
+                                </div>
+                            </form>
+                        </div>
                     </div>
-                    <div className="flex gap-1 flex-col">
-                        <input type="password" className="w-full bg-slate-100 p-2 text-base px-4 border-2 border-gray-600 appearance-none resize-none overflow-y-hidden rounded focus:outline-none focus:border-orange-500 focus:bg-white" placeholder="密碼" onChange={this.handlePasswordChange} />
-                        <PasswordValidNotice password={password}/>
-                    </div>
                 </div>
-                <div className="mt-10 flex flex-col text-center">
-                    <LoginButton />
-                </div>
-                <div>
-                    <a className="w-full text-center" href="/register">  
-                        <p className="text-gray-500 mt-10">沒有帳號嗎？點此註冊</p>
-                    </a>
-                </div>
-            </form>
+            </div>
         )
         return login_form
     }

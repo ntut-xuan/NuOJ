@@ -6,6 +6,10 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
+function getRandomInt(max) {
+    return Math.floor(Math.random() * max);
+}
+
 function AccountValidNotice(prop) {
     var account = prop.account;
     if (account.includes("@")) {
@@ -23,13 +27,15 @@ var LoginButton = function (_React$Component) {
 
         var _this = _possibleConstructorReturn(this, (LoginButton.__proto__ || Object.getPrototypeOf(LoginButton)).call(this, props));
 
-        _this.state = { status: null, github_oauth_url: null, google_oauth_url: null };
+        _this.state = { status: null, github_oauth_url: null, google_oauth_url: null, random_color: props.color };
         return _this;
     }
 
     _createClass(LoginButton, [{
         key: "componentDidMount",
         value: function componentDidMount() {
+            var random_color = this.state.random_color;
+
             $.ajax({
                 url: "./oauth_info",
                 type: "GET",
@@ -47,16 +53,28 @@ var LoginButton = function (_React$Component) {
             });
         }
     }, {
-        key: "render",
-        value: function render() {
+        key: "componentDidUpdate",
+        value: function componentDidUpdate() {
             var _state = this.state,
                 status = _state.status,
-                github_oauth_url = _state.github_oauth_url,
-                google_oauth_url = _state.google_oauth_url;
+                random_color = _state.random_color;
+
+            if (status != null) {
+                document.getElementById("viaAccount").classList.add("bg-" + random_color + "-500");
+                document.getElementById("viaAccount").classList.add("hover:bg-" + random_color + "-300");
+            }
+        }
+    }, {
+        key: "render",
+        value: function render() {
+            var _state2 = this.state,
+                status = _state2.status,
+                github_oauth_url = _state2.github_oauth_url,
+                google_oauth_url = _state2.google_oauth_url;
 
             var normal_submit = React.createElement(
                 "button",
-                { type: "submit", id: "viaAccount", className: "w-full bg-orange-500 text-white text-lg p-2 rounded my-2 duration-150 hover:bg-orange-300" },
+                { type: "submit", id: "viaAccount", className: "w-full text-white text-lg p-2 rounded my-2 duration-150" },
                 " \u767B\u5165 "
             );
             var github_submit = React.createElement(
@@ -95,7 +113,8 @@ var LoginForm = function (_React$Component2) {
 
         var _this2 = _possibleConstructorReturn(this, (LoginForm.__proto__ || Object.getPrototypeOf(LoginForm)).call(this, props));
 
-        _this2.state = { account: "", password: "" };
+        color_array = ["blue", "orange", "purple", "red"];
+        _this2.state = { account: "", password: "", random_color: color_array[getRandomInt(4)] };
         _this2.handleAccountChange = _this2.handleAccountChange.bind(_this2);
         _this2.handlePasswordChange = _this2.handlePasswordChange.bind(_this2);
         _this2.handleSubmit = _this2.handleSubmit.bind(_this2);
@@ -115,9 +134,9 @@ var LoginForm = function (_React$Component2) {
     }, {
         key: "handleSubmit",
         value: function handleSubmit(event) {
-            var _state2 = this.state,
-                account = _state2.account,
-                password = _state2.password;
+            var _state3 = this.state,
+                account = _state3.account,
+                password = _state3.password;
 
             event.preventDefault();
             var shaObj = new jsSHA("SHA-512", "TEXT", { encoding: "UTF8" });
@@ -144,51 +163,92 @@ var LoginForm = function (_React$Component2) {
             });
         }
     }, {
+        key: "componentDidMount",
+        value: function componentDidMount() {
+            var random_color = this.state.random_color;
+            /* Update Background and button color */
+
+            document.getElementById("login_background").classList.add("bg-" + random_color + "-300");
+            var input_field_array = document.getElementsByTagName("input");
+            for (var i = 0; i < input_field_array.length; i++) {
+                input_field_array[i].classList.add("focus:border-" + random_color + "-500");
+            }
+        }
+    }, {
         key: "render",
         value: function render() {
-            var _state3 = this.state,
-                account = _state3.account,
-                password = _state3.password;
+            var _state4 = this.state,
+                account = _state4.account,
+                password = _state4.password,
+                random_color = _state4.random_color;
 
             var login_form = React.createElement(
-                "form",
-                { className: "absolute left-[50%] top-[50%] -translate-x-[50%] -translate-y-[50%] w-[40%] bg-white bg-opacity-100 rounded p-10 pb-3", onSubmit: this.handleSubmit },
-                React.createElement(
-                    "p",
-                    { className: "text-4xl text-center mb-10" },
-                    " \u767B\u5165 "
-                ),
+                "div",
+                { className: "w-full h-screen flex" },
+                React.createElement("div", { className: "bg-blue-500 bg-blue-300 bg-orange-500 bg-orange-300 bg-purple-500 bg-purple-300 bg-red-500 bg-red-300" }),
+                React.createElement("div", { className: "hover:bg-blue-300  hover:bg-orange-300 hover:bg-purple-300 hover:bg-red-300" }),
+                React.createElement("div", { className: "focus:border-blue-500 focus:border-orange-500 focus:border-purple-500 focus:border-red-500" }),
                 React.createElement(
                     "div",
-                    { className: "mt-10 flex flex-col gap-5" },
+                    { id: "login_background", className: "w-full h-screen bg-cover" },
                     React.createElement(
                         "div",
-                        { className: "flex gap-1 flex-col" },
-                        React.createElement("input", { type: "text", className: "w-full bg-slate-100 p-2 text-base px-4 border-2 border-gray-600 appearance-none resize-none overflow-y-hidden rounded focus:outline-none focus:border-orange-500 focus:bg-white", placeholder: "\u5E33\u865F\u6216\u96FB\u5B50\u4FE1\u7BB1", onChange: this.handleAccountChange }),
-                        React.createElement(AccountValidNotice, { account: account })
-                    ),
-                    React.createElement(
-                        "div",
-                        { className: "flex gap-1 flex-col" },
-                        React.createElement("input", { type: "password", className: "w-full bg-slate-100 p-2 text-base px-4 border-2 border-gray-600 appearance-none resize-none overflow-y-hidden rounded focus:outline-none focus:border-orange-500 focus:bg-white", placeholder: "\u5BC6\u78BC", onChange: this.handlePasswordChange }),
-                        React.createElement(PasswordValidNotice, { password: password })
-                    )
-                ),
-                React.createElement(
-                    "div",
-                    { className: "mt-10 flex flex-col text-center" },
-                    React.createElement(LoginButton, null)
-                ),
-                React.createElement(
-                    "div",
-                    null,
-                    React.createElement(
-                        "a",
-                        { className: "w-full text-center", href: "/register" },
+                        { className: "w-full h-screen bg-cover" },
                         React.createElement(
-                            "p",
-                            { className: "text-gray-500 mt-10" },
-                            "\u6C92\u6709\u5E33\u865F\u55CE\uFF1F\u9EDE\u6B64\u8A3B\u518A"
+                            "div",
+                            { className: "w-full h-full" },
+                            React.createElement(
+                                "form",
+                                { className: "absolute left-[50%] top-[50%] -translate-x-[50%] -translate-y-[50%] w-[40%] bg-white bg-opacity-100 rounded p-10 pb-3", onSubmit: this.handleSubmit },
+                                React.createElement(
+                                    "div",
+                                    { className: "pb-5" },
+                                    React.createElement(
+                                        "a",
+                                        { href: "/" },
+                                        React.createElement("img", { className: "w-[18%] mx-auto", src: "/static/logo_min.png" })
+                                    )
+                                ),
+                                React.createElement(
+                                    "p",
+                                    { className: "text-4xl text-center mb-10" },
+                                    " \u767B\u5165 "
+                                ),
+                                React.createElement(
+                                    "div",
+                                    { className: "mt-10 flex flex-col gap-5" },
+                                    React.createElement(
+                                        "div",
+                                        { className: "flex gap-1 flex-col" },
+                                        React.createElement("input", { type: "text", className: "w-full bg-slate-100 p-2 text-base px-4 border-2 border-gray-600 appearance-none resize-none overflow-y-hidden rounded focus:outline-none focus:bg-white", placeholder: "\u5E33\u865F\u6216\u96FB\u5B50\u4FE1\u7BB1", onChange: this.handleAccountChange }),
+                                        React.createElement(AccountValidNotice, { account: account })
+                                    ),
+                                    React.createElement(
+                                        "div",
+                                        { className: "flex gap-1 flex-col" },
+                                        React.createElement("input", { type: "password", className: "w-full bg-slate-100 p-2 text-base px-4 border-2 border-gray-600 appearance-none resize-none overflow-y-hidden rounded focus:outline-none focus:bg-white", placeholder: "\u5BC6\u78BC", onChange: this.handlePasswordChange }),
+                                        React.createElement(PasswordValidNotice, { password: password })
+                                    )
+                                ),
+                                React.createElement(
+                                    "div",
+                                    { className: "mt-10 flex flex-col text-center" },
+                                    React.createElement(LoginButton, { color: random_color })
+                                ),
+                                React.createElement(
+                                    "div",
+                                    null,
+                                    React.createElement(
+                                        "a",
+                                        { className: "w-full text-center", href: "/register" },
+                                        React.createElement(
+                                            "p",
+                                            { className: "text-gray-500 mt-10" },
+                                            "\u6C92\u6709\u5E33\u865F\u55CE\uFF1F\u9EDE\u6B64\u8A3B\u518A"
+                                        )
+                                    )
+                                )
+                            )
                         )
                     )
                 )

@@ -18,11 +18,13 @@ import setting_util as setting_util
 from app_auth import auth
 from app_add_problem import problem
 from app_problem import problem_page
+from app_profile import profile_page
 
 app = Flask(__name__, static_url_path='', template_folder="/opt/nuoj/templates")
 app.register_blueprint(auth)
 app.register_blueprint(problem)
 app.register_blueprint(problem_page)
+app.register_blueprint(profile_page)
 
 asana_util = asana_util.AsanatUil(json.loads(open("/opt/nuoj/setting.json", "r").read())["asana"]["token"])
 app.config['JSON_SORT_KEYS'] = False
@@ -117,35 +119,7 @@ def logout():
 		code = 500
 	resp = Response(response=json.dumps(data), status=code)
 	return resp
-
-@app.route("/profile/<name>", methods=["GET"])
-def returnProfilePageWithName(name):
-
-	# Check user exist
-	count = database_util.command_execute("SELECT COUNT(*) FROM `user` WHERE handle=%s", (name))[0]["COUNT(*)"]
-
-	if count == 0:
-		abort(404)
-
-	# Fetch user infomation
-	user_data = database_util.command_execute("SELECT role FROM `user` WHERE handle=%s", (name))[0]
-	admin = user_data["role"]
-	handle = name
-	school = "未知"
-	accountType = "使用者" if admin == 0 else "管理員"
 	
-	problem_data = database_util.command_execute("SELECT * FROM `problem` WHERE problem_author=%s", (handle))
-	problems = []
-
-	for data in problem_data:
-		if not database_util.file_storage_tunnel_exist(data["problem_pid"] + ".json", TunnelCode.PROBLEM):
-			problems.append({"color": "green", "state": "公開", "title": "---", "token": data["problem_pid"]})
-			continue
-		problem_storage_data = json.loads(database_util.file_storage_tunnel_read(data["problem_pid"] + ".json", TunnelCode.PROBLEM))
-		problems.append({"color": "green", "state": "公開", "title": problem_storage_data["problem_content"]["title"], "token": data["problem_pid"]})
-	
-	return render_template("profile.html", **locals())
-
 @app.route("/github_login", methods=["GET", "POST"])
 def processGithubLogin():
 	

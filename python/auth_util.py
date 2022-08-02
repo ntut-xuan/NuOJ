@@ -8,6 +8,7 @@ import smtplib
 import threading
 import sys
 import database_util as database_util
+from tunnel_code import TunnelCode
 import setting_util as setting_util
 from uuid import uuid4
 from email.mime.multipart import MIMEMultipart
@@ -127,11 +128,15 @@ def register_db(data) -> dict:
     # Cypto
     password = password_cypto(password)
 
-    # Write into database
+    # Write into database (init)
     user_uid = str(uuid4())
     database_util.command_execute("INSERT INTO `user`(user_uid, handle, password, email, role, email_verified) VALUES(%s, %s, %s, %s, %s, %s)", (user_uid, handle, password, email, admin, False))
     data_dict = {"user_id": user_uid, "email": email, "handle": handle, 
                 "password": password, "admin": admin, "email_verified": False}
+
+    # Write into storage (init)
+    if not database_util.file_storage_tunnel_exist(user_uid + ".json", TunnelCode.USER_PROFILE):
+        database_util.file_storage_tunnel_write(user_uid + ".json", json.dumps({"handle": handle, "email": email, "school": "", "bio": ""}), TunnelCode.USER_PROFILE)
 
     # Email verification
     mail_info = json.loads(open("/opt/nuoj/setting.json", "r").read())["mail"]
@@ -167,5 +172,9 @@ def handle_setup(data, email) -> dict:
 
     # Setup Handle
     database_util.command_execute("UPDATE `user` SET handle=%s WHERE email=%s", (handle, email))
+
+    # Setup Handle on storage data
+    user_uid = database_util.command_execute("SELECT user_uid from `user` where email=%s", (email))[0]["user_uid"]
+    database_util.file_storage_tunnel_write(user_uid + ".json", json.dumps({"handle": handle, "email": email, "school": "", "bio": ""}), TunnelCode.USER_PROFILE)      
 
     return {"status": "OK", "data": {"email": email, "handle": handle}}

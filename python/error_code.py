@@ -18,5 +18,5 @@ class ErrorCode(Enum):
     ACCOUNT_INVALID = 701
     UNEXCEPT_ERROR = 999
 
-def error_dict(code: ErrorCode) -> dict:
-    return {"status": "Failed", "message": code.name, "code": code.value}
+def error_dict(code: ErrorCode, extend_message="") -> dict:
+    return {"status": "Failed", "message": code.name, "extend_message": extend_message, "code": code.value}

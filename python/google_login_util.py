@@ -5,6 +5,7 @@ import json
 import requests
 import database_util
 from uuid import uuid4
+from tunnel_code import TunnelCode
 
 def googleLogin(conn, args, settingJsonObject):
     
@@ -37,6 +38,8 @@ def googleLogin(conn, args, settingJsonObject):
     if count == 0:
         user_uid = str(uuid4())
         database_util.command_execute("INSERT INTO `user`(user_uid, password, email, role, email_verified) VALUES(%s, %s, %s, %s, %s)", (user_uid, str(uuid4()), email, 0, True))
+        if not database_util.file_storage_tunnel_exist(user_uid + ".json", TunnelCode.USER_PROFILE):
+            database_util.file_storage_tunnel_write(user_uid + ".json", json.dumps({"handle": "", "email": email, "school": "", "bio": ""}), TunnelCode.USER_PROFILE)
     else:
         result = database_util.command_execute("SELECT handle FROM `user` WHERE email=%s", (email))[0]
         data["handle"] = result["handle"]
