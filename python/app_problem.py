@@ -9,8 +9,21 @@ import setting_util
 from datetime import datetime
 from uuid import uuid4
 from tunnel_code import TunnelCode
+from functools import wraps
 
 problem_page = Blueprint('problem_page', __name__)
+
+def require_session(func):
+	@wraps(func)
+	def decorator(*args, **kwargs):
+		SID = request.cookies.get("SID")
+		login = SID in session
+
+		if not login:
+			return Response(json.dumps(error_dict(ErrorCode.REQUIRE_AUTHORIZATION)), mimetype="application/json")
+		
+		return func(SID, *args, **kwargs)
+	return decorator
 
 @problem_page.route("/problem/<int:ID>", methods=["GET", "POST"])
 def returnProblemIDPage(ID):
@@ -26,17 +39,12 @@ def returnProblemIDPage(ID):
 	return render_template("problem_page.html", **locals())
 
 @problem_page.route("/submit/", methods=["POST"])
+@require_session
 def submitCode():
 
 	try:
 
-		# Check session valid
 		SID = request.cookies.get("SID")
-		login = SID in session
-
-		if not login:
-			return Response(json.dumps(error_dict(ErrorCode.REQUIRE_AUTHORIZATION)), mimetype="application/json")
-
 		session_data = session[SID]
 		data = request.json
 		
