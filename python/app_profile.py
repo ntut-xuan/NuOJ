@@ -142,7 +142,7 @@ def get_problem_list(index):
 	except:
 		return "please login", 400
 	real_index = int(index)*4
-	problems = database_util.command_execute("select * from problem where author=%s limit 4 offset %s;",(handle,real_index))
+	problems = database_util.command_execute("select * from problem where problem_author=%s limit 4 offset %s;",(handle,real_index))
 	return render_template("profile_problem_list.html",**locals())
 
 
@@ -154,7 +154,7 @@ def get_problem_list_setting():
 	except:
 		return "please login", 400
 	
-	count = database_util.command_execute("select count(*) from problem where author = %s",(handle))
+	count = database_util.command_execute("select count(*) from problem where problem_author = %s",(handle))
 	response={
 		"count":count[0]["count(*)"]
 	}

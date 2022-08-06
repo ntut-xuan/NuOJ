@@ -162,10 +162,8 @@ function inputpage(){
 function contentchange(c){
     if(profileRunning ||  problemRunning) return
     if(state!=c){
-        getElement("profile").classList.remove("animationStop")
-        getElement("problem").classList.remove("animationStop")
-        getElement("profile").classList.add("animationStart")
-        getElement("problem").classList.add("animationStart")
+        getElement("problem").classList.remove("left-150")
+        getElement("profile").classList.add("left-150")
         if(c==1){
             getElement("first_choice").className="unselect"
             getElement("second_choice").className="select"

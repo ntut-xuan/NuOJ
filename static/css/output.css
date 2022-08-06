@@ -558,14 +558,6 @@ video {
   --tw-backdrop-sepia:  ;
 }
 
-.visible {
-  visibility: visible;
-}
-
-.invisible {
-  visibility: hidden;
-}
-
 .fixed {
   position: fixed;
 }
@@ -609,14 +601,6 @@ video {
 
 .top-0 {
   top: 0px;
-}
-
-.top-\[-5px\] {
-  top: -5px;
-}
-
-.left-\[105\%\] {
-  left: 105%;
 }
 
 .z-50 {
@@ -863,14 +847,6 @@ video {
 
 .w-\[18\%\] {
   width: 18%;
-}
-
-.w-16 {
-  width: 4rem;
-}
-
-.w-\[64px\] {
-  width: 64px;
 }
 
 .table-auto {
@@ -1286,6 +1262,14 @@ video {
   padding: 0.375rem;
 }
 
+.p-\[1\.25rem\] {
+  padding: 1.25rem;
+}
+
+.p-\[1\.25rem_2\.5rem\] {
+  padding: 1.25rem 2.5rem;
+}
+
 .py-8 {
   padding-top: 2rem;
   padding-bottom: 2rem;
@@ -1578,12 +1562,16 @@ video {
   transition-duration: 300ms;
 }
 
+.duration-\[2000\] {
+  transition-duration: 2000;
+}
+
 .duration-150 {
   transition-duration: 150ms;
 }
 
-.duration-100 {
-  transition-duration: 100ms;
+.duration-\[2000ms\] {
+  transition-duration: 2000ms;
 }
 
 .ease-linear {
@@ -1596,10 +1584,6 @@ video {
 
 .ease-out {
   transition-timing-function: cubic-bezier(0, 0, 0.2, 1);
-}
-
-.hover\:visible:hover {
-  visibility: visible;
 }
 
 .hover\:border-b-2:hover {

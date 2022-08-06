@@ -9,7 +9,7 @@
     <body class="bg-slate-100" style="min-height: 600px; display: flex; flex-direction: column;height: 100vh;overflow: hidden;">
         
         <!-- 選項欄位 -->
-        <div class="bg-gray-50 border-2 shadow-sm flex items-center"  style="padding: 1.25rem 2.5rem;width: 100vw;height: 75px; margin: 0px;gap:20px">
+        <div class="bg-gray-50 border-2 shadow-sm flex items-center p-[1.25rem_2.5rem]"  style="width: 100vw;height: 75px; margin: 0px;gap:20px">
             <div class="flex">
                 <a  href="/">
                     <img style="height: 3rem;" src="/static/logo-black.svg">
@@ -28,7 +28,7 @@
         <!-- 主要介面 -->
         <div id="main" style="width: 100vw;height: 100%;">
             <!-- 個人資料 -->
-            <div id="profile" class="containter flex flex-col middel page_changhe animationStop animationDiralternate" style="width: 500px; margin:0px;">
+            <div id="profile" class="containter flex flex-col middel transition-all duration-1000" style="width: 500px; margin:0px;">
                 <!-- 帳號名稱與頭像 -->
                 <div class="w-full flex">
                     <div class="w-1/3 flex flex-col" style="gap: 10px;">
@@ -87,7 +87,7 @@
             </div>
 
             <!-- 題目 -->
-            <div id="problem"class="containter flex flex-col  middel page_changhe animationStop animationDiralternateRe left-150" style="width: 500px; margin:0px;height: 600px;justify-content: space-between;">
+            <div id="problem"class="containter flex flex-col middel left-150 transition-all duration-1000" style="width: 500px; margin:0px;height: 600px;justify-content: space-between;">
                 <div id="problem_list" style="display: flex;flex-direction: column;gap:10px;"> </div>
                 <div  id="PageSelecter"style="display: flex;gap: 15px;justify-content: center;" >
                     <button onclick="bigjump(0)">&lt;&lt;</button>
