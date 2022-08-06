@@ -137,7 +137,9 @@ def returnProfilePageWithName(name):
 @profile_page.route("/problem_list/<index>")
 def get_problem_list(index):
 	problems=[
-		{"state":1,"title":"qweqeqwe","token":"qweqweq"},
-		{"state":0,"title":"qweqeqwe","token":"qweqweq"}
+		{"visibility":1,"name":"qweqeqwe","token":"qweqweq"},
+		{"visibility":0,"name":"qweqeqwe","token":"qweqweq"},
+		{"visibility":1,"name":"qweqeqwe","token":"qweqweq"},
+		{"visibility":0,"name":"qweqeqwe","token":"qweqweq"}
 	]
 	return render_template("profile_problem_list.html",**locals())

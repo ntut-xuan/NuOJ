@@ -1,8 +1,8 @@
 {% for problem in problems %}
 <a href="/edit_problem/{{problem.token}}/">
-    <div style="border:2px black solid;padding: 10px;border-radius: 20px;">
+    <div style="border:2px black solid;padding: 10px;border-radius: 20px; height: 100px;">
         <div style="display:flex;gap: 10px;align-items: center" >
-            {% if problem.state==1 %}
+            {% if problem.visibility==1 %}
             <div style="width: 20px;height:20px; background-color: green; border-radius: 10px;"> </div>
             <p>公開</p>
             {% else %}
@@ -11,8 +11,8 @@
             {% endif %}
         </div>
         <hr>
-        <p class="text-2xl">{{problem.title}}</p>
-        <p class="text-1xl">{{problem.token}}</p>
+        <p class="text-2xl">{{problem.name}}</p>
+        <!-- <p class="text-1xl">{{problem.token}}</p> -->
     </div>
 </a>
 {% endfor %}
