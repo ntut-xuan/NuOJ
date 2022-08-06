@@ -121,25 +121,41 @@ def returnProfilePageWithName(name):
 	school = "未知"
 	accountType = "使用者" if admin == 0 else "管理員"
 	
-	problem_data = database_util.command_execute("SELECT * FROM `problem` WHERE author=%s", (handle))
-	problems = []
+	# problem_data = database_util.command_execute("SELECT * FROM `problem` WHERE author=%s", (handle))
+	# problems = []
 
-	for data in problem_data:
-		if not database_util.file_storage_tunnel_exist(data["problem_pid"] + ".json", TunnelCode.PROBLEM):
-			problems.append({"color": "green", "state": "公開", "title": "---", "token": data["problem_pid"]})
-			continue
-		problem_storage_data = json.loads(database_util.file_storage_tunnel_read(data["problem_pid"] + ".json", TunnelCode.PROBLEM))
-		problems.append({"color": "green", "state": "公開", "title": problem_storage_data["problem_content"]["title"], "token": data["problem_pid"]})
+	# for data in problem_data:
+	# 	if not database_util.file_storage_tunnel_exist(data["problem_pid"] + ".json", TunnelCode.PROBLEM):
+	# 		problems.append({"color": "green", "state": "公開", "title": "---", "token": data["problem_pid"]})
+	# 		continue
+	# 	problem_storage_data = json.loads(database_util.file_storage_tunnel_read(data["problem_pid"] + ".json", TunnelCode.PROBLEM))
+	# 	problems.append({"color": "green", "state": "公開", "title": problem_storage_data["problem_content"]["title"], "token": data["problem_pid"]})
 	
 	return render_template("profile.html", **locals())
 
 
 @profile_page.route("/problem_list/<index>")
 def get_problem_list(index):
-	problems=[
-		{"visibility":1,"name":"qweqeqwe","token":"qweqweq"},
-		{"visibility":0,"name":"qweqeqwe","token":"qweqweq"},
-		{"visibility":1,"name":"qweqeqwe","token":"qweqweq"},
-		{"visibility":0,"name":"qweqeqwe","token":"qweqweq"}
-	]
+	try:	
+		SID = request.cookies.get("SID")
+		handle = session[SID]["handle"]
+	except:
+		return "please login", 400
+	real_index = int(index)*4
+	problems = database_util.command_execute("select * from problem where author=%s limit 4 offset %s;",(handle,real_index))
 	return render_template("profile_problem_list.html",**locals())
+
+
+@profile_page.route("/problem_list_setting")
+def get_problem_list_setting():
+	try:	
+		SID = request.cookies.get("SID")
+		handle = session[SID]["handle"]
+	except:
+		return "please login", 400
+	
+	count = database_util.command_execute("select count(*) from problem where author = %s",(handle))
+	response={
+		"count":count[0]["count(*)"]
+	}
+	return response

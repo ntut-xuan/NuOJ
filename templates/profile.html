@@ -88,17 +88,20 @@
 
             <!-- 題目 -->
             <div id="problem"class="containter flex flex-col  middel page_changhe animationStop animationDiralternateRe left-150" style="width: 500px; margin:0px;height: 600px;justify-content: space-between;">
-                <div id="problem_list" style="display: flex;flex-direction: column;gap:10px;">
-                    
-                </div>
-                <div style="display: flex;gap: 5px;justify-content: center">
-                    <button>&lt;&lt;</button>
-                    <button>&lt;</button>
-                    <div style="border: 2px gray solid;border-radius: 5px;">
-                        1
-                    </div>
-                    <button>&gt;</button>
-                    <button>&gt;&gt;</button>
+                <div id="problem_list" style="display: flex;flex-direction: column;gap:10px;"> </div>
+                <div  id="PageSelecter"style="display: flex;gap: 15px;justify-content: center;" >
+                    <button onclick="bigjump(0)">&lt;&lt;</button>
+                    <button onclick="jump(0)">&lt;</button>
+                    <div id="left_number"style="display: flex;gap: 5px;justify-content: center;" ></div>
+                    <input id="InputPage" type="text" 
+                        style="border: 2px gray solid;border-radius: 5px;width: 27px;height: 27px;text-align:center;" 
+                        value="" 
+                        onchange  = "inputpage()" 
+                        oninput="value=value.replace(/[^\d]/g,'')"
+                        maxlength="2">
+                    <div id="right_number" style="display: flex;gap: 5px;justify-content: center;"></div>
+                    <button onclick="jump(1)">&gt;</button>
+                    <button onclick="bigjump(1)">&gt;&gt;</button>
                 </div>
             </div>
 
@@ -145,6 +148,8 @@
         
         <div id="cover"class="hidden all_page_cover"></div>
 
+        <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+        <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
         <script src="/static/js/profile.js"></script>
     </body>
 </html>
