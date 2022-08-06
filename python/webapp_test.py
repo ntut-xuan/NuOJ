@@ -3,6 +3,7 @@ import json
 import random
 import database_util
 import hashlib
+import os
 from error_code import ErrorCode
 from uuid import uuid4
 from nuoj_service import app
@@ -138,6 +139,46 @@ class RegisterUnitTest(unittest.TestCase):
         data = json.dumps({"uriahxuan": "=="})
         resp = test_client.post("/register", data=data, headers={"content-type": "application/json"}).data
         self.assertEqual(json.loads(resp)["code"], ErrorCode.INVALID_DATA.value)
+
+''' SUBMIT TEST START '''
+class SubmitUnitTest(unittest.TestCase):
+    def setUp(self) -> None:
+        # add problem
+        database_util.command_execute("INSERT INTO `problem`(ID, problem_pid, problem_author) VALUES(%s, %s, %s)", (99999, os.urandom(10).hex(), "uriahxuan"))
+
+        # add account
+        hash = hashlib.sha512(str("uriahxuan99").encode("utf-8")).hexdigest()
+        database_util.command_execute("INSERT INTO `user`(user_uid, handle, password, email, role, email_verified) VALUES(%s, %s, %s, %s, %s, %s)", (str(uuid4()), "uriahxuan", password_cypto(hash), "nuoj@test.net", 0, True))
+        
+        # login account
+        hash = hashlib.sha512(str("uriahxuan99").encode("utf-8")).hexdigest()
+        data = json.dumps({"account": "uriahxuan", "password": hash})
+        resp = test_client.post("/login", data=data, headers={"content-type": "application/json"})
+        return super().setUp()
+    
+    def test_invalid_id(self):
+        data = json.dumps({"code": "test123", "problem_id": 48763})
+        resp = test_client.post("/submit", data=data, headers={"content-type": "application/json"}).data
+        self.assertEqual(json.loads(resp)["code"], ErrorCode.INVALID_DATA.value)
+
+    def test_invalid_id(self):
+        data = json.dumps({"code": "test123", "problem_id": "AAABB"})
+        resp = test_client.post("/submit", data=data, headers={"content-type": "application/json"}).data
+        self.assertEqual(json.loads(resp)["code"], ErrorCode.INVALID_DATA.value)
+    
+    def test_invalid_column(self):
+        data = json.dumps({"uriahxuan": "hehe"})
+        resp = test_client.post("/submit", data=data, headers={"content-type": "application/json"}).data
+        self.assertEqual(json.loads(resp)["code"], ErrorCode.UNEXCEPT_ERROR.value)
+    
+    def test_invalid_normal_submit(self):
+        data = json.dumps({"code": "#include<bits/stdc++.h>using namespace std;int main(){int a, b;cin >> a >> b;cout << a + b << endl;}", "problem_id": 99999})
+        resp = test_client.post("/submit", data=data, headers={"content-type": "application/json"}).data
+        self.assertEqual(json.loads(resp)["status"], "OK")
+    
+    def tearDown(self) -> None:
+        database_util.command_execute("DELETE FROM `problem` WHERE ID=99999", ())
+        return super().tearDown()
 
 if __name__ == "__main__":
 

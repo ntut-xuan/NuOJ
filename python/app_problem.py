@@ -16,13 +16,14 @@ problem_page = Blueprint('problem_page', __name__)
 def require_session(func):
 	@wraps(func)
 	def decorator(*args, **kwargs):
+
 		SID = request.cookies.get("SID")
 		login = SID in session
 
 		if not login:
 			return Response(json.dumps(error_dict(ErrorCode.REQUIRE_AUTHORIZATION)), mimetype="application/json")
 		
-		return func(SID, *args, **kwargs)
+		return func(*args, **kwargs)
 	return decorator
 
 @problem_page.route("/problem/<int:ID>", methods=["GET", "POST"])
@@ -38,7 +39,7 @@ def returnProblemIDPage(ID):
 	ML = problemJsonObject["basic_setting"]["memory_limit"]
 	return render_template("problem_page.html", **locals())
 
-@problem_page.route("/submit/", methods=["POST"])
+@problem_page.route("/submit", methods=["POST"])
 @require_session
 def submitCode():
 	try:
