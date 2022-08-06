@@ -1,6 +1,7 @@
 all: install sandbox-install db-tcp
 
 install:
+	sudo apt-get update
 	sudo apt-get install -y python3 python3-pip git build-essential asciidoc-base libcap-dev sysfsutils
 	# clone NuOJ repository on github
 	sudo mkdir /opt/nuoj
@@ -92,6 +93,9 @@ db-tcp:
 	sudo mysql -u root --database="NuOJ" --execute="CREATE TABLE \`problem\` (\`ID\` int NOT NULL AUTO_INCREMENT, \`name\` VARCHAR(20) NOT NULL, \`visibility\` VARCHAR(20) NOT NULL, \`token\` VARCHAR(40) NOT NULL, \`author\` VARCHAR(20) NOT NULL, PRIMARY KEY(ID));"
 	# create a new admin account
 	sudo mysql -u root -h '127.0.0.1' --database="NuOJ" --execute="INSERT INTO \`user\` (user_uid, handle, password, email, role, email_verified) VALUES ('7d4be98f-1792-4255-b3f9-42a32a201fbb', 'nuoj', 'f0affe539c194d46d66d96c4c7aab38d', 'NuOJ@ntut.edu.tw', 1, 1);"
+
+db-drop:
+	sudo mysql -u root --execute="DROP DATABASE NuOJ;
 
 test-all:
 	sudo systemctl start nuoj
