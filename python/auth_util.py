@@ -134,7 +134,7 @@ def register_db(data) -> dict:
 
     # Write into database (init)
     user_uid = str(uuid4())
-    database_util.command_execute("INSERT INTO `user`(user_uid, handle, password, email, role, email_verified) VALUES(%s, %s, %s, %s, %s, %s)", (user_uid, handle, password, email, admin, False))
+    database_util.command_execute("INSERT INTO `user` (user_uid, handle, password, email, role, email_verified) VALUES(%s, %s, %s, %s, %s, %s)", (user_uid, handle, password, email, admin, False))
     data_dict = {"user_id": user_uid, "email": email, "handle": handle, 
                 "password": password, "admin": admin, "email_verified": False}
 

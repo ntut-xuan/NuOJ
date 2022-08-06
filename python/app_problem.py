@@ -41,9 +41,7 @@ def returnProblemIDPage(ID):
 @problem_page.route("/submit/", methods=["POST"])
 @require_session
 def submitCode():
-
 	try:
-
 		SID = request.cookies.get("SID")
 		session_data = session[SID]
 		data = request.json

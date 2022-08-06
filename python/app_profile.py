@@ -37,10 +37,19 @@ def updateUserProfile(handle):
 	# User School: allow null value, should use some method to improve it, limit 70 words.
 	# User Bio: allow null value, limit 200 words.
 	put_data = request.json
+	data_type = put_data["data_type"]
 	email_data = put_data["email"]
 	school_data = put_data["school"]
 	bio_data = put_data["bio"]
 
+	if(data_type == 0):
+		updateEmail(user_uid,put_data)
+	elif(data_type == 1):
+		updateSchool(user_uid,put_data)
+	elif(data_type == 3):
+		updateBio_data(user_uid,put_data)
+	else:
+		return error_dict(ErrorCode.INVALID_DATA)
 	# Check Email is valid or not
 	email_valid = bool(re.match("^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$", email_data))
 	if not email_valid:
@@ -68,6 +77,30 @@ def updateUserProfile(handle):
 
 	return {"status": "OK"}
 
+def updateEmail(uid,data):
+	email_data=""
+	try:
+		email_data = data["email"]
+	except:
+		return error_dict(ErrorCode.EMAIL_INVALID)
+	
+	email_valid = bool(re.match("^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$", email_data))
+	if not email_valid:
+		return error_dict(ErrorCode.EMAIL_INVALID)
+	database_util.command_execute("UPDATE  `user` set `email`= %s where `user_uid`= %s",(email_data,uid))
+
+	return {"status": "OK"}
+
+def updateSchool(uid,data):
+	# Check User School is valid or not
+	if len(school_data) > 70:
+		return error_dict(ErrorCode.INVALID_DATA, "School name too long.")
+
+def updateBio_data(uid,data):
+	# Check User Bio is valid or not
+	if len(bio_data) > 200:
+		return error_dict(ErrorCode.INVALID_DATA, "Bio too long.")
+
 @profile_page.route("/profile/<name>", methods=["GET", "PUT"])
 @profile_page.route("/profile/<name>/", methods=["GET", "PUT"])
 def returnProfilePageWithName(name):
@@ -88,7 +121,7 @@ def returnProfilePageWithName(name):
 	school = "未知"
 	accountType = "使用者" if admin == 0 else "管理員"
 	
-	problem_data = database_util.command_execute("SELECT * FROM `problem` WHERE problem_author=%s", (handle))
+	problem_data = database_util.command_execute("SELECT * FROM `problem` WHERE author=%s", (handle))
 	problems = []
 
 	for data in problem_data:
@@ -99,3 +132,12 @@ def returnProfilePageWithName(name):
 		problems.append({"color": "green", "state": "公開", "title": problem_storage_data["problem_content"]["title"], "token": data["problem_pid"]})
 	
 	return render_template("profile.html", **locals())
+
+
+@profile_page.route("/problem_list/<index>")
+def get_problem_list(index):
+	problems=[
+		{"state":1,"title":"qweqeqwe","token":"qweqweq"},
+		{"state":0,"title":"qweqeqwe","token":"qweqweq"}
+	]
+	return render_template("profile_problem_list.html",**locals())

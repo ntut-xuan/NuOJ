@@ -45,8 +45,9 @@ var LoginComponent = function (_React$Component) {
             var _state = this.state,
                 handle = _state.handle,
                 isLogin = _state.isLogin;
+            // redirect_url = "https://nuoj.ntut-xuan.net/profile/" + handle
 
-            redirect_url = "https://nuoj.ntut-xuan.net/profile/" + handle;
+            redirect_url = "/profile/" + handle;
             element_class = "text-white text-2xl border-b-2 border-white border-opacity-0 duration-500 hover:border-white hover:border-opacity-100";
             login_div = [React.createElement(
                 "div",

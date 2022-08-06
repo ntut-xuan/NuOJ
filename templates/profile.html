@@ -26,7 +26,7 @@
             </div>
         </div>
         <!-- 主要介面 -->
-        <div style="width: 100vw;height: 100%;">
+        <div id="main" style="width: 100vw;height: 100%;">
             <!-- 個人資料 -->
             <div id="profile" class="containter flex flex-col middel page_changhe animationStop animationDiralternate" style="width: 500px; margin:0px;">
                 <!-- 帳號名稱與頭像 -->
@@ -83,34 +83,25 @@
                             <button id="introduce_change"class="bg-slate-200" style="border-radius: 2px;background-color: rgb(210, 220, 233);padding: 5px;">修改</button>
                         </div>
                     </div>
-                    
                 </div>
             </div>
+
             <!-- 題目 -->
             <div id="problem"class="containter flex flex-col  middel page_changhe animationStop animationDiralternateRe left-150" style="width: 500px; margin:0px;height: 600px;justify-content: space-between;">
-                <div style="display: flex;flex-direction: column;gap:10px;">
-                    {% for problem in problems %}
-                    <a href="/edit_problem/{{problem.token}}/">
-                        <div style="border:2px black solid;padding: 10px;border-radius: 20px;">
-                            <div style="display:flex;gap: 10px;align-items: center" >
-                                <div style="width: 20px;height:20px; background-color: {{problem.color}}; border-radius: 10px;"> </div>
-                                <p>{{problem.state}}</p>
-                            </div>
-                            <hr>
-                            <p class="text-2xl">{{problem.title}}</p>
-                            <p class="text-1xl">{{problem.token}}</p>
-                        </div>
-                    </a>
-                    {% endfor %}
+                <div id="problem_list" style="display: flex;flex-direction: column;gap:10px;">
+                    
                 </div>
                 <div style="display: flex;gap: 5px;justify-content: center">
+                    <button>&lt;&lt;</button>
                     <button>&lt;</button>
                     <div style="border: 2px gray solid;border-radius: 5px;">
                         1
                     </div>
                     <button>&gt;</button>
+                    <button>&gt;&gt;</button>
                 </div>
             </div>
+
         </div>
 
         <!-- 修改介面--文字-->
