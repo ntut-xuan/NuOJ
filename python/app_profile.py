@@ -2,7 +2,7 @@ import traceback
 from flask import *
 import time
 import os
-import auth_util
+from auth_util import jwt_valid, jwt_decode
 import database_util
 from error_code import error_dict, ErrorCode
 import setting_util
@@ -26,10 +26,10 @@ def updateUserProfile(handle):
 
 	# Get User UID
 	user_uid = database_data[0]["user_uid"]
-
+	
 	# Check user session is valid, otherwise return REQUIRE_AUTHORIZATION
 	SID = request.cookies.get("SID")
-	if (SID not in session) or (session[SID]["handle"].lower() != handle):
+	if not jwt_valid(SID) or (jwt_decode(SID)["handle"].lower() != handle):
 		return error_dict(ErrorCode.REQUIRE_AUTHORIZATION)
 
 	# Check data is all valid
@@ -138,7 +138,7 @@ def returnProfilePageWithName(name):
 def get_problem_list(index):
 	try:	
 		SID = request.cookies.get("SID")
-		handle = session[SID]["handle"]
+		handle = jwt_decode(SID)["handle"]
 	except:
 		return "please login", 400
 	real_index = int(index)*4
@@ -150,7 +150,7 @@ def get_problem_list(index):
 def get_problem_list_setting():
 	try:	
 		SID = request.cookies.get("SID")
-		handle = session[SID]["handle"]
+		handle = jwt_decode(SID)["handle"]
 	except:
 		return "please login", 400
 	

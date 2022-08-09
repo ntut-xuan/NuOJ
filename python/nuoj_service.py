@@ -105,19 +105,8 @@ def returnProblemPage():
 
 @app.route("/logout", methods=["GET", "POST"])
 def logout():
-	data = {}
-	data["status"] = "OK"
-	data["message"] = "Logout successful."
-	code = 200
-	try:
-		SID = request.cookies.get("SID")
-		if(SID in session):
-			del session[SID]
-	except Exception as ex:
-		data["status"] = "Failed"
-		data["message"] = ex
-		code = 500
-	resp = Response(response=json.dumps(data), status=code)
+	resp = Response(json.dumps({"status": "OK"}))
+	resp.set_cookie("SID", value = "", expires=0)
 	return resp
 	
 @app.route("/github_login", methods=["GET", "POST"])

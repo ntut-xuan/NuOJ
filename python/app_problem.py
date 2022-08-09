@@ -6,6 +6,7 @@ import auth_util
 import database_util
 from error_code import error_dict, ErrorCode
 import setting_util
+from auth_util import jwt_decode, jwt_valid
 from datetime import datetime
 from uuid import uuid4
 from tunnel_code import TunnelCode
@@ -18,10 +19,11 @@ def require_session(func):
 	def decorator(*args, **kwargs):
 
 		SID = request.cookies.get("SID")
-		login = SID in session
 
-		if not login:
-			return Response(json.dumps(error_dict(ErrorCode.REQUIRE_AUTHORIZATION)), mimetype="application/json")
+		if not jwt_valid(SID):
+			resp = Response(json.dumps(error_dict(ErrorCode.REQUIRE_AUTHORIZATION)), mimetype="application/json")
+			resp.set_cookie("SID", value = "", expires=0)
+			return resp
 		
 		return func(*args, **kwargs)
 	return decorator
@@ -44,7 +46,7 @@ def returnProblemIDPage(ID):
 def submitCode():
 	try:
 		SID = request.cookies.get("SID")
-		session_data = session[SID]
+		session_data = jwt_decode(SID)
 		data = request.json
 		
 		# Create submission infomation
