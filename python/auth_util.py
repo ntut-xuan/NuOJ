@@ -60,9 +60,9 @@ def login(data):
 
 def send_email(email, username, verification_code):
 
-    mail_info = json.loads(open("/opt/nuoj/setting.json", "r").read())["mail"]
+    mail_info = json.loads(open("/etc/nuoj/setting.json", "r").read())["mail"]
 
-    img_file_name = "/opt/nuoj/static/logo_min.png"
+    img_file_name = "/etc/nuoj/static/logo_min.png"
     with open(img_file_name, 'rb') as f:
         img_data = f.read()
 
@@ -143,7 +143,7 @@ def register_db(data) -> dict:
         database_util.file_storage_tunnel_write(user_uid + ".json", json.dumps({"handle": handle, "email": email, "school": "", "bio": ""}), TunnelCode.USER_PROFILE)
 
     # Email verification
-    mail_info = json.loads(open("/opt/nuoj/setting.json", "r").read())["mail"]
+    mail_info = json.loads(open("/etc/nuoj/setting.json", "r").read())["mail"]
     response["mail_verification_require"] = mail_info["enable"]
     if mail_info["enable"] == True:
         # Make email with verification link:
