@@ -20,13 +20,13 @@ from app_add_problem import problem
 from app_problem import problem_page
 from app_profile import profile_page
 
-app = Flask(__name__, static_url_path='', template_folder="/opt/nuoj/templates")
+app = Flask(__name__, static_url_path='', template_folder="/etc/nuoj/templates")
 app.register_blueprint(auth)
 app.register_blueprint(problem)
 app.register_blueprint(problem_page)
 app.register_blueprint(profile_page)
 
-asana_util = asana_util.AsanatUil(json.loads(open("/opt/nuoj/setting.json", "r").read())["asana"]["token"])
+asana_util = asana_util.AsanatUil(json.loads(open("/etc/nuoj/setting.json", "r").read())["asana"]["token"])
 app.config['JSON_SORT_KEYS'] = False
 app.config['SECRET_KEY'] = os.urandom(24)
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=31)
@@ -123,7 +123,7 @@ def logout():
 @app.route("/github_login", methods=["GET", "POST"])
 def processGithubLogin():
 	
-	settingJsonObject = json.loads(open("/opt/nuoj/setting.json", "r").read())
+	settingJsonObject = json.loads(open("/etc/nuoj/setting.json", "r").read())
 	data = github_login_util.githubLogin(conn, request.args.get("code"), settingJsonObject)
 
 	if(data["status"] == "OK"):
@@ -144,7 +144,7 @@ def processGithubLogin():
 @app.route("/google_login", methods=["GET", "POST"])
 def processGoogleLogin():
 
-	settingJsonObject = json.loads(open("/opt/nuoj/setting.json", "r").read())
+	settingJsonObject = json.loads(open("/etc/nuoj/setting.json", "r").read())
 	data = google_login_util.googleLogin(conn, request.args, settingJsonObject)
 	resp = None
 
@@ -242,7 +242,7 @@ def getHeartbeat():
 
 if __name__ == "__main__":
 
-	settingJsonObject = json.loads(open("/opt/nuoj/setting.json", "r").read())
+	settingJsonObject = json.loads(open("/etc/nuoj/setting.json", "r").read())
 
 	conn = database_util.connect_database()
 	result = database_util.command_execute("SELECT * FROM `user`", ())

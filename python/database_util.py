@@ -34,11 +34,11 @@ def command_execute(command: str, param: tuple) -> dict:
             return {}
 
 def file_storage_tunnel_exist(filename: str, tunnel: TunnelCode) -> bool:
-    path = "/opt/nuoj/storage/%s/%s" % (tunnel.value, filename)
+    path = "/etc/nuoj/storage/%s/%s" % (tunnel.value, filename)
     return os.path.exists(path)
 
 def file_storage_tunnel_read(filename: str, tunnel: TunnelCode) -> str:
-    path = "/opt/nuoj/storage/%s/%s" % (tunnel.value, filename)
+    path = "/etc/nuoj/storage/%s/%s" % (tunnel.value, filename)
     if file_storage_tunnel_exist(filename, tunnel):
         with open(path, "r") as file:
             return file.read()
@@ -46,7 +46,7 @@ def file_storage_tunnel_read(filename: str, tunnel: TunnelCode) -> str:
         return ""
 
 def file_storage_tunnel_write(filename: str, data: str, tunnel: TunnelCode) -> None:
-    path = "/opt/nuoj/storage/%s/%s" % (tunnel.value, filename)
+    path = "/etc/nuoj/storage/%s/%s" % (tunnel.value, filename)
     with open(path, "w") as file:
         file.write(data)
         file.close()
