@@ -2,7 +2,7 @@ all: install sandbox-install db-tcp
 
 install:
 	sudo apt-get update
-	sudo apt-get install -y python3 python3-pip git build-essential asciidoc-base libcap-dev sysfsutils
+	sudo apt-get install -y python3 python3-pip git build-essential asciidoc-base libcap-dev sysfsutils mariadb-server
 	# clone NuOJ repository on github
 	sudo mkdir /etc/nuoj
 	sudo git clone --recursive https://github.com/ntut-xuan/NuOJ.git /etc/nuoj
@@ -89,7 +89,7 @@ db-tcp:
 	sudo mysql -u root --database="NuOJ" --execute="CREATE TABLE \`submission\`(\`solution_id\` VARCHAR(40) NOT NULL,\`problem_id\` VARCHAR(40) NOT NULL, \`user_uid\` VARCHAR(40) NOT NULL,\`language\` VARCHAR(20) NOT NULL,\`date\` VARCHAR(40) NOT NULL, \`result\` VARCHAR(20), \`time\` VARCHAR(40), \`memory\` VARCHAR(40), \`judger_id\` VARCHAR(40), PRIMARY KEY(solution_id));"
 	sudo mysql -u root --database="NuOJ" --execute="CREATE TABLE \`problem\` (\`ID\` int NOT NULL AUTO_INCREMENT, \`problem_pid\` VARCHAR(20) NOT NULL, \`problem_author\` VARCHAR(20) NOT NULL, PRIMARY KEY(ID));"
 	# create a new admin account
-	sudo mysql -u root -h '127.0.0.1' --database="NuOJ" --execute="INSERT INTO \`user\` (user_uid, handle, password, email, role, email_verified) VALUES ('7d4be98f-1792-4255-b3f9-42a32a201fbb', 'nuoj', 'f0affe539c194d46d66d96c4c7aab38d', 'NuOJ@ntut.edu.tw', 1, 1);"
+	sudo mysql -u root --database="NuOJ" --execute="INSERT INTO \`user\` (user_uid, handle, password, email, role, email_verified) VALUES ('7d4be98f-1792-4255-b3f9-42a32a201fbb', 'nuoj', 'f0affe539c194d46d66d96c4c7aab38d', 'NuOJ@ntut.edu.tw', 1, 1);"
 
 db-drop:
 	sudo mysql -u root --execute="DROP DATABASE NuOJ;
