@@ -1,8 +1,8 @@
-all: install sandbox-install db-tcp
+all: install mariadb-install sandbox-install db-tcp
 
 install:
 	sudo apt-get update
-	sudo apt-get install -y python3 python3-pip git build-essential asciidoc-base libcap-dev sysfsutils mariadb-server
+	sudo apt-get install -y python3 python3-pip git build-essential asciidoc-base libcap-dev sysfsutils
 	# clone NuOJ repository on github
 	sudo mkdir /etc/nuoj
 	sudo git clone --recursive https://github.com/ntut-xuan/NuOJ.git /etc/nuoj
@@ -32,6 +32,9 @@ install:
 	sudo systemctl daemon-reload
 	sudo systemctl enable nuoj
 	sudo systemctl start nuoj
+
+mariadb-install:
+	sudo apt-get install mariadb-server
 
 cert:
 	sudo snap install core; sudo snap refresh core
