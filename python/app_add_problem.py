@@ -42,7 +42,7 @@ def returnAddProblemPage():
 	handle = data["handle"]
 	problem_pid = os.urandom(10).hex()
 
-	database_util.command_execute("INSERT INTO `problem`(ID, author) VALUES(%s,%s)", (problem_pid, handle))
+	database_util.command_execute("INSERT INTO `problem`(problem_pid, problem_author) VALUES(%s,%s)", (problem_pid, handle))
 	return redirect("/edit_problem/" + problem_pid + "/basic")
 
 

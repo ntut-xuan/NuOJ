@@ -17,7 +17,7 @@ document.getElementById("logout").addEventListener("click", () => {
 
 var state = 0;
 var profileRunning,problemRunning = false
-var problemCount = 80
+var problemCount = 0
 
 
 async function getProblem(index){
@@ -156,8 +156,6 @@ function inputpage(){
     }
     toPage(i.value)
 }
-
-
 
 function contentchange(c){
     if(profileRunning ||  problemRunning) return

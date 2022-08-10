@@ -10,6 +10,7 @@ from datetime import datetime
 from uuid import uuid4
 from tunnel_code import TunnelCode
 import re
+import json
 
 profile_page = Blueprint('profile_page', __name__)
 
@@ -134,16 +135,29 @@ def returnProfilePageWithName(name):
 	return render_template("profile.html", **locals())
 
 
-@profile_page.route("/problem_list/<index>")
-def get_problem_list(index):
+@profile_page.route("/problem_list")
+def get_problem_list():
 	try:	
 		SID = request.cookies.get("SID")
 		handle = session[SID]["handle"]
 	except:
 		return "please login", 400
-	real_index = int(index)*4
-	problems = database_util.command_execute("select * from problem where problem_author=%s limit 4 offset %s;",(handle,real_index))
-	return render_template("profile_problem_list.html",**locals())
+	args = request.args
+	number_of_problem = int(args["numbers"])
+	offset = int(args["from"])
+
+	problems = database_util.command_execute("select * from problem where problem_author=%s limit %s offset %s;",(handle,number_of_problem,offset))
+	result =[]
+	i=0
+	for problem in problems:
+		problem_pid = problem["problem_pid"]
+		problem_raw_data = database_util.file_storage_tunnel_read("%s.json"%problem_pid,TunnelCode.PROBLEM)
+		if( len(problem_raw_data)!= 0):
+			problem_json = json.loads(problem_raw_data)
+			subdata = {"id":i, "title" : problem_json["problem_content"]["title"], "permission" : problem_json["basic_setting"]["permission"], "author" : problem["problem_author"], "problem_pid":problem_pid}
+			result.append(subdata)
+			i+=1
+	return {"data":result}
 
 
 @profile_page.route("/problem_list_setting")
@@ -154,6 +168,10 @@ def get_problem_list_setting():
 	except:
 		return "please login", 400
 	
+
+	args = request.args
+
+
 	count = database_util.command_execute("select count(*) from problem where problem_author = %s",(handle))
 	response={
 		"count":count[0]["count(*)"]
