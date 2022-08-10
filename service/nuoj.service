@@ -3,7 +3,7 @@ Description=NUOJ
 
 [Service]
 Type=simple
-ExecStart=/opt/nuoj/python/nuoj_service.py
+ExecStart=/etc/nuoj/python/nuoj_service.py
 Restart=always
 Environment=PYTHONUNBUFFERED=1
 

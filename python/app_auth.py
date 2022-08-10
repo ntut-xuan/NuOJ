@@ -1,10 +1,13 @@
-from flask import *
 import time
 import os
 import auth_util
+import jwt
 import database_util
-from error_code import error_dict, ErrorCode
 import setting_util
+from auth_util import jwt_decode, jwt_valid, payload_generator
+from datetime import timedelta, datetime, timezone
+from flask import *
+from error_code import error_dict, ErrorCode
 
 auth = Blueprint('auth', __name__)
 
@@ -13,11 +16,12 @@ verification_code_dict = {}
 @auth.route("/session_verification", methods=["POST"])
 def session_veri():
 	SID = request.cookies.get("SID")
-	login = (SID in session)
-	if login == True:
-		return {"status": "OK", "handle": session[SID]["handle"]}
-	else:
-		return error_dict(ErrorCode.REQUIRE_AUTHORIZATION)
+	if not jwt_valid(SID):
+		resp = Response(json.dumps(error_dict(ErrorCode.REQUIRE_AUTHORIZATION)), mimetype="application/json")
+		resp.set_cookie("SID", value="", expires=0)
+		return resp
+
+	return Response(json.dumps({"status": "OK", "handle": jwt_decode(SID)["handle"]}), mimetype="application/json")
 
 @auth.route("/oauth_info", methods=["GET"])
 def oauth_info():
@@ -40,7 +44,7 @@ def oauth_info():
 
 @auth.route("/login", methods=["GET", "POST"])
 def returnLoginPage():
-	settingJsonObject = json.loads(open("/opt/nuoj/setting.json", "r").read())
+	settingJsonObject = json.loads(open("/etc/nuoj/setting.json", "r").read())
 
 	if request.method == "GET":
 		return render_template("login.html", **locals())
@@ -50,15 +54,14 @@ def returnLoginPage():
 	resp = Response(json.dumps(result), mimetype="application/json")
 
 	if(result["status"] == "OK"):
-		sessionID = os.urandom(16).hex()
-		resp.set_cookie("SID", value = sessionID, expires=time.time()+24*60*60)
-		session[sessionID] = {"handle": result["data"]["handle"], "email": result["data"]["email"]}
+		sessionID = payload_generator(result["data"]["handle"], result["data"]["email"])
+		resp.set_cookie("SID", value = sessionID, expires=(datetime.now(tz=timezone.utc) + timedelta(days=1)).timestamp())
 
 	return resp
 
 @auth.route("/register", methods=["GET", "POST"])
 def returnRegisterPage():
-	settingJsonObject = json.loads(open("/opt/nuoj/setting.json", "r").read())
+	settingJsonObject = json.loads(open("/etc/nuoj/setting.json", "r").read())
 
 	verifyStatus = setting_util.mail_verification_enable()
 
@@ -82,9 +85,8 @@ def returnRegisterPage():
 	resp = Response(json.dumps(result), mimetype="application/json")
 
 	if setting_util.mail_verification_enable() == False:
-		sessionID = os.urandom(16).hex()
+		sessionID = payload_generator(result["data"]["handle"], result["data"]["email"])
 		resp.set_cookie("SID", value = sessionID, expires=time.time()+24*60*60)
-		session[sessionID] = {"handle": result["data"]["handle"], "email": result["data"]["email"]}
 	else:
 		verification_code_dict[verification_code] = result["data"]["handle"]
 

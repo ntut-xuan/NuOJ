@@ -1,5 +1,6 @@
 from flask import *
 from tunnel_code import TunnelCode
+from auth_util import jwt_decode, jwt_valid
 import database_util as database_util
 from functools import wraps
 import os
@@ -10,9 +11,7 @@ def require_session_or_redirect_index(func):
 	@wraps(func)
 	def decorator(*args, **kwargs):
 		SID = request.cookies.get("SID")
-		login = SID in session
-
-		if not login:
+		if not jwt_valid(SID):
 			return redirect("/")
 		return func(*args, **kwargs)
 	return decorator
@@ -21,7 +20,7 @@ def session_name_auth(func):
 	@wraps(func)
 	def decorator(PID):
 		SID = request.cookies.get("SID")
-		data = session[SID]
+		data = jwt_decode(SID)
 		username = data["handle"]
 		problem_mysql_data = database_util.command_execute("SELECT * from `problem` WHERE problem_pid = %s", (PID))[0]
 		problem_storage_raw_data = database_util.file_storage_tunnel_read("%s.json" % PID, TunnelCode.PROBLEM)
@@ -38,11 +37,12 @@ def returnAddProblemPage():
 
 	SID = request.cookies.get("SID")
 
-	data = session[SID]
+	data = jwt_decode(SID)
 	handle = data["handle"]
 	problem_pid = os.urandom(10).hex()
 
 	database_util.command_execute("INSERT INTO `problem`(problem_pid, problem_author) VALUES(%s,%s)", (problem_pid, handle))
+
 	return redirect("/edit_problem/" + problem_pid + "/basic")
 
 
@@ -52,7 +52,7 @@ def returnAddProblemPage():
 def returnEditProblemPage(PID):
 	
 	SID = request.cookies.get("SID")
-	data = session[SID]
+	data = jwt_decode(SID)
 	username = data["handle"]
 
 	@session_name_auth

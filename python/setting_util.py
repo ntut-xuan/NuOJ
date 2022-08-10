@@ -3,7 +3,7 @@ import platform
 import requests
 import database_util
 
-setting = json.loads(open("/opt/nuoj/setting.json", "r").read())
+setting = json.loads(open("/etc/nuoj/setting.json", "r").read())
 
 def github_oauth_enable() -> bool:
     '''
