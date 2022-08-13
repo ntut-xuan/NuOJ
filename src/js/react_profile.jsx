@@ -1,30 +1,12 @@
 class Subtitle extends React.Component{
     constructor(props){
         super(props)
-        this.state={
-            title : "",
-            content : ""
-        }
     }
-
-    componentDidMount(){
-        this.setState({
-            title : this.props.data.title,
-            content : this.props.data.content
-        })
-    }
-
     render(){
         let main=(
-            <div className="w-full flex flex-col">
-                <p className="subtitle text-size-normal">{this.state.title}</p>
-                <div className="flex">
-                    <div className="w-80">
-                        <p>{this.state.content}</p>
-                    </div>
-                    <div className="flex justify-end w-20" >
-                        <button className="little-btu-bg" >修改</button>
-                    </div>
+            <div className="flex">
+                <div className="w-full">
+                    <p className="text-size-small text-little_gray">{this.props.content}</p>
                 </div>
             </div>
         )
@@ -36,34 +18,52 @@ class Introduce extends React.Component {
     constructor(pro){
         super(pro)
         this.state={
-            accountType:"使用者",
-            handle:"0000",
-            email : "pony076152340@gmail.com",
-            about_me : ""
+            accountType : null,
+            handle : null,
+            sub_data: {},
+            changing : false
         }
+        this.render_subtitles = this.render_subtitles.bind(this)
+    }
+
+    componentDidMount(){
+        fetch("/get_user").then((res)=>{
+            return res.json()
+        }).then((json)=>{
+            this.setState({
+                accountType : json.main.accountType,
+                handle : json.main.handle,
+                sub_data : json.sub
+            })
+        })
+    }
+
+    render_subtitles(){
+        const sub_datas =  Object.entries(this.state.sub_data)
+        resp =[]
+        sub_datas.forEach(element=>{
+            if(element[1]!="")
+                resp.push(<Subtitle key={element[0]} title={element[0]} content={element[1]} mode={this.state.changing}></Subtitle>)  
+        })
+        return resp
     }
     render(){
-        let {accountType,handle,email,about_me} = this.state
-        let pos = "container g-40 flex flex-col middel main-interface "+this.props.position
+        let pos = "container g-15 p-40 flex flex-col profile-page absolute"+this.props.position
         let context = (
             <div className={pos}>
-                <div className="w-full flex">
-                    <div className="w-33 flex flex-col g-10">
-                        <div className="profile-picture-container" >
-                            <img  className="main-img" src="/static/logo-black.svg" alt=""/>
-                        </div>
-                        <div>
-                            <div className="flex justify-center w-full">
-                                <button className="large-btu-bg">修改個人資料</button>
-                            </div>
-                        </div>
-                    </div>
-                    <div className="w-full flex justify-center flex-col items-center">
-                        <p className="text-size-q font-mono"> {accountType} </p>
-                        <p className="text-size-large font-mono ">{handle}</p>
+                <div className="m-auto">
+                    <div className="profile-picture-container" >
+                        <img className="main-img" src="/static/logo-black.svg" alt=""/>
                     </div>
                 </div>
-                <Subtitle data={{title:"電子信箱", content : email}}></Subtitle>
+                <div className="w-full flex flex-col">
+                    <p className="text-size-small font-mono">{this.state.accountType}</p>
+                    <p className="text-size-large font-mono ">{this.state.handle}</p>
+                </div>
+                <this.render_subtitles></this.render_subtitles>
+                <div className="flex w-full">
+                    <button className="large-btu-bg w-full">修改個人資料</button>
+                </div>
             </div>
         )
         return context
@@ -149,53 +149,31 @@ class PageSlecter extends React.Component{
 }
 
 class Problem_info extends React.Component{
-    constructor(props){
-        super(props)
-        this.state={
-            problem_pid : "",
-            title : "",
-            permission : 0
-        }
-    }
-
-    componentDidMount(){
-        this.setState({
-            problem_pid : this.props.problem_pid,
-            title : this.props.title,
-            permission : this.props.permission
-        })
-    }
-
-    Status(permission) {
-        let T=[
-            <div className="problem-status bg-green"> </div>
-            ,<p>公開</p>
-        ]
-
-        let F=[
-            <div className="problem-status bg-red"> </div>,
-            <p>未公開</p> 
-        ]
-        if(permission.value==1){
-            return T
+    render(){
+        var status;
+        if(this.props.permission == true){
+            status=<p>公開</p>
         }
         else{
-            return F
+            status=<p>未公開</p>
         }
-    }
-
-    render(){
-        let url ="/edit/"+this.state.problem_pid
+        let url ="/edit/"+this.props.problem_pid
         let main=(
-            <a href={url}>
+            <div className="w-50">
                 <div className="problem-container">
-                    <div className="flex g-10 align-items-center">
-                        <this.Status value={this.state.permission}></this.Status>
+                    <div className="border-sd p-10 flex flex-col">
+                        <div className="flex g-10 align-items-center problem-title">
+                        <a href={url}  className="text-size-small problem-info-col text-bule">
+                            {this.props.title}
+                        </a>
+                        {status}
+                        </div>
+                        <div className="problem-info-col">
+
+                        </div>
                     </div>
-                    <hr/>
-                    <p className="text-size-normal">{this.state.title}</p>
                 </div>
-            </a>
+            </div>
         )
         return main
     }
@@ -235,7 +213,7 @@ class Problem_list extends React.Component {
     }
 
     getProblems(){
-        result=[]
+        re=[]
         const from = this.state.number_per_page * (this.state.page_now -1)
         const to = this.state.number_per_page + from
         const max = this.state.problems.length
@@ -246,9 +224,25 @@ class Problem_list extends React.Component {
             var element = this.state.problems[i]
             let info =
                 <Problem_info key={element.problem_pid} problem_pid={element.problem_pid} title={element.title} permission={element.permission}></Problem_info>
-            result.push(info)
+            re.push(info)
         }
-        return result
+
+        var main=(
+            <div className="problem-list">
+                {re}
+            </div>
+        )
+
+        console.log(re.length)
+        if(re.length==0){
+            var None_problems=(
+                <p className="problem-notification p-40"> You didn't released any problem yet</p>
+            )
+            return None_problems
+        }
+        else{
+            return main
+        }
     }
 
     topage(i){
@@ -259,16 +253,20 @@ class Problem_list extends React.Component {
     }
 
     render(){
-        const max = Math.ceil(this.state.problem_number / this.state.number_per_page)
-
-        let pos = "container flex-col middel main-interface problem-list "+this.props.position
+        var max = Math.ceil(this.state.problem_number / this.state.number_per_page)
+        if(max == 0){
+            max =1
+        }
+        let pos = "container flex-col problem-list p-40 "+this.props.position
         let main=(
-            <div className={pos} >
-                <div className="flex g-15 flex-col">
-                    <this.getProblems value={this.state.problems}></this.getProblems>
+            <div>
+                <div className="m-b-10">
+                    <p>Problrm list</p>
                 </div>
-                <PageSlecter topage={(i)=>{this.topage(i)}}  Lastpage={max}></PageSlecter>
-            </div>
+                <div className="">
+                    <this.getProblems></this.getProblems>
+                </div>
+            </div>  
         )
         return main
     }
@@ -279,7 +277,9 @@ class Interface_slecter extends React.Component{
         let main = (
             <div className="items-center container g-20 interface-selecter">
                 <div className="flex g-20 w-80">
-                    <a  href="/"><img  src="/static/logo-black.svg"/></a>
+                    <div className="h-50">
+                        <a href="/"><img width={100}src="/static/logo-black.svg"/></a>
+                    </div>
                     <button className="text-size-normal" onClick={()=>this.props.onclick(0)}>個人資料</button>
                     <button className="text-size-normal" onClick={()=>this.props.onclick(1)}>題目</button>
                 </div>
@@ -298,7 +298,8 @@ class Main extends React.Component{
     constructor(props){
         super(props)
         this.state={
-            now_showing: 0
+            now_showing: 0,
+            changing : false
         }
     }
 
@@ -314,14 +315,17 @@ class Main extends React.Component{
 
     render(){
         var main=[<Interface_slecter onclick={(i)=>this.changePage(i)}/>]
-        if(this.state.now_showing==0){
-            main.push(<Introduce position={""}/>)
-            main.push(<Problem_list position={"l-150"}/>)
-        }
-        else{
-            main.push(<Introduce position={"l-150"}/>)
-            main.push(<Problem_list position={""}/>)
-        }
+        let page = (
+            <div className="p-40 main-page">
+                <Introduce position={""}/>
+                <div className="main-interface">
+                    <div className="p-40 container flex flex-col">   
+                        <Problem_list position={""}></Problem_list>
+                    </div>
+                </div>
+            </div>
+        )
+        main.push(page)
         return main
     }
 }

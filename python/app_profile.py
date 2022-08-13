@@ -9,10 +9,24 @@ import setting_util
 from datetime import datetime
 from uuid import uuid4
 from tunnel_code import TunnelCode
+from functools import wraps
 import re
 import json
 
 profile_page = Blueprint('profile_page', __name__)
+
+def require_session(func):
+	@wraps(func)
+	def decorator(*args, **kwargs):
+		SID = request.cookies.get("SID")
+
+		if not jwt_valid(SID):
+			resp = Response(json.dumps(error_dict(ErrorCode.REQUIRE_AUTHORIZATION)), mimetype="application/json")
+			resp.set_cookie("SID", value = "", expires=0)
+			return resp
+		
+		return func(*args, **kwargs)
+	return decorator
 
 def updateUserProfile(handle):
 	# Name all lowercase
@@ -105,43 +119,62 @@ def updateBio_data(uid,data):
 @profile_page.route("/profile/<name>", methods=["GET", "PUT"])
 @profile_page.route("/profile/<name>/", methods=["GET", "PUT"])
 def returnProfilePageWithName(name):
-
 	if request.method == "PUT":
 		return json.dumps(updateUserProfile(name))
+		
+	return render_template("profile.html", **locals())
+
+@profile_page.route("/get_user")
+@require_session
+def getUserInfo():
+	try:	
+		SID = request.cookies.get("SID")
+		handle = jwt_decode(SID)["handle"]
+	except:
+		return "please login", 400
 
 	# Check user exist
-	count = database_util.command_execute("SELECT COUNT(*) FROM `user` WHERE handle=%s", (name))[0]["COUNT(*)"]
+	count = database_util.command_execute("SELECT COUNT(*) FROM `user` WHERE handle=%s", (handle))[0]["COUNT(*)"]
 
 	if count == 0:
 		abort(404)
 
 	# Fetch user infomation
-	user_data = database_util.command_execute("SELECT role FROM `user` WHERE handle=%s", (name))[0]
+	user_data = database_util.command_execute("SELECT role,email,user_uid FROM `user` WHERE handle=%s", (handle))[0]
 	admin = user_data["role"]
-	handle = name
-	school = "未知"
-	accountType = "使用者" if admin == 0 else "管理員"
-	
-	# problem_data = database_util.command_execute("SELECT * FROM `problem` WHERE author=%s", (handle))
-	# problems = []
+	email = user_data["email"]
+	accountType = "User" if admin == 0 else "admin"
 
-	# for data in problem_data:
-	# 	if not database_util.file_storage_tunnel_exist(data["problem_pid"] + ".json", TunnelCode.PROBLEM):
-	# 		problems.append({"color": "green", "state": "公開", "title": "---", "token": data["problem_pid"]})
-	# 		continue
-	# 	problem_storage_data = json.loads(database_util.file_storage_tunnel_read(data["problem_pid"] + ".json", TunnelCode.PROBLEM))
-	# 	problems.append({"color": "green", "state": "公開", "title": problem_storage_data["problem_content"]["title"], "token": data["problem_pid"]})
-	
-	return render_template("profile.html", **locals())
+	user_pid = user_data["user_uid"]
+	user_raw_data = database_util.file_storage_tunnel_read("%s.json"%user_pid,TunnelCode.USER_PROFILE)
+	try:
+		user_data_json = json.loads(user_raw_data)
+	except:
+		abort(404)
+	school = user_data_json["school"]
 
+	resp = {
+		"main":{
+			"handle" : handle,
+			"accountType":accountType
+		},
+		"sub":{
+			"email" : email,	
+			"school" : school,
+			"about_me" : user_data_json["bio"]
+		}
+	}
+	return resp 
 
 @profile_page.route("/problem_list")
+@require_session
 def get_problem_list():
 	try:	
 		SID = request.cookies.get("SID")
 		handle = jwt_decode(SID)["handle"]
 	except:
 		return "please login", 400
+	
 	args = request.args
 	number_of_problem = int(args["numbers"])
 	offset = int(args["from"])
@@ -161,6 +194,7 @@ def get_problem_list():
 
 
 @profile_page.route("/problem_list_setting")
+@require_session
 def get_problem_list_setting():
 	try:	
 		SID = request.cookies.get("SID")

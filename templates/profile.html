@@ -7,50 +7,7 @@
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     </head>
     <body>
-        
-        <div id="main" class="bg-slate-100" style="height: 100vh;"></div>
-
-        <!-- 修改介面--文字-->
-        <div id="change_interface" class="hidden containter flex flex-col justify-center middel"style=" gap: 10px;z-index: 5;width:500px;">
-            <p id="change_main_title"class="font-mono text-2xl" style="text-align: center;">main title</p>
-            <p id="change_subtitle"class="font-mono text-1xl" style="text-align: center;">second title</p>
-            <hr>
-            <p id="input_indecate" class="font-mono text-1xl">input indecate</p>
-            <input id="new" type="text" name="" id="">
-            <p class="font-mono text-1xl">password</p>
-            <input type="text" name="" id="">
-            <div class="flex justify-end" style="gap:20px">
-                <input type="button" value="取消" onclick="allHidden()"style="padding: 5px 10px;background-color: rgb(255, 88, 88); border-radius: 10px; color: rgb(236, 228, 228);">
-                <input type="button" value="確認" style="padding: 5px 10px;background-color: rgb(22, 114, 22); border-radius: 10px; color: rgb(236, 228, 228);">
-            </div>
-        </div>
-
-        <!-- 修改介面-- 圖片 -->
-        <div id="change_img"class=" containter flex flex-col justify-center middel hidden"style=" gap: 10px;z-index: 5;width:300px;">   
-            <div class="bg-slate-200 rounded-full mx-auto p-1" style="height: 15vw; width: 15vw;">
-                <img id="img_show" class="rounded-full"style="object-fit: cover;height: inherit;width:inherit;overflow:hidden;">
-            </div>
-            <div class="flex justify-end" style="gap:20px">
-                <input type="button" value="取消" onclick="allHidden()"style="padding: 5px 10px;background-color: rgb(255, 88, 88); border-radius: 10px; color: rgb(236, 228, 228);">
-                <input type="button" value="確認" style="padding: 5px 10px;background-color: rgb(22, 114, 22); border-radius: 10px; color: rgb(236, 228, 228);">
-            </div>  
-        </div>
-
-        <!-- 選擇修改模式 -->
-        <div id="chose"class="hidden containter flex justify-center middel"style="padding :15px; gap: 10px;z-index: 2;width:500px;">
-            <div class="shadow-sm border-2 bg-gray-50" style="height: 10vw;width: 45%;justify-content: center;align-items: center;display: flex;">
-                <p class="font-mono text-1xl">改變圖片</p>
-                <label style="height: 10vw;width: inherit; position: absolute" for="input_file">
-                    <input type="file" id="input_file" style="position: absolute; height: 1px; width: 1px;">
-                </label>
-            </div>
-            <div id="name_change" class="shadow-sm border-2 bg-gray-50" style="height: 10vw;width: 45%;justify-content: center;align-items: center;display: flex;">                
-                <p  class="font-mono text-1xl">改變名稱</p>
-            </div>
-        </div>
-        
-        <div id="cover"class="hidden all_page_cover"></div>
-
+        <div id="main" class="bg-slate-100" style="height: 100vh;overflow: hidden;"></div>
         <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
         <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
         <script src="/static/js/react_profile.js"></script>
