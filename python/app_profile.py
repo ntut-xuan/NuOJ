@@ -28,13 +28,12 @@ def require_session(func):
 		return func(*args, **kwargs)
 	return decorator
 
-def updateUserProfile(handle):
+def updateUserProfile(handle,put_data):
 	# Name all lowercase
 	handle = handle.lower()
 
 	# Query User UID from Database
 	database_data = database_util.command_execute("SELECT user_uid from `user` where handle=%s", (handle))
-
 	# Return HANDLE_NOT_FOUND if user handle is not found
 	if len(database_data) == 0:
 		return error_dict(ErrorCode.HANDLE_NOT_FOUND)
@@ -43,28 +42,22 @@ def updateUserProfile(handle):
 	user_uid = database_data[0]["user_uid"]
 	
 	# Check user session is valid, otherwise return REQUIRE_AUTHORIZATION
-	SID = request.cookies.get("SID")
-	if not jwt_valid(SID) or (jwt_decode(SID)["handle"].lower() != handle):
-		return error_dict(ErrorCode.REQUIRE_AUTHORIZATION)
 
+
+	def getdata(i):
+		try:
+			return  put_data[i]
+		except:
+			return ""
 	# Check data is all valid
 	# User Email: should exist and changeable, should check email is valid or not.
 	# User School: allow null value, should use some method to improve it, limit 70 words.
 	# User Bio: allow null value, limit 200 words.
-	put_data = request.json
-	data_type = put_data["data_type"]
-	email_data = put_data["email"]
-	school_data = put_data["school"]
-	bio_data = put_data["bio"]
+	data_type = getdata("data_type")
+	email_data = getdata("email")
+	school_data = getdata("school")
+	bio_data = getdata("about_me")
 
-	if(data_type == 0):
-		updateEmail(user_uid,put_data)
-	elif(data_type == 1):
-		updateSchool(user_uid,put_data)
-	elif(data_type == 3):
-		updateBio_data(user_uid,put_data)
-	else:
-		return error_dict(ErrorCode.INVALID_DATA)
 	# Check Email is valid or not
 	email_valid = bool(re.match("^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$", email_data))
 	if not email_valid:
@@ -87,41 +80,17 @@ def updateUserProfile(handle):
 	data["email"] = email_data
 	data["school"] = school_data
 	data["bio"] = bio_data
-
+	print(data)
 	database_util.file_storage_tunnel_write(user_uid + ".json", json.dumps(data), TunnelCode.USER_PROFILE)
 
 	return {"status": "OK"}
-
-def updateEmail(uid,data):
-	email_data=""
-	try:
-		email_data = data["email"]
-	except:
-		return error_dict(ErrorCode.EMAIL_INVALID)
-	
-	email_valid = bool(re.match("^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$", email_data))
-	if not email_valid:
-		return error_dict(ErrorCode.EMAIL_INVALID)
-	database_util.command_execute("UPDATE  `user` set `email`= %s where `user_uid`= %s",(email_data,uid))
-
-	return {"status": "OK"}
-
-def updateSchool(uid,data):
-	# Check User School is valid or not
-	if len(school_data) > 70:
-		return error_dict(ErrorCode.INVALID_DATA, "School name too long.")
-
-def updateBio_data(uid,data):
-	# Check User Bio is valid or not
-	if len(bio_data) > 200:
-		return error_dict(ErrorCode.INVALID_DATA, "Bio too long.")
 
 @profile_page.route("/profile/<name>", methods=["GET", "PUT"])
 @profile_page.route("/profile/<name>/", methods=["GET", "PUT"])
 def returnProfilePageWithName(name):
 	if request.method == "PUT":
-		return json.dumps(updateUserProfile(name))
-		
+		put_data = request.json
+		return json.dumps(updateUserProfile(name,put_data))
 	return render_template("profile.html", **locals())
 
 @profile_page.route("/get_user")
@@ -185,9 +154,17 @@ def get_problem_list():
 	for problem in problems:
 		problem_pid = problem["problem_pid"]
 		problem_raw_data = database_util.file_storage_tunnel_read("%s.json"%problem_pid,TunnelCode.PROBLEM)
+
 		if( len(problem_raw_data)!= 0):
+
 			problem_json = json.loads(problem_raw_data)
-			subdata = {"id":i, "title" : problem_json["problem_content"]["title"], "permission" : problem_json["basic_setting"]["permission"], "author" : problem["problem_author"], "problem_pid":problem_pid}
+
+			permission = False
+
+			if(problem_json["basic_setting"]["permission"] == "1"):
+				permission = True
+			
+			subdata = {"id":i, "title" : problem_json["problem_content"]["title"], "permission" :	permission , "author" : problem["problem_author"], "problem_pid":problem_pid}
 			result.append(subdata)
 			i+=1
 	return {"data":result}

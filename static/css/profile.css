@@ -1,5 +1,6 @@
 p,button{
     font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    font-weight: 600;
 }
 
 button{
@@ -11,13 +12,16 @@ ul{
     list-style-type: none;
 }
 
+hr{
+    border: 2px solid rgb(117, 117, 117 / 0.5);
+}
+
 body{
-    height: 100vh;
     width: 100vw;
     position: absolute;
     top:0;
     left: 0;
-    /* overflow: hidden; */
+    overflow: hidden;
 }
 
 .logo-img{
@@ -56,6 +60,18 @@ body{
 
 .text-size-small{
     font-size: 18px;
+}
+
+.text-align-end{
+    text-align: end;
+}
+
+.justify-content-end{
+    justify-content:flex-end;
+}
+
+.align-items-center{
+    align-items: center;
 }
 
 .absolute{
@@ -144,7 +160,6 @@ body{
     padding: 10px;
 }
 
-
 .p-40{
     padding: 2.5rem;
 }
@@ -167,29 +182,26 @@ body{
     box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
 }
 
-.main-interface{
+.main-content{
     margin-left: 360px;
-
 }
 
-.profile-page{
+.profile-area{
     width: 350px;
 }
 
-.interface-selecter{
+.tool_bar{
     width: 100vw;
     height: 75px;
     padding: 10px 20px !important;
     border-width: 2px;
     box-shadow: 0 0px 2px 0 rgb(0 0 0 / 0.05);
     background-color: rgb(249 250 251 / 1);
-    
 }
 
-.problem-status{
-    width: 20px;
-    height:20px; 
-    border-radius: 10px;
+.problem-overview-list{
+    display: flex;
+    flex-wrap: wrap;
 }
 
 .problem-list{
@@ -197,14 +209,11 @@ body{
     flex-wrap: wrap;
 }
 
+
 .problem-container{
-    /* max-width: 350px; */
-    /* margin-left: auto; */
-    /* margin-right: auto; */
     padding-left: 8px;
     padding-right: 8px;
     margin-bottom: 10px;
-
 }
 
 .problem-info-col{
@@ -219,6 +228,39 @@ body{
     text-align: center;
     font-weight: 600;
     font-size: xx-large;
+}
+
+.page-info-title{
+
+}
+
+.page-info{
+    width: 100px;
+    text-align: center;
+    position: relative;
+    z-index: 2;
+}
+
+.page-info-indecater{
+    justify-content: space-between;
+    position: absolute;
+    /* transform: translateX(26px); */
+    z-index: 0;
+    transition-property: all;
+    transition-duration: 500ms;
+}
+
+.info-first{
+    transform: translateX(26px);
+}
+
+.info-second{
+    transform: translateX(136px);
+}
+
+.page-info-btn{
+    padding: 0px;
+
 }
 
 .middel{
