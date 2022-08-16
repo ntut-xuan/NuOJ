@@ -6,60 +6,95 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-var Subtitle = function (_React$Component) {
-    _inherits(Subtitle, _React$Component);
+var Inputbox = function (_React$Component) {
+    _inherits(Inputbox, _React$Component);
 
-    function Subtitle(props) {
-        _classCallCheck(this, Subtitle);
+    function Inputbox(pro) {
+        _classCallCheck(this, Inputbox);
 
-        var _this = _possibleConstructorReturn(this, (Subtitle.__proto__ || Object.getPrototypeOf(Subtitle)).call(this, props));
+        var _this = _possibleConstructorReturn(this, (Inputbox.__proto__ || Object.getPrototypeOf(Inputbox)).call(this, pro));
 
         _this.state = {
-            title: "",
-            content: ""
+            key: "",
+            value: ""
         };
+        _this.onchange = _this.onchange.bind(_this);
+        _this.update = _this.update.bind(_this);
         return _this;
     }
 
-    _createClass(Subtitle, [{
+    _createClass(Inputbox, [{
         key: "componentDidMount",
         value: function componentDidMount() {
             this.setState({
-                title: this.props.data.title,
-                content: this.props.data.content
+                title: this.props.title,
+                value: this.props.value
             });
+            this.props.new(this.props.title, this.props.value);
+        }
+    }, {
+        key: "onchange",
+        value: function onchange(event) {
+            this.setState({
+                value: event.target.value
+            });
+        }
+    }, {
+        key: "update",
+        value: function update() {
+            this.props.new(this.state.title, this.state.value);
         }
     }, {
         key: "render",
         value: function render() {
-            var main = React.createElement(
+            var type;
+            if (this.state.title == "about_me") {
+                type = React.createElement("textarea", { cols: "30", rows: "5", value: this.state.value, onChange: this.onchange, onBlur: this.update });
+            } else {
+                type = React.createElement("input", { type: "text", value: this.state.value, onChange: this.onchange, onBlur: this.update });
+            }
+            var main = [React.createElement(
                 "div",
-                { className: "w-full flex flex-col" },
+                null,
                 React.createElement(
                     "p",
-                    { className: "subtitle text-size-normal" },
+                    null,
                     this.state.title
-                ),
+                )
+            ), React.createElement(
+                "div",
+                { className: "w-full" },
+                type
+            )];
+            return main;
+        }
+    }]);
+
+    return Inputbox;
+}(React.Component);
+
+var Subtitle = function (_React$Component2) {
+    _inherits(Subtitle, _React$Component2);
+
+    function Subtitle() {
+        _classCallCheck(this, Subtitle);
+
+        return _possibleConstructorReturn(this, (Subtitle.__proto__ || Object.getPrototypeOf(Subtitle)).apply(this, arguments));
+    }
+
+    _createClass(Subtitle, [{
+        key: "render",
+        value: function render() {
+            var main = React.createElement(
+                "div",
+                { className: "flex" },
                 React.createElement(
                     "div",
-                    { className: "flex" },
+                    { className: "w-full" },
                     React.createElement(
-                        "div",
-                        { className: "w-80" },
-                        React.createElement(
-                            "p",
-                            null,
-                            this.state.content
-                        )
-                    ),
-                    React.createElement(
-                        "div",
-                        { className: "flex justify-end w-20" },
-                        React.createElement(
-                            "button",
-                            { className: "little-btu-bg" },
-                            "\u4FEE\u6539"
-                        )
+                        "p",
+                        { className: "text-size-small text-little_gray" },
+                        this.props.content
                     )
                 )
             );
@@ -70,79 +105,217 @@ var Subtitle = function (_React$Component) {
     return Subtitle;
 }(React.Component);
 
-var Introduce = function (_React$Component2) {
-    _inherits(Introduce, _React$Component2);
+var Introduce = function (_React$Component3) {
+    _inherits(Introduce, _React$Component3);
 
     function Introduce(pro) {
         _classCallCheck(this, Introduce);
 
-        var _this2 = _possibleConstructorReturn(this, (Introduce.__proto__ || Object.getPrototypeOf(Introduce)).call(this, pro));
+        var _this3 = _possibleConstructorReturn(this, (Introduce.__proto__ || Object.getPrototypeOf(Introduce)).call(this, pro));
 
-        _this2.state = {
-            accountType: "使用者",
-            handle: "0000",
-            email: "pony076152340@gmail.com",
-            about_me: ""
+        _this3.state = {
+            accountType: null,
+            handle: null,
+            sub_data: {},
+            changing: false,
+            input_tmp: {},
+            profile_img: "/static/logo-black.svg",
+            upload_img: false,
+            img_data: null
         };
-        return _this2;
+        _this3.render_subtitles = _this3.render_subtitles.bind(_this3);
+        _this3.render_input = _this3.render_input.bind(_this3);
+        _this3.changing_mode = _this3.changing_mode.bind(_this3);
+        _this3.get_user_data = _this3.get_user_data.bind(_this3);
+        _this3.handle_img = _this3.handle_img.bind(_this3);
+        return _this3;
     }
 
     _createClass(Introduce, [{
+        key: "componentDidMount",
+        value: function componentDidMount() {
+            this.get_user_data();
+        }
+    }, {
+        key: "get_user_data",
+        value: function get_user_data() {
+            var _this4 = this;
+
+            fetch("/get_user").then(function (res) {
+                return res.json();
+            }).then(function (json) {
+                _this4.setState({
+                    accountType: json.main.accountType,
+                    handle: json.main.handle,
+                    sub_data: json.sub
+                });
+            });
+        }
+    }, {
+        key: "render_subtitles",
+        value: function render_subtitles() {
+            var _this5 = this;
+
+            var sub_datas = Object.entries(this.state.sub_data);
+            resp = [];
+            sub_datas.forEach(function (element) {
+                if (element[1] != "") resp.push(React.createElement(Subtitle, { key: element[0], title: element[0], content: element[1], mode: _this5.state.changing }));
+            });
+            return resp;
+        }
+    }, {
+        key: "render_input",
+        value: function render_input() {
+            var _this6 = this;
+
+            resp = [];
+            var sub_datas = Object.entries(this.state.sub_data);
+            sub_datas.forEach(function (element) {
+                resp.push(React.createElement(Inputbox, { title: element[0], value: element[1], "new": function _new(i, j) {
+                        return _this6.setup_userdata(i, j);
+                    } }));
+            });
+            return resp;
+        }
+    }, {
+        key: "setup_userdata",
+        value: function setup_userdata(i, j) {
+
+            var temp = this.state.input_tmp;
+            temp[i] = j;
+            this.setState({
+                input_tmp: temp
+            });
+        }
+    }, {
+        key: "changing_mode",
+        value: function changing_mode() {
+            this.setState({
+                changing: !this.state.changing
+            });
+        }
+    }, {
+        key: "update_user_data",
+        value: function update_user_data() {
+            var _this7 = this;
+
+            fetch("#", { method: "PUT",
+                body: JSON.stringify(this.state.input_tmp),
+                headers: new Headers({
+                    'Content-Type': 'application/json'
+                }) }).then(function (res) {
+                return res.json();
+            }).then(function (respons) {
+                if (respons.status == "OK") {
+                    _this7.get_user_data();
+                }
+            });
+
+            if (this.state.upload_img) {}
+            this.setState({
+                upload_img: false
+            });
+
+            this.changing_mode();
+        }
+    }, {
+        key: "handle_img",
+        value: function handle_img(file) {
+            var form = new FormData();
+            form.append("product[photos][]", file[0]);
+            this.setState({
+                profile_img: URL.createObjectURL(file[0])
+            });
+            this.setState({
+                upload_img: false
+            });
+            console.log(this.state.input_tmp);
+        }
+    }, {
         key: "render",
         value: function render() {
-            var _state = this.state,
-                accountType = _state.accountType,
-                handle = _state.handle,
-                email = _state.email,
-                about_me = _state.about_me;
+            var _this8 = this;
 
-            var pos = "container g-40 flex flex-col middel main-interface " + this.props.position;
+            var main_showing;
+            var img_area;
+            if (this.state.changing) {
+                main_showing = [React.createElement(this.render_input, null), React.createElement(
+                    "div",
+                    { className: "flex w-full" },
+                    React.createElement(
+                        "button",
+                        { className: "large-btu-bg w-full", onClick: function onClick() {
+                                _this8.update_user_data();
+                            } },
+                        "\u78BA\u8A8D\u4FEE\u6539"
+                    )
+                ), React.createElement(
+                    "div",
+                    { className: "flex w-full" },
+                    React.createElement(
+                        "button",
+                        { className: "large-btu-bg w-full", onClick: function onClick() {
+                                return _this8.changing_mode();
+                            } },
+                        "\u53D6\u6D88"
+                    )
+                )];
+
+                img_area = [React.createElement(
+                    "div",
+                    { className: "profile-picture-container" },
+                    React.createElement(
+                        "label",
+                        { className: "profile-picture-container ", "for": "file" },
+                        React.createElement("img", { className: "main-img", src: this.state.profile_img, alt: "" })
+                    )
+                ), React.createElement("input", { type: "file", name: "", id: "file", style: { display: "none" },
+                    onChange: function onChange(e) {
+                        return _this8.handle_img(e.target.files);
+                    } })];
+            } else {
+                main_showing = [React.createElement(
+                    "div",
+                    { className: "w-full flex flex-col" },
+                    React.createElement(
+                        "p",
+                        { className: "text-size-small font-mono" },
+                        this.state.accountType
+                    ),
+                    React.createElement(
+                        "p",
+                        { className: "text-size-large font-mono " },
+                        this.state.handle
+                    )
+                ), React.createElement(this.render_subtitles, null), React.createElement(
+                    "div",
+                    { className: "flex w-full" },
+                    React.createElement(
+                        "button",
+                        { className: "large-btu-bg w-full", onClick: function onClick() {
+                                return _this8.changing_mode();
+                            } },
+                        "\u4FEE\u6539\u500B\u4EBA\u8CC7\u6599"
+                    )
+                )];
+
+                img_area = React.createElement(
+                    "div",
+                    { className: "profile-picture-container" },
+                    React.createElement("img", { className: "main-img", src: this.state.profile_img, alt: "" })
+                );
+            }
+
+            var pos = "container g-15 p-40 flex flex-col profile-area absolute";
             var context = React.createElement(
                 "div",
                 { className: pos },
                 React.createElement(
                     "div",
-                    { className: "w-full flex" },
-                    React.createElement(
-                        "div",
-                        { className: "w-33 flex flex-col g-10" },
-                        React.createElement(
-                            "div",
-                            { className: "profile-picture-container" },
-                            React.createElement("img", { className: "main-img", src: "/static/logo-black.svg", alt: "" })
-                        ),
-                        React.createElement(
-                            "div",
-                            null,
-                            React.createElement(
-                                "div",
-                                { className: "flex justify-center w-full" },
-                                React.createElement(
-                                    "button",
-                                    { className: "large-btu-bg" },
-                                    "\u4FEE\u6539\u500B\u4EBA\u8CC7\u6599"
-                                )
-                            )
-                        )
-                    ),
-                    React.createElement(
-                        "div",
-                        { className: "w-full flex justify-center flex-col items-center" },
-                        React.createElement(
-                            "p",
-                            { className: "text-size-q font-mono" },
-                            " ",
-                            accountType,
-                            " "
-                        ),
-                        React.createElement(
-                            "p",
-                            { className: "text-size-large font-mono " },
-                            handle
-                        )
-                    )
+                    { className: "m-auto" },
+                    img_area
                 ),
-                React.createElement(Subtitle, { data: { title: "電子信箱", content: email } })
+                main_showing
             );
             return context;
         }
@@ -151,20 +324,20 @@ var Introduce = function (_React$Component2) {
     return Introduce;
 }(React.Component);
 
-var PageSlecter = function (_React$Component3) {
-    _inherits(PageSlecter, _React$Component3);
+var PageSlecter = function (_React$Component4) {
+    _inherits(PageSlecter, _React$Component4);
 
     function PageSlecter(props) {
         _classCallCheck(this, PageSlecter);
 
-        var _this3 = _possibleConstructorReturn(this, (PageSlecter.__proto__ || Object.getPrototypeOf(PageSlecter)).call(this, props));
+        var _this9 = _possibleConstructorReturn(this, (PageSlecter.__proto__ || Object.getPrototypeOf(PageSlecter)).call(this, props));
 
-        _this3.state = {
+        _this9.state = {
             inputbox: "1"
         };
-        _this3.change = _this3.change.bind(_this3);
-        _this3.limit = _this3.limit.bind(_this3);
-        return _this3;
+        _this9.change = _this9.change.bind(_this9);
+        _this9.limit = _this9.limit.bind(_this9);
+        return _this9;
     }
 
     _createClass(PageSlecter, [{
@@ -211,7 +384,7 @@ var PageSlecter = function (_React$Component3) {
     }, {
         key: "render",
         value: function render() {
-            var _this4 = this;
+            var _this10 = this;
 
             var main = React.createElement(
                 "div",
@@ -219,14 +392,14 @@ var PageSlecter = function (_React$Component3) {
                 React.createElement(
                     "button",
                     { onClick: function onClick() {
-                            return _this4.bigjump(1);
+                            return _this10.bigjump(1);
                         } },
                     "<<"
                 ),
                 React.createElement(
                     "button",
                     { onClick: function onClick() {
-                            return _this4.littlejump(1);
+                            return _this10.littlejump(1);
                         } },
                     "<"
                 ),
@@ -243,14 +416,14 @@ var PageSlecter = function (_React$Component3) {
                 React.createElement(
                     "button",
                     { onClick: function onClick() {
-                            return _this4.littlejump(0);
+                            return _this10.littlejump(0);
                         } },
                     ">"
                 ),
                 React.createElement(
                     "button",
                     { onClick: function onClick() {
-                            return _this4.bigjump(0);
+                            return _this10.bigjump(0);
                         } },
                     ">>"
                 )
@@ -262,118 +435,235 @@ var PageSlecter = function (_React$Component3) {
     return PageSlecter;
 }(React.Component);
 
-var Problem_info = function (_React$Component4) {
-    _inherits(Problem_info, _React$Component4);
+var Problem_info = function (_React$Component5) {
+    _inherits(Problem_info, _React$Component5);
 
-    function Problem_info(props) {
+    function Problem_info() {
         _classCallCheck(this, Problem_info);
 
-        var _this5 = _possibleConstructorReturn(this, (Problem_info.__proto__ || Object.getPrototypeOf(Problem_info)).call(this, props));
-
-        _this5.state = {
-            problem_pid: "",
-            title: "",
-            permission: 0
-        };
-        return _this5;
+        return _possibleConstructorReturn(this, (Problem_info.__proto__ || Object.getPrototypeOf(Problem_info)).apply(this, arguments));
     }
 
     _createClass(Problem_info, [{
-        key: "componentDidMount",
-        value: function componentDidMount() {
-            this.setState({
-                problem_pid: this.props.problem_pid,
-                title: this.props.title,
-                permission: this.props.permission
-            });
-        }
-    }, {
-        key: "Status",
-        value: function Status(permission) {
-            var T = [React.createElement(
-                "div",
-                { className: "problem-status bg-green" },
-                " "
-            ), React.createElement(
-                "p",
-                null,
-                "\u516C\u958B"
-            )];
-
-            var F = [React.createElement(
-                "div",
-                { className: "problem-status bg-red" },
-                " "
-            ), React.createElement(
-                "p",
-                null,
-                "\u672A\u516C\u958B"
-            )];
-            if (permission.value == 1) {
-                return T;
-            } else {
-                return F;
-            }
-        }
-    }, {
         key: "render",
         value: function render() {
-            var url = "/edit/" + this.state.problem_pid;
+            var status;
+            if (this.props.permission == true) {
+                status = React.createElement(
+                    "p",
+                    null,
+                    "\u516C\u958B"
+                );
+            } else {
+                status = React.createElement(
+                    "p",
+                    null,
+                    "\u672A\u516C\u958B"
+                );
+            }
+            var url = "/edit/" + this.props.problem_pid;
+
             var main = React.createElement(
-                "a",
-                { href: url },
+                "div",
+                { className: "w-50" },
                 React.createElement(
                     "div",
                     { className: "problem-container" },
                     React.createElement(
                         "div",
-                        { className: "flex g-10 align-items-center" },
-                        React.createElement(this.Status, { value: this.state.permission })
-                    ),
-                    React.createElement("hr", null),
-                    React.createElement(
-                        "p",
-                        { className: "text-size-normal" },
-                        this.state.title
+                        { className: "border-sd p-10 flex flex-col" },
+                        React.createElement(
+                            "div",
+                            { className: "flex g-10 align-items-center problem-title" },
+                            React.createElement(
+                                "a",
+                                { href: url, className: "text-size-small problem-info-col text-bule" },
+                                this.props.title
+                            ),
+                            status
+                        ),
+                        React.createElement("div", { className: "problem-info-col" })
                     )
                 )
             );
-            return main;
+
+            var all = React.createElement(
+                "div",
+                { className: "p-10 flex flex-col" },
+                React.createElement(
+                    "div",
+                    { className: "flex g-10 align-items-center problem-title" },
+                    React.createElement(
+                        "a",
+                        { href: url, className: "text-size-small problem-info-col text-bule" },
+                        this.props.title
+                    ),
+                    status
+                ),
+                React.createElement("div", { className: "problem-info-col" }),
+                React.createElement("hr", null)
+            );
+
+            if (this.props.mode == true) {
+                return main;
+            } else {
+                return all;
+            }
         }
     }]);
 
     return Problem_info;
 }(React.Component);
 
-var Problem_list = function (_React$Component5) {
-    _inherits(Problem_list, _React$Component5);
+var Problem_List = function (_React$Component6) {
+    _inherits(Problem_List, _React$Component6);
 
-    function Problem_list(props) {
-        _classCallCheck(this, Problem_list);
+    function Problem_List(prop) {
+        _classCallCheck(this, Problem_List);
 
-        var _this6 = _possibleConstructorReturn(this, (Problem_list.__proto__ || Object.getPrototypeOf(Problem_list)).call(this, props));
+        var _this12 = _possibleConstructorReturn(this, (Problem_List.__proto__ || Object.getPrototypeOf(Problem_List)).call(this, prop));
 
-        _this6.state = {
-            problem_number: 0,
-            number_per_page: 4,
-            page_now: 1,
+        _this12.state = {
+            num_per_page: 10,
+            showing: 1,
             problems: []
         };
 
-        _this6.getProblems = _this6.getProblems.bind(_this6);
-        _this6.topage = _this6.topage.bind(_this6);
-        return _this6;
+        _this12.topage = _this12.topage.bind(_this12);
+        _this12.get_problem_list = _this12.get_problem_list.bind(_this12);
+        return _this12;
     }
 
-    _createClass(Problem_list, [{
-        key: "componentDidMount",
-        value: function componentDidMount() {
-            var _this7 = this;
+    _createClass(Problem_List, [{
+        key: "getProblems",
+        value: function getProblems(i, j) {
+            var _this13 = this;
 
-            fetch("/problem_list?" + new URLSearchParams({ numbers: 50, from: 0 })).then(function (res) {
+            fetch("/problem_list?" + new URLSearchParams({ numbers: i, from: j })).then(function (res) {
                 return res.json();
             }).then(function (list) {
-                _this7.setState({
+                console.log(list);
+                _this13.setState({
+                    problems: _this13.state.problems.concat(list.data)
+                });
+            });
+        }
+    }, {
+        key: "getMoerProblems",
+        value: function getMoerProblems(i) {
+            var from = this.state.problems.length;
+            this.getProblems(i, from);
+        }
+    }, {
+        key: "componentDidMount",
+        value: function componentDidMount() {
+            this.getProblems(20, 0);
+        }
+    }, {
+        key: "topage",
+        value: function topage(i) {
+            if (i == this.state.showing) return;
+            var real_page;
+            var max = Math.ceil(this.props.num_of_problem / this.state.num_per_page);
+
+            if (i > max) {
+                real_page = max;
+            } else if (i < 1) {
+                real_page = 1;
+            } else {
+                real_page = i;
+            }
+
+            num_should_be = this.state.showing * this.state.num_per_page;
+            if (this.state.problems.length < num_should_be) {
+                var needed = num_should_be - this.state.problems.length + 20;
+                this.getMoerProblems(needed);
+            }
+        }
+    }, {
+        key: "get_problem_list",
+        value: function get_problem_list() {
+            if (this.props.num_of_problem == 0) {
+                var None_problems = React.createElement(
+                    "p",
+                    { className: "problem-notification p-40" },
+                    " You didn't released any problem yet"
+                );
+                return None_problems;
+            }
+            re = [];
+            var from = (this.state.showing - 1) * this.state.num_per_page;
+            var to = this.state.num_per_page + from;
+            var max = this.state.problems.length;
+            console.log(from);
+            console.log(to);
+            console.log(max);
+            for (var i = from; i < to; i++) {
+                if (i >= max) {
+                    break;
+                }
+                var element = this.state.problems[i];
+                var info = React.createElement(Problem_info, { key: element.problem_pid, problem_pid: element.problem_pid, title: element.title, permission: element.permission, mode: false });
+                re.push(info);
+            }
+
+            return re;
+        }
+    }, {
+        key: "render",
+        value: function render() {
+            var main = React.createElement(
+                "div",
+                null,
+                React.createElement(
+                    "div",
+                    { className: "m-b-10" },
+                    React.createElement(
+                        "p",
+                        null,
+                        "Problrm list"
+                    )
+                ),
+                React.createElement(
+                    "div",
+                    { className: "flex flex-col" },
+                    React.createElement(this.get_problem_list, null)
+                )
+            );
+
+            return main;
+        }
+    }]);
+
+    return Problem_List;
+}(React.Component);
+
+var OverView_problem = function (_React$Component7) {
+    _inherits(OverView_problem, _React$Component7);
+
+    function OverView_problem(props) {
+        _classCallCheck(this, OverView_problem);
+
+        var _this14 = _possibleConstructorReturn(this, (OverView_problem.__proto__ || Object.getPrototypeOf(OverView_problem)).call(this, props));
+
+        _this14.state = {
+            problem_number: 0,
+            problems: []
+        };
+
+        _this14.getProblems = _this14.getProblems.bind(_this14);
+        return _this14;
+    }
+
+    _createClass(OverView_problem, [{
+        key: "componentDidMount",
+        value: function componentDidMount() {
+            var _this15 = this;
+
+            fetch("/problem_list?" + new URLSearchParams({ numbers: 4, from: 0 })).then(function (res) {
+                return res.json();
+            }).then(function (list) {
+                _this15.setState({
                     problems: list["data"]
                 });
             });
@@ -381,8 +671,7 @@ var Problem_list = function (_React$Component5) {
             fetch("/problem_list_setting").then(function (res) {
                 return res.json();
             }).then(function (data) {
-                console.log(data["count"]);
-                _this7.setState({
+                _this15.setState({
                     problem_number: data["count"]
                 });
             });
@@ -390,93 +679,134 @@ var Problem_list = function (_React$Component5) {
     }, {
         key: "getProblems",
         value: function getProblems() {
-            result = [];
-            var from = this.state.number_per_page * (this.state.page_now - 1);
-            var to = this.state.number_per_page + from;
+            re = [];
             var max = this.state.problems.length;
-            for (var i = from; i < to; i++) {
+            for (var i = 0; i < 4; i++) {
                 if (i >= max) {
                     break;
                 }
                 var element = this.state.problems[i];
-                var info = React.createElement(Problem_info, { key: element.problem_pid, problem_pid: element.problem_pid, title: element.title, permission: element.permission });
-                result.push(info);
+                var info = React.createElement(Problem_info, { key: element.problem_pid, problem_pid: element.problem_pid, title: element.title, permission: element.permission, mode: true });
+                re.push(info);
             }
-            return result;
-        }
-    }, {
-        key: "topage",
-        value: function topage(i) {
-            if (this.state.page_now == i) return;
-            this.setState({
-                page_now: i
-            });
+
+            var main = React.createElement(
+                "div",
+                { className: "problem-overview-list" },
+                re
+            );
+            if (re.length == 0) {
+                var None_problems = React.createElement(
+                    "p",
+                    { className: "problem-notification p-40" },
+                    " You didn't released any problem yet"
+                );
+                return None_problems;
+            } else {
+                return main;
+            }
         }
     }, {
         key: "render",
         value: function render() {
-            var _this8 = this;
+            var _this16 = this;
 
-            var max = Math.ceil(this.state.problem_number / this.state.number_per_page);
+            var overflow_tag;
+            if (this.props.num_of_problem > 4) {
+                overflow_tag = React.createElement(
+                    "button",
+                    { onClick: function onClick() {
+                            return _this16.props.onclick("Problem");
+                        } },
+                    "...see more"
+                );
+            } else {
+                overflow_tag = "";
+            }
 
-            var pos = "container flex-col middel main-interface problem-list " + this.props.position;
             var main = React.createElement(
                 "div",
-                { className: pos },
+                null,
                 React.createElement(
                     "div",
-                    { className: "flex g-15 flex-col" },
-                    React.createElement(this.getProblems, { value: this.state.problems })
+                    { className: "m-b-10" },
+                    React.createElement(
+                        "p",
+                        null,
+                        "Problrm list"
+                    )
                 ),
-                React.createElement(PageSlecter, { topage: function topage(i) {
-                        _this8.topage(i);
-                    }, Lastpage: max })
+                React.createElement(
+                    "div",
+                    { className: "" },
+                    React.createElement(this.getProblems, null)
+                ),
+                React.createElement(
+                    "div",
+                    { className: "flex justify-content-end" },
+                    overflow_tag
+                )
             );
             return main;
         }
     }]);
 
-    return Problem_list;
+    return OverView_problem;
 }(React.Component);
 
-var Interface_slecter = function (_React$Component6) {
-    _inherits(Interface_slecter, _React$Component6);
+var Tool_bar = function (_React$Component8) {
+    _inherits(Tool_bar, _React$Component8);
 
-    function Interface_slecter() {
-        _classCallCheck(this, Interface_slecter);
+    function Tool_bar() {
+        _classCallCheck(this, Tool_bar);
 
-        return _possibleConstructorReturn(this, (Interface_slecter.__proto__ || Object.getPrototypeOf(Interface_slecter)).apply(this, arguments));
+        return _possibleConstructorReturn(this, (Tool_bar.__proto__ || Object.getPrototypeOf(Tool_bar)).apply(this, arguments));
     }
 
-    _createClass(Interface_slecter, [{
+    _createClass(Tool_bar, [{
         key: "render",
         value: function render() {
-            var _this10 = this;
-
             var main = React.createElement(
                 "div",
-                { className: "items-center container g-20 interface-selecter" },
+                { className: "items-center container g-20 tool_bar" },
                 React.createElement(
                     "div",
-                    { className: "flex g-20 w-80" },
+                    { className: "flex g-20 w-80 align-items-center" },
+                    React.createElement(
+                        "div",
+                        { className: "h-50" },
+                        React.createElement(
+                            "a",
+                            { href: "/" },
+                            React.createElement("img", { width: 100, src: "/static/logo-black.svg" })
+                        )
+                    ),
                     React.createElement(
                         "a",
-                        { href: "/" },
-                        React.createElement("img", { src: "/static/logo-black.svg" })
+                        { href: "/problem" },
+                        React.createElement(
+                            "p",
+                            { className: "text-size-normal" },
+                            "\u984C\u76EE"
+                        )
                     ),
                     React.createElement(
-                        "button",
-                        { className: "text-size-normal", onClick: function onClick() {
-                                return _this10.props.onclick(0);
-                            } },
-                        "\u500B\u4EBA\u8CC7\u6599"
+                        "a",
+                        { href: "/about" },
+                        React.createElement(
+                            "p",
+                            { className: "text-size-normal" },
+                            "\u95DC\u65BC"
+                        )
                     ),
                     React.createElement(
-                        "button",
-                        { className: "text-size-normal", onClick: function onClick() {
-                                return _this10.props.onclick(1);
-                            } },
-                        "\u984C\u76EE"
+                        "a",
+                        { href: "/status" },
+                        React.createElement(
+                            "p",
+                            { className: "text-size-normal" },
+                            "\u72C0\u614B"
+                        )
                     )
                 ),
                 React.createElement(
@@ -497,48 +827,160 @@ var Interface_slecter = function (_React$Component6) {
         }
     }]);
 
-    return Interface_slecter;
+    return Tool_bar;
 }(React.Component);
 
-var Main = function (_React$Component7) {
-    _inherits(Main, _React$Component7);
+var Info_selecter = function (_React$Component9) {
+    _inherits(Info_selecter, _React$Component9);
+
+    function Info_selecter() {
+        _classCallCheck(this, Info_selecter);
+
+        return _possibleConstructorReturn(this, (Info_selecter.__proto__ || Object.getPrototypeOf(Info_selecter)).apply(this, arguments));
+    }
+
+    _createClass(Info_selecter, [{
+        key: "render",
+        value: function render() {
+            var _this19 = this;
+
+            var indecater_class = "page-info flex page-info-indecater " + this.props.pos;
+            var main = [React.createElement(
+                "div",
+                { className: "flex g-10 m-b-10 page-info-title" },
+                React.createElement(
+                    "button",
+                    { className: "page-info-btn", onClick: function onClick() {
+                            return _this19.props.onclick("OverView");
+                        } },
+                    React.createElement("img", { src: "/static/house.svg", alt: "" })
+                ),
+                React.createElement(
+                    "div",
+                    { className: "page-info" },
+                    React.createElement(
+                        "button",
+                        { onClick: function onClick() {
+                                return _this19.props.onclick("OverView");
+                            }, className: "page-info-btn" },
+                        "OverView"
+                    )
+                ),
+                React.createElement(
+                    "div",
+                    { className: "page-info" },
+                    React.createElement(
+                        "button",
+                        { onClick: function onClick() {
+                                return _this19.props.onclick("Problem");
+                            }, className: "page-info-btn" },
+                        "Problems"
+                    )
+                ),
+                React.createElement(
+                    "div",
+                    { className: indecater_class },
+                    React.createElement(
+                        "p",
+                        null,
+                        "<"
+                    ),
+                    React.createElement(
+                        "p",
+                        null,
+                        ">"
+                    )
+                )
+            ), React.createElement("hr", null)];
+            return main;
+        }
+    }]);
+
+    return Info_selecter;
+}(React.Component);
+
+var Main = function (_React$Component10) {
+    _inherits(Main, _React$Component10);
 
     function Main(props) {
         _classCallCheck(this, Main);
 
-        var _this11 = _possibleConstructorReturn(this, (Main.__proto__ || Object.getPrototypeOf(Main)).call(this, props));
+        var _this20 = _possibleConstructorReturn(this, (Main.__proto__ || Object.getPrototypeOf(Main)).call(this, props));
 
-        _this11.state = {
-            now_showing: 0
+        _this20.state = {
+            changing: false,
+            showing: "OverView",
+            problem_number: 0
         };
-        return _this11;
+        _this20.get_maincontent = _this20.get_maincontent.bind(_this20);
+        _this20.change_Info = _this20.change_Info.bind(_this20);
+        return _this20;
     }
 
     _createClass(Main, [{
         key: "componentDidMount",
-        value: function componentDidMount() {}
+        value: function componentDidMount() {
+            var _this21 = this;
+
+            fetch("/problem_list_setting").then(function (res) {
+                return res.json();
+            }).then(function (data) {
+                _this21.setState({
+                    problem_number: data["count"]
+                });
+            });
+        }
     }, {
-        key: "changePage",
-        value: function changePage(selected) {
+        key: "get_maincontent",
+        value: function get_maincontent() {
+            var _this22 = this;
+
+            if (this.state.showing == "OverView") {
+                var html = [React.createElement(OverView_problem, { position: "", num_of_problem: this.state.problem_number, onclick: function onclick(i) {
+                        return _this22.change_Info(i);
+                    } })];
+                return html;
+            } else if (this.state.showing == "Problem") {
+                var _html = React.createElement(Problem_List, null);
+                return _html;
+            }
+        }
+    }, {
+        key: "change_Info",
+        value: function change_Info(i) {
             this.setState({
-                now_showing: selected
+                showing: i
             });
         }
     }, {
         key: "render",
         value: function render() {
-            var _this12 = this;
+            var _this23 = this;
 
-            var main = [React.createElement(Interface_slecter, { onclick: function onclick(i) {
-                    return _this12.changePage(i);
-                } })];
-            if (this.state.now_showing == 0) {
-                main.push(React.createElement(Introduce, { position: "" }));
-                main.push(React.createElement(Problem_list, { position: "l-150" }));
-            } else {
-                main.push(React.createElement(Introduce, { position: "l-150" }));
-                main.push(React.createElement(Problem_list, { position: "" }));
-            }
+            var translate_pos = {
+                "OverView": "info-first",
+                "Problem": "info-second"
+            };
+
+            var main = [React.createElement(Tool_bar, null)];
+            var page = React.createElement(
+                "div",
+                { className: "p-40 main-page" },
+                React.createElement(Introduce, { position: "" }),
+                React.createElement(
+                    "div",
+                    { className: "main-content" },
+                    React.createElement(Info_selecter, { onclick: function onclick(i) {
+                            _this23.change_Info(i);
+                        }, pos: translate_pos[this.state.showing] }),
+                    React.createElement(
+                        "div",
+                        { className: "p-40 container flex flex-col" },
+                        React.createElement(this.get_maincontent, null)
+                    )
+                )
+            );
+            main.push(page);
             return main;
         }
     }]);
