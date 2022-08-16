@@ -667,14 +667,6 @@ var OverView_problem = function (_React$Component7) {
                     problems: list["data"]
                 });
             });
-
-            fetch("/problem_list_setting").then(function (res) {
-                return res.json();
-            }).then(function (data) {
-                _this15.setState({
-                    problem_number: data["count"]
-                });
-            });
         }
     }, {
         key: "getProblems",
@@ -757,13 +749,25 @@ var OverView_problem = function (_React$Component7) {
 var Tool_bar = function (_React$Component8) {
     _inherits(Tool_bar, _React$Component8);
 
-    function Tool_bar() {
+    function Tool_bar(prop) {
         _classCallCheck(this, Tool_bar);
 
-        return _possibleConstructorReturn(this, (Tool_bar.__proto__ || Object.getPrototypeOf(Tool_bar)).apply(this, arguments));
+        return _possibleConstructorReturn(this, (Tool_bar.__proto__ || Object.getPrototypeOf(Tool_bar)).call(this, prop));
     }
 
     _createClass(Tool_bar, [{
+        key: "logout",
+        value: function logout() {
+
+            fetch("/logout").then(function (res) {
+                return res.json();
+            }).then(function (resp) {
+                console.log(resp);if (resp.status == "OK") {
+                    window.location.href = "/";
+                }
+            });
+        }
+    }, {
         key: "render",
         value: function render() {
             var main = React.createElement(
@@ -817,7 +821,7 @@ var Tool_bar = function (_React$Component8) {
                         null,
                         React.createElement(
                             "button",
-                            { className: "text-size-normal" },
+                            { className: "text-size-normal", onClick: this.logout },
                             "\u767B\u51FA"
                         )
                     )

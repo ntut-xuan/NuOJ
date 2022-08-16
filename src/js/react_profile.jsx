@@ -471,14 +471,6 @@ class OverView_problem extends React.Component {
                 problems : list["data"]
             })
         })
-
-        fetch("/problem_list_setting").then((res)=>{
-            return res.json()
-        }).then((data)=>{
-            this.setState({
-                problem_number : data["count"]
-            })
-        })
     }
 
     getProblems(){
@@ -539,6 +531,13 @@ class OverView_problem extends React.Component {
 }
 
 class Tool_bar extends React.Component{
+    constructor(prop){
+        super(prop)
+    }
+    logout(){
+        
+        fetch("/logout").then((res)=>{ return res.json()}).then((resp)=>{console.log(resp);if(resp.status == "OK"){ window.location.href = "/" }})
+    }
     render(){
         let main = (
             <div className="items-center container g-20 tool_bar">
@@ -552,7 +551,7 @@ class Tool_bar extends React.Component{
                 </div>
                 <div className="w-20 flex justify-end">
                     <div>
-                        <button className="text-size-normal">登出</button>
+                        <button className="text-size-normal" onClick={this.logout}>登出</button>
                     </div>
                 </div>
             </div>
