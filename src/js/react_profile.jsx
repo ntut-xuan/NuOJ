@@ -540,7 +540,7 @@ class Tool_bar extends React.Component{
     }
     render(){
         let main = (
-            <div className="items-center container g-20 tool_bar">
+            <div className="items-center flex g-20 tool_bar">
                 <div className="flex g-20 w-80 align-items-center">
                     <div className="h-50">
                         <a href="/"><img width={100} src="/static/logo-black.svg"/></a>
@@ -631,9 +631,8 @@ class Main extends React.Component{
             "OverView" :  "info-first",
             "Problem" :  "info-second"
         }
-
-        var main=[<Tool_bar></Tool_bar>]
-        let page = (
+        let page = [
+            <Tool_bar></Tool_bar>,
             <div className="p-40 main-page">
                 <Introduce position={""}/>
                 <div className="main-content">
@@ -643,9 +642,8 @@ class Main extends React.Component{
                     </div>
                 </div>
             </div>
-        )
-        main.push(page)
-        return main
+        ]
+        return page
     }
 }
 

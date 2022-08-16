@@ -772,7 +772,7 @@ var Tool_bar = function (_React$Component8) {
         value: function render() {
             var main = React.createElement(
                 "div",
-                { className: "items-center container g-20 tool_bar" },
+                { className: "items-center flex g-20 tool_bar" },
                 React.createElement(
                     "div",
                     { className: "flex g-20 w-80 align-items-center" },
@@ -965,9 +965,7 @@ var Main = function (_React$Component10) {
                 "OverView": "info-first",
                 "Problem": "info-second"
             };
-
-            var main = [React.createElement(Tool_bar, null)];
-            var page = React.createElement(
+            var page = [React.createElement(Tool_bar, null), React.createElement(
                 "div",
                 { className: "p-40 main-page" },
                 React.createElement(Introduce, { position: "" }),
@@ -983,9 +981,8 @@ var Main = function (_React$Component10) {
                         React.createElement(this.get_maincontent, null)
                     )
                 )
-            );
-            main.push(page);
-            return main;
+            )];
+            return page;
         }
     }]);
 
