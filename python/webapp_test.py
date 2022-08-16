@@ -187,5 +187,5 @@ class SubmitUnitTest(unittest.TestCase):
         return super().tearDown()
 
 if __name__ == "__main__":
-
+    crypto_util.GenerateKey()
     unittest.main()
