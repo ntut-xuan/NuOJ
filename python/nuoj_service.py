@@ -13,6 +13,7 @@ import asana_util as asana_util
 import pytz
 from error_code import error_dict, ErrorCode 
 import database_util as database_util
+import crypto_util as crypto_util
 from tunnel_code import TunnelCode
 import setting_util as setting_util
 from app_auth import auth
@@ -61,6 +62,10 @@ def veriCookie(cookie):
 	else:
 		data["status"] = "Failed"
 	return json.dumps(data)
+
+@app.route("/pubkey")
+def pubkey():
+	return send_from_directory('../', "public.pem")
 
 @app.route("/static/<path:path>")
 def returnStaticFile(path):
@@ -235,8 +240,10 @@ if __name__ == "__main__":
 
 	conn = database_util.connect_database()
 	result = database_util.command_execute("SELECT * FROM `user`", ())
-
+	crypto_util.GenerateKey()
+	
 	app.debug = True
+	
 
 	if(settingJsonObject["cert"]["enable"] == False):
 		app.run(host="0.0.0.0", port=80, threaded=True)

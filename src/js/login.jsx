@@ -1,3 +1,4 @@
+
 function getRandomInt(max) {
     return Math.floor(Math.random() * max);
 }
@@ -79,26 +80,34 @@ class LoginForm extends React.Component {
     handleSubmit(event){
         let {account, password} = this.state
         event.preventDefault();
-        const shaObj = new jsSHA("SHA-512", "TEXT", { encoding: "UTF8" });
-        shaObj.update(password)
+        // const shaObj = new jsSHA("SHA-512", "TEXT", { encoding: "UTF8" });
+        // shaObj.update(password)
         $.ajax({
-            url: "./login",
-            type: "POST",
-            data: JSON.stringify({"account": account, "password": shaObj.getHash("HEX")}),
-            dataType: "json",
-            contentType: "application/json",
+            url: "./pubkey",
+            type: "GET",
             success(data, status, xhr){
-                if(data["status"] == "OK"){
-                    success_swal("登入成功").then(() => {window.location.href = "/"})
-                }else{
-                    if(data["code"] === 304){
-                        window.location.href = "/mail_check"
-                    }else{
-                        error_swal("登入失敗", data["code"])
+                var publick = forge.pki.publicKeyFromPem(data)
+                $.ajax({
+                    url: "./login",
+                    type: "POST",
+                    data: JSON.stringify({"account": account, "password": forge.util.encode64(publick.encrypt(encodeURIComponent(password), 'RSA-OAEP', {md: forge.md.sha256.create(), mgf1: { md: forge.md.sha1.create() }}))}),
+                    dataType: "json",
+                    contentType: "application/json",
+                    success(data, status, xhr){
+                        if(data["status"] == "OK"){
+                            success_swal("登入成功").then(() => {window.location.href = "/"})
+                        }else{
+                            if(data["code"] === 304){
+                                window.location.href = "/mail_check"
+                            }else{
+                                error_swal("登入失敗", data["code"])
+                            }
+                        }
                     }
-                }
-            }
+                })
+            }   
         })
+        
     }
     componentDidMount(){
         let {random_color} = this.state

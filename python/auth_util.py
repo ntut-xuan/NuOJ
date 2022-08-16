@@ -8,6 +8,7 @@ import smtplib
 import threading
 import jwt
 import database_util as database_util
+import crypto_util as crypto_util
 from datetime import *
 from tunnel_code import TunnelCode
 import setting_util as setting_util
@@ -26,7 +27,8 @@ def password_cypto(password) -> str:
 
 def login(data):
 	account = data["account"]
-	password = password_cypto(data["password"])
+	password = crypto_util.Decrypt(data["password"])
+	password = password_cypto(password)
 
 	# Check Data Valid
 	if '@' in account:
@@ -37,10 +39,6 @@ def login(data):
 		handle_valid = bool(re.match("[a-zA-Z\\d](?:[a-zA-Z\\d]|[_-](?=[a-zA-Z\\d])){3,38}$", account))
 		if not handle_valid:
 			return error_dict(ErrorCode.HANDLE_INVALID)
-
-	password_valid = bool(re.match("(?=.*?[a-zA-Z])(?=.*?[0-9]).{8,}$", password))
-	if not password_valid:
-		return error_dict(ErrorCode.PASSWORD_INVALID)
 
 	command = "SELECT * FROM `user` WHERE `handle` = %s OR `email` = %s;"
 	userdata_set = database_util.command_execute(command, (account, account))
@@ -104,6 +102,7 @@ def register_db(data) -> dict:
 	email = data["email"]
 	handle = data["handle"]
 	password = data["password"]
+	password = crypto_util.Decrypt(password)
 	admin = 0
 	response = {"status": "OK"}
 

@@ -136,24 +136,31 @@ var RegisterForm = function (_React$Component2) {
                 password = _state3.password;
 
             event.preventDefault();
-            var shaObj = new jsSHA("SHA-512", "TEXT", { encoding: "UTF8" });
-            shaObj.update(password);
+            // const shaObj = new jsSHA("SHA-512", "TEXT", { encoding: "UTF8" });
+            // shaObj.update(password)
             console.log(email);
             $.ajax({
-                url: "./register",
-                type: "POST",
-                data: JSON.stringify({ "handle": handle, "email": email, "password": shaObj.getHash("HEX") }),
-                dataType: "json",
-                contentType: "application/json",
+                url: "./pubkey",
+                type: "GET",
                 success: function success(data, status, xhr) {
-                    var redirect = data["mail_verification_redirect"] ? "/mail_check" : "/";
-                    if (data["status"] == "OK") {
-                        success_swal("註冊成功").then(function () {
-                            window.location.href = redirect;
-                        });
-                    } else {
-                        error_swal("註冊失敗", data["code"]);
-                    }
+                    var publick = forge.pki.publicKeyFromPem(data);
+                    $.ajax({
+                        url: "./register",
+                        type: "POST",
+                        data: JSON.stringify({ "handle": handle, "email": email, "password": forge.util.encode64(publick.encrypt(encodeURIComponent(password), 'RSA-OAEP', { md: forge.md.sha256.create(), mgf1: { md: forge.md.sha1.create() } })) }),
+                        dataType: "json",
+                        contentType: "application/json",
+                        success: function success(data, status, xhr) {
+                            var redirect = data["mail_verification_redirect"] ? "/mail_check" : "/";
+                            if (data["status"] == "OK") {
+                                success_swal("註冊成功").then(function () {
+                                    window.location.href = redirect;
+                                });
+                            } else {
+                                error_swal("註冊失敗", data["code"]);
+                            }
+                        }
+                    });
                 }
             });
         }
