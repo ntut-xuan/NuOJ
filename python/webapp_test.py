@@ -5,6 +5,8 @@ import database_util
 import hashlib
 import os
 import re
+import base64
+import crypto_util
 from error_code import ErrorCode
 from uuid import uuid4
 from nuoj_service import app
@@ -13,12 +15,12 @@ from auth_util import password_cypto
 test_client = app.test_client()
 
 def register_test(handle, email, password):
-    data = json.dumps({"handle": handle, "email": email, "password": password})
+    data = json.dumps({"handle": handle, "email": email, "password": crypto_util.Encrypt(password)})
     resp = test_client.post("/register", data=data, headers={"content-type": "application/json"})
     return (json.loads(resp.data), resp.headers["Set-Cookie"])
 
 def login_test(account, password):
-    data = json.dumps({"account": account, "password": password})
+    data = json.dumps({"account": account, "password": crypto_util.Encrypt(password)})
     resp = test_client.post("/login", data=data, headers={"content-type": "application/json"})
     return (json.loads(resp.data), resp.headers["Set-Cookie"])
 
@@ -153,12 +155,10 @@ class SubmitUnitTest(unittest.TestCase):
         database_util.command_execute("INSERT INTO `problem`(ID, problem_pid, problem_author) VALUES(%s, %s, %s)", (99999, os.urandom(10).hex(), "uriahxuan"))
 
         # add account
-        hash = hashlib.sha512(str("uriahxuan99").encode("utf-8")).hexdigest()
-        database_util.command_execute("INSERT INTO `user`(user_uid, handle, password, email, role, email_verified) VALUES(%s, %s, %s, %s, %s, %s)", (str(uuid4()), "uriahxuan", password_cypto(hash), "nuoj@test.net", 0, True))
+        database_util.command_execute("INSERT INTO `user`(user_uid, handle, password, email, role, email_verified) VALUES(%s, %s, %s, %s, %s, %s)", (str(uuid4()), "uriahxuan", password_cypto(crypto_util.Encrypt(str("uriahxuan99"))), "nuoj@test.net", 0, True))
         
         # login account
-        hash = hashlib.sha512(str("uriahxuan99").encode("utf-8")).hexdigest()
-        data = json.dumps({"account": "uriahxuan", "password": hash})
+        data = json.dumps({"account": "uriahxuan", "password": crypto_util.Encrypt(str("uriahxuan99"))})
         resp = test_client.post("/login", data=data, headers={"content-type": "application/json"})
         return super().setUp()
     

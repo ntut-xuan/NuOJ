@@ -33,8 +33,8 @@ def Decrypt(cipher):
     data = Decryptor.decrypt(cipher).decode('utf-8')
     return data
 
-def Encrypt(plain):
+def Encrypt(plain: str):
     PublicKey = GetPubkey()
     Encryptor = PKCS1_OAEP.new(PublicKey, SHA256, lambda x,y: pss.MGF1(x,y, SHA1))
-    encrypted = Encryptor.encrypt(plain)
-    return encrypted
+    encrypted = Encryptor.encrypt(plain.encode())
+    return base64.b64encode(encrypted).decode('utf-8')
