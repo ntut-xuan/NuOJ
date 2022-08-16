@@ -1,3 +1,4 @@
+
 class Inputbox extends React.Component{
     constructor(pro){
         super(pro)
@@ -67,12 +68,20 @@ class Introduce extends React.Component {
             handle : null,
             sub_data: {},
             changing : false,
-            input_tmp : {}
+            input_tmp : {},
+            profile_img : "/static/logo-black.svg",
+            upload_img : false,
+            img_data : null
         }
         this.render_subtitles = this.render_subtitles.bind(this)
-        this.changing = this.changing.bind(this)
         this.render_input = this.render_input.bind(this)
-        this.update = this.update.bind(this)
+        this.changing_mode = this.changing_mode.bind(this)
+        this.get_user_data = this.get_user_data.bind(this)
+        this.handle_img = this.handle_img.bind(this)
+    }
+
+    componentDidMount(){
+        this.get_user_data()
     }
 
     get_user_data(){
@@ -87,10 +96,6 @@ class Introduce extends React.Component {
         })
     }
 
-    componentDidMount(){
-        this.get_user_data()
-    }
-
     render_subtitles(){
         const sub_datas =  Object.entries(this.state.sub_data)
         resp =[]
@@ -102,15 +107,16 @@ class Introduce extends React.Component {
     }
 
     render_input(){
-        resp =[<Inputbox title={"handel"} value={this.state.handle} new={(i,j)=>this.new_input(i,j)}></Inputbox>]
+        resp =[]
         const sub_datas =  Object.entries(this.state.sub_data)
         sub_datas.forEach(element=>{
-            resp.push(<Inputbox title={element[0]} value={element[1]} new={(i,j)=>this.new_input(i,j)}></Inputbox>)  
+            resp.push(<Inputbox title={element[0]} value={element[1]} new={(i,j)=>this.setup_userdata(i,j)}></Inputbox>)  
         })
         return resp
     }
 
-    new_input(i,j){
+    setup_userdata(i,j){
+        
         var temp =this.state.input_tmp
         temp[i] = j
         this.setState({
@@ -118,13 +124,13 @@ class Introduce extends React.Component {
         })
     }
 
-    changing(){
+    changing_mode(){
         this.setState({
             changing : !this.state.changing
         })
     }
 
-    update(){
+    update_user_data(){
         fetch("#",
             {method : "PUT",
             body : JSON.stringify(this.state.input_tmp),
@@ -137,21 +143,51 @@ class Introduce extends React.Component {
                 this.get_user_data()
             }
         });
-        this.changing()
+
+        if(this.state.upload_img){
+            
+        }
+        this.setState({
+            upload_img : false
+        })
+
+        this.changing_mode()
+    }
+
+    handle_img(file){
+        let form = new FormData();
+        form.append("product[photos][]",file[0])
+        this.setState({
+            profile_img : URL.createObjectURL(file[0])
+        })
+        this.setState({
+            upload_img : false
+        })
+        console.log(this.state.input_tmp)
     }
 
     render(){
-        let pos = "container g-15 p-40 flex flex-col profile-area absolute"
         var main_showing;
+        var img_area;
         if(this.state.changing){
             main_showing=[
                 <this.render_input></this.render_input>,
                 <div className="flex w-full">
-                    <button className="large-btu-bg w-full" onClick={()=>{this.update()}}>確認修改</button>
+                    <button className="large-btu-bg w-full" onClick={()=>{this.update_user_data()}}>確認修改</button>
                 </div>,
                 <div className="flex w-full">
-                    <button className="large-btu-bg w-full" onClick={()=>this.changing()}>取消</button>
+                    <button className="large-btu-bg w-full" onClick={()=>this.changing_mode()}>取消</button>
                 </div>
+            ]
+            
+            img_area = [
+                <div className="profile-picture-container">
+                    <label className="profile-picture-container " for="file">
+                        <img className="main-img" src={this.state.profile_img} alt=""/>
+                    </label>
+                </div>,
+                <input type="file" name="" id="file" style={{display:"none"}}  
+                onChange={ (e) => this.handle_img(e.target.files)}/>
             ]
         }
         else{
@@ -162,16 +198,22 @@ class Introduce extends React.Component {
                 </div>,
                 <this.render_subtitles></this.render_subtitles>,
                 <div className="flex w-full">
-                    <button className="large-btu-bg w-full" onClick={()=>this.changing()}>修改個人資料</button>
+                    <button className="large-btu-bg w-full" onClick={()=>this.changing_mode()}>修改個人資料</button>
                 </div>
             ]
+
+            img_area = (
+                <div className="profile-picture-container" >
+                        <img className="main-img" src={this.state.profile_img} alt=""/>
+                </div>
+            )
         }
+
+        let pos = "container g-15 p-40 flex flex-col profile-area absolute"
         let context = (
             <div className={pos}>
                 <div className="m-auto">
-                    <div className="profile-picture-container" >
-                        <img className="main-img" src="/static/logo-black.svg" alt=""/>
-                    </div>
+                    {img_area}
                 </div>
                 {main_showing}
             </div>
@@ -269,7 +311,7 @@ class Problem_info extends React.Component{
         }
         let url ="/edit/"+this.props.problem_pid
 
-        let main=(
+        var main=(
             <div className="w-50">
                 <div className="problem-container">
                     <div className="border-sd p-10 flex flex-col">
@@ -288,11 +330,25 @@ class Problem_info extends React.Component{
             </div>
         )
 
-        if(this.props.mode = true){
+        var all=(
+            <div className="p-10 flex flex-col">
+                <div className="flex g-10 align-items-center problem-title">
+                    <a href={url}  className="text-size-small problem-info-col text-bule">
+                        {this.props.title}
+                    </a>
+                    {status}
+                </div>
+                <div className="problem-info-col"></div>
+                <hr />
+            </div>
+        )
+        
+
+        if(this.props.mode == true){
             return main
         }
         else{
-
+            return all
         }
     }
 }
@@ -303,8 +359,7 @@ class Problem_List extends React.Component{
         this.state={
             num_per_page : 10,
             showing : 1,
-            problems : [],
-            num_of_problem : 0
+            problems : []
         }
 
         this.topage = this.topage.bind(this)
@@ -315,8 +370,9 @@ class Problem_List extends React.Component{
         fetch("/problem_list?"+new URLSearchParams({numbers:i,from:j})).then((res)=>{
             return res.json()
         }).then((list)=>{
+            console.log(list)
             this.setState({
-                problems : this.state.problems.concat(list)
+                problems : this.state.problems.concat(list.data)
             })
         })
     }
@@ -332,7 +388,7 @@ class Problem_List extends React.Component{
 
     topage(i){
         if(i==this.state.showing) return
-        var real_page=0
+        var real_page;
         var max = Math.ceil(this.props.num_of_problem / this.state.num_per_page)
         
         if(i>max){
@@ -352,37 +408,32 @@ class Problem_List extends React.Component{
         }
     }
 
-
-
     get_problem_list(){
+        if(this.props.num_of_problem==0){
+            var None_problems=(
+                <p className="problem-notification p-40"> You didn't released any problem yet</p>
+            )
+            return None_problems
+        }
         re=[]
-        const from = (this.state.showing - 1)*this.state.num_of_problem
-        const to = this.state.num_of_problem + from
+        const from = (this.state.showing - 1)*this.state.num_per_page
+        const to = this.state.num_per_page + from
         const max = this.state.problems.length
+        console.log(from)
+        console.log(to)
+        console.log(max)
         for(var i= from;i<to;i++){
             if(i>=max){
                 break;
             }
             var element = this.state.problems[i]
             let info =
-                <Problem_info key={element.problem_pid} problem_pid={element.problem_pid} title={element.title} permission={element.permission}></Problem_info>
+                <Problem_info key={element.problem_pid} problem_pid={element.problem_pid} title={element.title} permission={element.permission}  mode={false}></Problem_info>
             re.push(info)
         }
 
-        var main=(
-            <div className="problem-overview-list">
-                {re}
-            </div>
-        )
-        if(re.length==0){
-            var None_problems=(
-                <p className="problem-notification p-40"> You didn't released any problem yet</p>
-            )
-            return None_problems
-        }
-        else{
-            return main
-        }
+        return re
+        
     }
 
     render(){
@@ -391,7 +442,7 @@ class Problem_List extends React.Component{
                 <div className="m-b-10">
                     <p>Problrm list</p>
                 </div>
-                <div className="">
+                <div className="flex flex-col">
                     <this.get_problem_list></this.get_problem_list>
                 </div>
             </div>  
@@ -439,7 +490,7 @@ class OverView_problem extends React.Component {
             }
             var element = this.state.problems[i]
             let info =
-                <Problem_info key={element.problem_pid} problem_pid={element.problem_pid} title={element.title} permission={element.permission}></Problem_info>
+                <Problem_info key={element.problem_pid} problem_pid={element.problem_pid} title={element.title} permission={element.permission} mode={true}></Problem_info>
             re.push(info)
         }
 
@@ -463,7 +514,7 @@ class OverView_problem extends React.Component {
         var overflow_tag;
         if(this.props.num_of_problem>4){
             overflow_tag=(
-                <a href="" className="text-align-end">...see more</a>
+                <button onClick={()=>this.props.onclick("Problem")}>...see more</button>
             )
         }
         else{
@@ -512,11 +563,10 @@ class Tool_bar extends React.Component{
 
 class Info_selecter extends React.Component{
     render(){
-
         var indecater_class = "page-info flex page-info-indecater "+this.props.pos
         var main = [
             <div className="flex g-10 m-b-10 page-info-title">
-                <button className="page-info-btn">
+                <button className="page-info-btn" onClick={()=>this.props.onclick("OverView")}>
                     <img src="/static/house.svg" alt="" />
                 </button>
                 <div className="page-info">
@@ -544,8 +594,8 @@ class Main extends React.Component{
             showing : "OverView",
             problem_number : 0
         }
-
-        this.MainContent = this.MainContent.bind(this)
+        this.get_maincontent = this.get_maincontent.bind(this)
+        this.change_Info = this.change_Info.bind(this)
     }
 
     componentDidMount(){
@@ -556,21 +606,18 @@ class Main extends React.Component{
                 problem_number : data["count"]
             })
         })
-        this.MainContent = this.MainContent.bind(this)
-        this.change_Info = this.change_Info.bind(this)
     }
 
-    MainContent(){
+    get_maincontent(){
         if(this.state.showing=="OverView"){
             const html = [
-                <OverView_problem position={""} num_of_problem={this.state.problem_number}></OverView_problem>
+                <OverView_problem position={""} num_of_problem={this.state.problem_number} onclick={(i)=>this.change_Info(i)}></OverView_problem>
             ]
             return html
         }
         else if(this.state.showing == "Problem"){
-            const html = <Problem_List></Problem_List>
+            const html = <Problem_List ></Problem_List>
             return html
-        
         }
     }
 
@@ -581,7 +628,6 @@ class Main extends React.Component{
     }
     
     render(){
-
         var translate_pos ={
             "OverView" :  "info-first",
             "Problem" :  "info-second"
@@ -594,7 +640,7 @@ class Main extends React.Component{
                 <div className="main-content">
                     <Info_selecter onclick={(i)=>{this.change_Info(i)}} pos={translate_pos[this.state.showing]} ></Info_selecter>
                     <div className="p-40 container flex flex-col">   
-                        <this.MainContent></this.MainContent>
+                        <this.get_maincontent></this.get_maincontent>
                     </div>
                 </div>
             </div>

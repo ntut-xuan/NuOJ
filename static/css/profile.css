@@ -12,6 +12,10 @@ ul{
     list-style-type: none;
 }
 
+img{
+    vertical-align: middle;
+}
+
 hr{
     border: 2px solid rgb(117, 117, 117 / 0.5);
 }
@@ -30,14 +34,15 @@ body{
 }
 
 .main-img{
-    height: inherit;
-    width: inherit;
-    overflow:hidden;
+    height: 250px;
+    width: 250px;
+    object-fit: cover;
 }
 
 .profile-picture-container{
     height: 250px; 
     width: 250px;
+    overflow: hidden;
     border-radius: 100%;
     box-shadow: rgba(0, 0, 0, 0.35) 0px 0px 5px;
 }
@@ -190,6 +195,10 @@ body{
     width: 350px;
 }
 
+.profile-img{
+    
+}
+
 .tool_bar{
     width: 100vw;
     height: 75px;
@@ -208,7 +217,6 @@ body{
     display: flex;
     flex-wrap: wrap;
 }
-
 
 .problem-container{
     padding-left: 8px;

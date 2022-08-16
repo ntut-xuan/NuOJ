@@ -43,7 +43,7 @@ def updateUserProfile(handle,put_data):
 	
 	# Check user session is valid, otherwise return REQUIRE_AUTHORIZATION
 
-
+	print(put_data)
 	def getdata(i):
 		try:
 			return  put_data[i]
@@ -92,6 +92,12 @@ def returnProfilePageWithName(name):
 		put_data = request.json
 		return json.dumps(updateUserProfile(name,put_data))
 	return render_template("profile.html", **locals())
+
+# @profile.route("/update_user_img",method=["PUT"])
+# @require_session
+# def update_user_img():
+# 	put_data = request.json
+# 	database_util.file_storage_tunnel_write("")
 
 @profile_page.route("/get_user")
 @require_session
