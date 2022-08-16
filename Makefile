@@ -28,6 +28,7 @@ install:
 	sudo pip3 install python-dateutil
 	sudo pip3 install pytz
 	sudo pip3 install pyjwt
+	sudo pip3 install pycryptodome
 	# load service 
 	sudo systemctl daemon-reload
 	sudo systemctl enable nuoj
