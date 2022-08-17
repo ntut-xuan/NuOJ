@@ -960,9 +960,7 @@ var Main = function (_React$Component10) {
                 "OverView": "info-first",
                 "Problem": "info-second"
             };
-
-            var main = [React.createElement(ToolBar, null)];
-            var page = React.createElement(
+            var page = [React.createElement(ToolBar, null), React.createElement(
                 "div",
                 { className: "p-40 main-page" },
                 React.createElement(Introduce, { position: "" }),
@@ -978,9 +976,8 @@ var Main = function (_React$Component10) {
                         React.createElement(this.get_maincontent, null)
                     )
                 )
-            );
-            main.push(page);
-            return main;
+            )];
+            return page;
         }
     }]);
 

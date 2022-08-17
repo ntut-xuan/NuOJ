@@ -625,9 +625,8 @@ class Main extends React.Component{
             "OverView" :  "info-first",
             "Problem" :  "info-second"
         }
-
-        var main=[<ToolBar></ToolBar>]
-        let page = (
+        let page = [
+            <ToolBar></ToolBar>,
             <div className="p-40 main-page">
                 <Introduce position={""}/>
                 <div className="main-content">
@@ -637,9 +636,8 @@ class Main extends React.Component{
                     </div>
                 </div>
             </div>
-        )
-        main.push(page)
-        return main
+        ]
+        return page
     }
 }
 

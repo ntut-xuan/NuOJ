@@ -1,3 +1,4 @@
+from importlib.metadata import requires
 from flask import *
 from tunnel_code import TunnelCode
 from auth_util import jwt_decode, jwt_valid
@@ -95,3 +96,9 @@ def returnEditProblemPage(PID):
 @session_name_auth
 def return_solution_page(PID):
     return render_template("add_problem_solution.html", **locals())
+
+@problem.route("/edit_problem/<PID>/testcase", methods=["GET", "POST"])
+@require_session_or_redirect_index
+@session_name_auth
+def return_testcase_page(PID):
+	return render_template("add_problem_testcase.html", **locals())
