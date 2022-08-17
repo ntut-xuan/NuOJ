@@ -90,7 +90,7 @@ var Subtitle = function (_React$Component2) {
                 { className: "over-flow-text" },
                 React.createElement(
                     "p",
-                    { className: "text-size-small text-little_gray" },
+                    { className: "text-size-small text-little_gray break-words" },
                     this.props.content
                 )
             );
@@ -124,6 +124,7 @@ var Introduce = function (_React$Component3) {
         _this3.changing_mode = _this3.changing_mode.bind(_this3);
         _this3.get_user_data = _this3.get_user_data.bind(_this3);
         _this3.handle_img = _this3.handle_img.bind(_this3);
+        _this3.trigger_image_upload = _this3.trigger_image_upload.bind(_this3);
         return _this3;
     }
 
@@ -228,6 +229,24 @@ var Introduce = function (_React$Component3) {
             console.log(this.state.input_tmp);
         }
     }, {
+        key: "trigger_image_upload",
+        value: function trigger_image_upload() {
+            var file_input = document.createElement("input");
+            file_input.type = "file";
+            file_input.accept = "image/*";
+            file_input.onchange = function (e) {
+                var image = e.target.files[0];
+                var reader = new FileReader();
+                reader.readAsDataURL(image);
+
+                reader.onload = function (readerEvent) {
+                    var content = readerEvent.target.result;
+                    document.getElementById("user_avater").setAttribute("src", content);
+                };
+            };
+            file_input.click();
+        }
+    }, {
         key: "render",
         value: function render() {
             var _this8 = this;
@@ -256,19 +275,6 @@ var Introduce = function (_React$Component3) {
                         "\u53D6\u6D88"
                     )
                 )];
-
-                img_area = [React.createElement(
-                    "div",
-                    { className: "profile-picture-container" },
-                    React.createElement(
-                        "label",
-                        { className: "profile-picture-container ", "for": "file" },
-                        React.createElement("img", { className: "main-img", src: this.state.profile_img, alt: "" })
-                    )
-                ), React.createElement("input", { type: "file", name: "", id: "file", style: { display: "none" },
-                    onChange: function onChange(e) {
-                        return _this8.handle_img(e.target.files);
-                    } })];
             } else {
                 main_showing = [React.createElement(
                     "div",
@@ -298,13 +304,17 @@ var Introduce = function (_React$Component3) {
                         "\u4FEE\u6539\u500B\u4EBA\u8CC7\u6599"
                     )
                 )];
-
-                img_area = React.createElement(
-                    "div",
-                    { className: "profile-picture-container" },
-                    React.createElement("img", { className: "main-img", src: this.state.profile_img, alt: "" })
-                );
             }
+
+            img_area = React.createElement(
+                "div",
+                { className: "profile-picture-container" },
+                React.createElement(
+                    "button",
+                    { className: "main-img hover:bg-black hover:bg-opacity-50 z-20", onClick: this.trigger_image_upload },
+                    React.createElement("img", { id: "user_avater", className: "w-full h-full rounded-full object-scale-down", src: this.state.profile_img, alt: "" })
+                )
+            );
 
             var pos = "container g-15 p-40 flex flex-col profile-area absolute";
             var context = React.createElement(

@@ -50,7 +50,7 @@ class Subtitle extends React.Component{
     render(){
         let main=(
             <div className="over-flow-text">
-                <p className="text-size-small text-little_gray">{this.props.content}</p>
+                <p className="text-size-small text-little_gray break-words">{this.props.content}</p>
             </div>
         )
         return main
@@ -75,6 +75,7 @@ class Introduce extends React.Component {
         this.changing_mode = this.changing_mode.bind(this)
         this.get_user_data = this.get_user_data.bind(this)
         this.handle_img = this.handle_img.bind(this)
+        this.trigger_image_upload = this.trigger_image_upload.bind(this)
     }
 
     componentDidMount(){
@@ -163,6 +164,23 @@ class Introduce extends React.Component {
         console.log(this.state.input_tmp)
     }
 
+    trigger_image_upload(){
+        let file_input = document.createElement("input")
+        file_input.type = "file"
+        file_input.accept = "image/*"
+        file_input.onchange = e => {
+            var image = e.target.files[0];
+            var reader = new FileReader();
+            reader.readAsDataURL(image)
+
+            reader.onload = readerEvent => {
+                var content = readerEvent.target.result;
+                document.getElementById("user_avater").setAttribute("src", content)
+            }
+        }
+        file_input.click();
+    }
+
     render(){
         var main_showing;
         var img_area;
@@ -175,16 +193,6 @@ class Introduce extends React.Component {
                 <div className="flex w-full">
                     <button className="large-btu-bg w-full" onClick={()=>this.changing_mode()}>取消</button>
                 </div>
-            ]
-            
-            img_area = [
-                <div className="profile-picture-container">
-                    <label className="profile-picture-container " for="file">
-                        <img className="main-img" src={this.state.profile_img} alt=""/>
-                    </label>
-                </div>,
-                <input type="file" name="" id="file" style={{display:"none"}}  
-                onChange={ (e) => this.handle_img(e.target.files)}/>
             ]
         }
         else{
@@ -200,13 +208,15 @@ class Introduce extends React.Component {
                     <button className="large-btu-bg w-full" onClick={()=>this.changing_mode()}>修改個人資料</button>
                 </div>
             ]
-
-            img_area = (
-                <div className="profile-picture-container" >
-                    <img className="main-img" src={this.state.profile_img} alt=""/>
-                </div>
-            )
         }
+
+        img_area = (
+            <div className="profile-picture-container" >
+                <button className="main-img hover:bg-black hover:bg-opacity-50 z-20" onClick={this.trigger_image_upload} >
+                    <img id="user_avater" className="w-full h-full rounded-full object-scale-down" src={this.state.profile_img} alt=""/>
+                </button>
+            </div>
+        )
 
         let pos = "container g-15 p-40 flex flex-col profile-area absolute"
         let context = (
