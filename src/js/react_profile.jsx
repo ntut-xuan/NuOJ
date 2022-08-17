@@ -1,4 +1,3 @@
-
 class Inputbox extends React.Component{
     constructor(pro){
         super(pro)
@@ -50,10 +49,8 @@ class Inputbox extends React.Component{
 class Subtitle extends React.Component{
     render(){
         let main=(
-            <div className="flex">
-                <div className="w-full">
-                    <p className="text-size-small text-little_gray">{this.props.content}</p>
-                </div>
+            <div className="over-flow-text">
+                <p className="text-size-small text-little_gray">{this.props.content}</p>
             </div>
         )
         return main
@@ -196,15 +193,17 @@ class Introduce extends React.Component {
                     <p className="text-size-small font-mono">{this.state.accountType}</p>
                     <p className="text-size-large font-mono ">{this.state.handle}</p>
                 </div>,
-                <this.render_subtitles></this.render_subtitles>,
-                <div className="flex w-full">
+                <div className="flex flex-col">
+                    <this.render_subtitles></this.render_subtitles>
+                </div>,
+                <div className="flex">
                     <button className="large-btu-bg w-full" onClick={()=>this.changing_mode()}>修改個人資料</button>
                 </div>
             ]
 
             img_area = (
                 <div className="profile-picture-container" >
-                        <img className="main-img" src={this.state.profile_img} alt=""/>
+                    <img className="main-img" src={this.state.profile_img} alt=""/>
                 </div>
             )
         }
@@ -367,10 +366,9 @@ class Problem_List extends React.Component{
     }
 
     getProblems(i,j){
-        fetch("/problem_list?"+new URLSearchParams({numbers:i,from:j})).then((res)=>{
+        fetch("/profile_problem_list?"+new URLSearchParams({numbers:i,from:j})).then((res)=>{
             return res.json()
         }).then((list)=>{
-            console.log(list)
             this.setState({
                 problems : this.state.problems.concat(list.data)
             })
@@ -419,9 +417,6 @@ class Problem_List extends React.Component{
         const from = (this.state.showing - 1)*this.state.num_per_page
         const to = this.state.num_per_page + from
         const max = this.state.problems.length
-        console.log(from)
-        console.log(to)
-        console.log(max)
         for(var i= from;i<to;i++){
             if(i>=max){
                 break;
@@ -443,7 +438,7 @@ class Problem_List extends React.Component{
                     <p>Problrm list</p>
                 </div>
                 <div className="flex flex-col">
-                    <this.get_problem_list></this.get_problem_list>
+                    <this.get_problem_list ></this.get_problem_list>
                 </div>
             </div>  
         )
@@ -464,7 +459,7 @@ class OverView_problem extends React.Component {
     }
 
     componentDidMount(){
-        fetch("/problem_list?"+new URLSearchParams({numbers:4,from:0})).then((res)=>{
+        fetch("/profile_problem_list?"+new URLSearchParams({numbers:4,from:0})).then((res)=>{
             return res.json()
         }).then((list)=>{
             this.setState({
@@ -530,18 +525,17 @@ class OverView_problem extends React.Component {
     }
 }
 
-class Tool_bar extends React.Component{
+class ToolBar extends React.Component{
     constructor(prop){
         super(prop)
     }
     logout(){
-        
         fetch("/logout").then((res)=>{ return res.json()}).then((resp)=>{console.log(resp);if(resp.status == "OK"){ window.location.href = "/" }})
     }
     render(){
         let main = (
-            <div className="items-center container g-20 tool_bar">
-                <div className="flex g-20 w-80 align-items-center">
+            <div className="items-center flex g-20 tool_bar">
+                <div className="flex g-40 w-80 align-items-center">
                     <div className="h-50">
                         <a href="/"><img width={100} src="/static/logo-black.svg"/></a>
                     </div>
@@ -598,7 +592,7 @@ class Main extends React.Component{
     }
 
     componentDidMount(){
-        fetch("/problem_list_setting").then((res)=>{
+        fetch("/profile_problem_setting").then((res)=>{
             return res.json()
         }).then((data)=>{
             this.setState({
@@ -615,7 +609,7 @@ class Main extends React.Component{
             return html
         }
         else if(this.state.showing == "Problem"){
-            const html = <Problem_List ></Problem_List>
+            const html = <Problem_List num_of_problem={this.state.problem_number} ></Problem_List>
             return html
         }
     }
@@ -632,7 +626,7 @@ class Main extends React.Component{
             "Problem" :  "info-second"
         }
 
-        var main=[<Tool_bar></Tool_bar>]
+        var main=[<ToolBar></ToolBar>]
         let page = (
             <div className="p-40 main-page">
                 <Introduce position={""}/>

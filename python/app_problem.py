@@ -44,6 +44,7 @@ def returnProblemIDPage(ID):
 @problem_page.route("/submit", methods=["POST"])
 @require_session
 def submitCode():
+
 	try:
 		SID = request.cookies.get("SID")
 		session_data = jwt_decode(SID)
@@ -74,3 +75,55 @@ def submitCode():
 	except Exception as e:
 		print(e)
 		return Response(json.dumps(error_dict(ErrorCode.UNEXCEPT_ERROR)), mimetype="application/json")
+
+
+@problem_page.route("/problem_page_num")
+@require_session
+def getProblemNum():
+	try:	
+		SID = request.cookies.get("SID")
+		handle = jwt_decode(SID)["handle"]
+	except:
+		return "please login", 400
+
+	count = database_util.command_execute("select count(*) from problem")
+	response={
+		"count":count[0]["count(*)"]
+	}
+	return response
+
+
+@problem_page.route("/all_problem_list")
+@require_session
+def getAllProblemList():
+	try:	
+		SID = request.cookies.get("SID")
+		handle = jwt_decode(SID)["handle"]
+	except:
+		return "please login", 400
+	
+	args = request.args
+	number_of_problem = int(args["numbers"])
+	offset = int(args["from"])
+
+	problems = database_util.command_execute("select * from problem limit %s offset %s;",(number_of_problem,offset))
+	print("RRRRRRRRR",problems)
+	result =[]
+	i=0
+	for problem in problems:
+		problem_pid = problem["problem_pid"]
+		problem_raw_data = database_util.file_storage_tunnel_read("%s.json"%problem_pid,TunnelCode.PROBLEM)
+
+		if( len(problem_raw_data)!= 0):
+
+			problem_json = json.loads(problem_raw_data)
+
+			permission = False
+
+			if(problem_json["basic_setting"]["permission"] == "1"):
+				permission = True
+			
+			subdata = {"id":problem["ID"], "title" : problem_json["problem_content"]["title"], "permission" :	permission , "author" : problem["problem_author"], "problem_pid":problem_pid , "tag":[]}
+			result.append(subdata)
+			i+=1
+	return {"data":result}

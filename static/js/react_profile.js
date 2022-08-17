@@ -87,15 +87,11 @@ var Subtitle = function (_React$Component2) {
         value: function render() {
             var main = React.createElement(
                 "div",
-                { className: "flex" },
+                { className: "over-flow-text" },
                 React.createElement(
-                    "div",
-                    { className: "w-full" },
-                    React.createElement(
-                        "p",
-                        { className: "text-size-small text-little_gray" },
-                        this.props.content
-                    )
+                    "p",
+                    { className: "text-size-small text-little_gray" },
+                    this.props.content
                 )
             );
             return main;
@@ -287,9 +283,13 @@ var Introduce = function (_React$Component3) {
                         { className: "text-size-large font-mono " },
                         this.state.handle
                     )
-                ), React.createElement(this.render_subtitles, null), React.createElement(
+                ), React.createElement(
                     "div",
-                    { className: "flex w-full" },
+                    { className: "flex flex-col" },
+                    React.createElement(this.render_subtitles, null)
+                ), React.createElement(
+                    "div",
+                    { className: "flex" },
                     React.createElement(
                         "button",
                         { className: "large-btu-bg w-full", onClick: function onClick() {
@@ -539,10 +539,9 @@ var Problem_List = function (_React$Component6) {
         value: function getProblems(i, j) {
             var _this13 = this;
 
-            fetch("/problem_list?" + new URLSearchParams({ numbers: i, from: j })).then(function (res) {
+            fetch("/profile_problem_list?" + new URLSearchParams({ numbers: i, from: j })).then(function (res) {
                 return res.json();
             }).then(function (list) {
-                console.log(list);
                 _this13.setState({
                     problems: _this13.state.problems.concat(list.data)
                 });
@@ -595,9 +594,6 @@ var Problem_List = function (_React$Component6) {
             var from = (this.state.showing - 1) * this.state.num_per_page;
             var to = this.state.num_per_page + from;
             var max = this.state.problems.length;
-            console.log(from);
-            console.log(to);
-            console.log(max);
             for (var i = from; i < to; i++) {
                 if (i >= max) {
                     break;
@@ -660,7 +656,7 @@ var OverView_problem = function (_React$Component7) {
         value: function componentDidMount() {
             var _this15 = this;
 
-            fetch("/problem_list?" + new URLSearchParams({ numbers: 4, from: 0 })).then(function (res) {
+            fetch("/profile_problem_list?" + new URLSearchParams({ numbers: 4, from: 0 })).then(function (res) {
                 return res.json();
             }).then(function (list) {
                 _this15.setState({
@@ -746,19 +742,18 @@ var OverView_problem = function (_React$Component7) {
     return OverView_problem;
 }(React.Component);
 
-var Tool_bar = function (_React$Component8) {
-    _inherits(Tool_bar, _React$Component8);
+var ToolBar = function (_React$Component8) {
+    _inherits(ToolBar, _React$Component8);
 
-    function Tool_bar(prop) {
-        _classCallCheck(this, Tool_bar);
+    function ToolBar(prop) {
+        _classCallCheck(this, ToolBar);
 
-        return _possibleConstructorReturn(this, (Tool_bar.__proto__ || Object.getPrototypeOf(Tool_bar)).call(this, prop));
+        return _possibleConstructorReturn(this, (ToolBar.__proto__ || Object.getPrototypeOf(ToolBar)).call(this, prop));
     }
 
-    _createClass(Tool_bar, [{
+    _createClass(ToolBar, [{
         key: "logout",
         value: function logout() {
-
             fetch("/logout").then(function (res) {
                 return res.json();
             }).then(function (resp) {
@@ -772,10 +767,10 @@ var Tool_bar = function (_React$Component8) {
         value: function render() {
             var main = React.createElement(
                 "div",
-                { className: "items-center container g-20 tool_bar" },
+                { className: "items-center flex g-20 tool_bar" },
                 React.createElement(
                     "div",
-                    { className: "flex g-20 w-80 align-items-center" },
+                    { className: "flex g-40 w-80 align-items-center" },
                     React.createElement(
                         "div",
                         { className: "h-50" },
@@ -831,7 +826,7 @@ var Tool_bar = function (_React$Component8) {
         }
     }]);
 
-    return Tool_bar;
+    return ToolBar;
 }(React.Component);
 
 var Info_selecter = function (_React$Component9) {
@@ -926,7 +921,7 @@ var Main = function (_React$Component10) {
         value: function componentDidMount() {
             var _this21 = this;
 
-            fetch("/problem_list_setting").then(function (res) {
+            fetch("/profile_problem_setting").then(function (res) {
                 return res.json();
             }).then(function (data) {
                 _this21.setState({
@@ -945,7 +940,7 @@ var Main = function (_React$Component10) {
                     } })];
                 return html;
             } else if (this.state.showing == "Problem") {
-                var _html = React.createElement(Problem_List, null);
+                var _html = React.createElement(Problem_List, { num_of_problem: this.state.problem_number });
                 return _html;
             }
         }
@@ -966,7 +961,7 @@ var Main = function (_React$Component10) {
                 "Problem": "info-second"
             };
 
-            var main = [React.createElement(Tool_bar, null)];
+            var main = [React.createElement(ToolBar, null)];
             var page = React.createElement(
                 "div",
                 { className: "p-40 main-page" },

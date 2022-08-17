@@ -28,6 +28,27 @@ body{
     overflow: hidden;
 }
 
+.flex{
+    display: flex;
+}
+
+.flex-col{
+    flex-direction: column;
+}
+
+.flex-wrap{
+    flex-wrap: wrap;
+}
+
+.over-flow-text{
+    text-align: start;
+}
+
+.subtitle-container{
+    width: 270px;
+    height: auto;
+}
+
 .logo-img{
     /* height: 50px; */
     width: 100px;
@@ -195,9 +216,6 @@ body{
     width: 350px;
 }
 
-.profile-img{
-    
-}
 
 .tool_bar{
     width: 100vw;

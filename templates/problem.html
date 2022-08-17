@@ -31,7 +31,7 @@
                     <p class="text-base lg:text-2xl inline-block align-middle leading-normal my-0 font-['Noto_Sans_TC'] border-b-2 border-black border-opacity-0 duration-500 hover:border-black hover:border-opacity-100"> 提交狀態 </p>
                 </div>
             </div>
-            <div class="px-3 flex justify-end gap-10">
+            <div id="user_title" class="px-3 flex justify-end gap-10">
                 {%- if login -%}
                 <div class="w-full h-fit my-auto text-center">
                     <p class="text-base lg:text-2xl inline-block align-middle leading-normal my-0 font-['Noto_Sans_TC'] border-b-2 border-black border-opacity-0 duration-500 hover:border-black hover:border-opacity-100 cursor-pointer"> <a href="/profile/{{username}}">{{username}}</a> </p>
@@ -58,7 +58,7 @@
                                 <th scope="col" class="sticky top-0 bg-orange-200 px-6 py-3 w-[40%]">題目標籤</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody id="table">
                             {%- for item in problem -%}
                             <tr class="hover:bg-slate-100 z-40 border">
                                 <td class="px-6 py-4 z-10"> {{item.problem_ID}} </td>
@@ -80,5 +80,9 @@
                 <p class="text-2xl text-center p-5"> NuOJ Lab </p>
             </div>
         </div>
+
+        <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+        <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+        <script src="/static/js/react_problem.js"></script> 
     </body>
 </html>

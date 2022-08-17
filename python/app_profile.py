@@ -141,7 +141,7 @@ def getUserInfo():
 	}
 	return resp 
 
-@profile_page.route("/problem_list")
+@profile_page.route("/profile_problem_list")
 @require_session
 def get_problem_list():
 	try:	
@@ -176,7 +176,7 @@ def get_problem_list():
 	return {"data":result}
 
 
-@profile_page.route("/problem_list_setting")
+@profile_page.route("/profile_problem_setting")
 @require_session
 def get_problem_list_setting():
 	try:	
