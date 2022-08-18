@@ -64,6 +64,7 @@ class App extends React.Component {
         this.state = {testcase: []}
         this.add_test_case = this.add_test_case.bind(this);
         this.save_test_case = this.save_test_case.bind(this);
+        this.upload_test_case = this.upload_test_case.bind(this);
     }
     add_test_case(){
         document.getElementById("add_testcase_platform").classList.remove("top-[100%]");
@@ -83,6 +84,73 @@ class App extends React.Component {
         document.getElementById("add_testcase_platform").classList.add("top-[100%]");
         document.getElementById("add_testcase_platform").classList.remove("top-0");
     }
+    upload_test_case(){
+        let file_input = document.createElement("input")
+        file_input.type = "file"
+        file_input.accept = "application/json"
+        file_input.onchange = e => {
+            let file = file_input.files[0]
+            Swal.fire({
+                icon: "info",
+                title: "接收到測試資料檔案",
+                text: "大小：" + file.size + " KB",
+                confirmButtonText: "上傳"
+            }).then((result) => {
+                if(result.isConfirmed) {
+                    let start = 0;
+                    let step = 1024 * 1024 * 2;
+                    let count = 0;
+                    Swal.fire({
+                        title: "讀取資料中...",
+                        didOpen: () => {
+                            Swal.showLoading()
+                            const promise = new Promise((resolve) => {
+                                let reader = new FileReader()
+                                reader.onload = () => {
+                                    resolve(reader.result)
+                                }
+                                reader.readAsArrayBuffer(file)
+                            })
+                            promise.then((data) => {
+                                for(let i = 0; i <= file.size / step; i++){
+                                    let array_buffer = new Int8Array(data.slice(start, Math.min(start + step, file.size)))
+                                    $.ajax({
+                                        url: "/file_test/upload",
+                                        type: "POST",
+                                        data: JSON.stringify({"hash": SparkMD5.ArrayBuffer.hash(array_buffer), "data": Array.from(array_buffer)}),
+                                        dataType: "json",
+                                        contentType: "application/json",
+                                        success: function(data){
+                                            count += 1;
+                                            Swal.getTitle().textContent = "上傳中（" + count + "/" + Math.ceil(file.size / step) + "）"
+                                            if(count == Math.ceil(file.size / step)){
+                                                Swal.fire({
+                                                    icon: "success",
+                                                    title: "上傳成功",
+                                                    timer: 2000,
+                                                    showConfirmButton: false
+                                                })
+                                            }
+                                        },
+                                        error: function(xhr, status, trown){
+                                            Swal.fire({
+                                                icon: "error",
+                                                title: "上傳失敗，請再次重新上傳",
+                                                timer: 2000,
+                                                showConfirmButton: false
+                                            })
+                                        }
+                                    })
+                                    start += step;
+                                }
+                            })
+                        }
+                    });
+                }
+            })
+        }
+        file_input.click();
+    }
     render(){
         let {testcase} = this.state
         return [
@@ -101,7 +169,7 @@ class App extends React.Component {
                             <button class="bg-teal-500 text-white transition-colors duration-200 hover:bg-teal-400 w-full p-3 text-lg rounded-lg" onClick={this.add_test_case}> 上傳測試資料 </button>
                         </div>
                         <div className="flex flex-col gap-5">
-                            <button class="bg-gray-500 transition-colors duration-200 w-full p-3 text-lg rounded-lg text-gray-300" disabled> 上傳測試資料壓縮檔 </button>
+                            <button class="bg-pink-500 transition-colors duration-200 w-full p-3 text-lg rounded-lg hover:bg-pink-400 text-white" onClick={this.upload_test_case}> 上傳測試資料壓縮檔 </button>
                             <button class="bg-gray-500 transition-colors duration-200 w-full p-3 text-lg rounded-lg text-gray-300" disabled> 利用測資產生器新增資料 </button>
                         </div>
                     </div>

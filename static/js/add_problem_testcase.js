@@ -134,6 +134,7 @@ var App = function (_React$Component2) {
         _this3.state = { testcase: [] };
         _this3.add_test_case = _this3.add_test_case.bind(_this3);
         _this3.save_test_case = _this3.save_test_case.bind(_this3);
+        _this3.upload_test_case = _this3.upload_test_case.bind(_this3);
         return _this3;
     }
 
@@ -159,6 +160,75 @@ var App = function (_React$Component2) {
             // Finish Save Testcase
             document.getElementById("add_testcase_platform").classList.add("top-[100%]");
             document.getElementById("add_testcase_platform").classList.remove("top-0");
+        }
+    }, {
+        key: "upload_test_case",
+        value: function upload_test_case() {
+            var file_input = document.createElement("input");
+            file_input.type = "file";
+            file_input.accept = "application/json";
+            file_input.onchange = function (e) {
+                var file = file_input.files[0];
+                Swal.fire({
+                    icon: "info",
+                    title: "接收到測試資料檔案",
+                    text: "大小：" + file.size + " KB",
+                    confirmButtonText: "上傳"
+                }).then(function (result) {
+                    if (result.isConfirmed) {
+                        var start = 0;
+                        var step = 1024 * 1024 * 2;
+                        var count = 0;
+                        Swal.fire({
+                            title: "讀取資料中...",
+                            didOpen: function didOpen() {
+                                Swal.showLoading();
+                                var promise = new Promise(function (resolve) {
+                                    var reader = new FileReader();
+                                    reader.onload = function () {
+                                        resolve(reader.result);
+                                    };
+                                    reader.readAsArrayBuffer(file);
+                                });
+                                promise.then(function (data) {
+                                    for (var i = 0; i <= file.size / step; i++) {
+                                        var array_buffer = new Int8Array(data.slice(start, Math.min(start + step, file.size)));
+                                        $.ajax({
+                                            url: "/file_test/upload",
+                                            type: "POST",
+                                            data: JSON.stringify({ "hash": SparkMD5.ArrayBuffer.hash(array_buffer), "data": Array.from(array_buffer) }),
+                                            dataType: "json",
+                                            contentType: "application/json",
+                                            success: function success(data) {
+                                                count += 1;
+                                                Swal.getTitle().textContent = "上傳中（" + count + "/" + Math.ceil(file.size / step) + "）";
+                                                if (count == Math.ceil(file.size / step)) {
+                                                    Swal.fire({
+                                                        icon: "success",
+                                                        title: "上傳成功",
+                                                        timer: 2000,
+                                                        showConfirmButton: false
+                                                    });
+                                                }
+                                            },
+                                            error: function error(xhr, status, trown) {
+                                                Swal.fire({
+                                                    icon: "error",
+                                                    title: "上傳失敗，請再次重新上傳",
+                                                    timer: 2000,
+                                                    showConfirmButton: false
+                                                });
+                                            }
+                                        });
+                                        start += step;
+                                    }
+                                });
+                            }
+                        });
+                    }
+                });
+            };
+            file_input.click();
         }
     }, {
         key: "render",
@@ -207,7 +277,7 @@ var App = function (_React$Component2) {
                             { className: "flex flex-col gap-5" },
                             React.createElement(
                                 "button",
-                                { "class": "bg-gray-500 transition-colors duration-200 w-full p-3 text-lg rounded-lg text-gray-300", disabled: true },
+                                { "class": "bg-pink-500 transition-colors duration-200 w-full p-3 text-lg rounded-lg hover:bg-pink-400 text-white", onClick: this.upload_test_case },
                                 " \u4E0A\u50B3\u6E2C\u8A66\u8CC7\u6599\u58D3\u7E2E\u6A94 "
                             ),
                             React.createElement(

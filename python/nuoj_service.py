@@ -14,6 +14,7 @@ import asana_util as asana_util
 import jwt
 import pytz
 import auth_util
+import hashlib
 from error_code import error_dict, ErrorCode 
 import database_util as database_util
 import crypto_util as crypto_util
@@ -237,6 +238,17 @@ def getStatusPage():
 def getHeartbeat():
 	return Response(json.dumps({"status": "OK"}), mimetype="application/json")
 
+@app.route("/file_test/upload", methods=["POST"])
+def file():
+	open("./testcase.json", "w").write("")
+	bytes_data = bytes(request.json["data"])
+	result = hashlib.md5(bytes_data).hexdigest()
+	if(result == request.json["hash"]):
+		open("./testcase.json", "ab").write(bytes_data)
+		return Response(json.dumps({"status": "OK"}))
+	else:
+		return Response(json.dumps({"status": "Failed", "message": "hash not equals (%s != %s)" % (result, request.json["hash"])}), status=403)
+
 if __name__ == "__main__":
 
 	settingJsonObject = json.loads(open("/etc/nuoj/setting.json", "r").read())
@@ -248,11 +260,13 @@ if __name__ == "__main__":
 	app.debug = True
 
 	if app.debug == True:
+		payload = {"handle": "nuoj_test", "email": "nuoj_test@nuoj.net", "iat": datetime.now(tz=timezone.utc), "exp": datetime.now(tz=timezone.utc) + timedelta(days=365)}
+		print(jwt.encode(payload, "secret", algorithm="HS256"))
+
 		test_account_exist = database_util.command_execute('SELECT COUNT(*) FROM `user` WHERE handle="nuoj_test"', ())[0]["COUNT(*)"]
 		password = auth_util.password_cypto("nuoj223344")
 		if test_account_exist == 0:
 			database_util.command_execute('INSERT INTO `user`(user_uid, handle, password, email, role, email_verified) VALUES("40ff8688-4142-459f-8f3a-aaecb6312d87", "nuoj_test", %s, "nuoj_test@nuoj.net", 0, 1) ', (password))
-
 
 	if(settingJsonObject["cert"]["enable"] == False):
 		app.run(host="0.0.0.0", port=80, threaded=True)
