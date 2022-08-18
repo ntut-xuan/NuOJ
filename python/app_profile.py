@@ -28,7 +28,8 @@ def require_session(func):
 		return func(*args, **kwargs)
 	return decorator
 
-def updateUserProfile(handle,put_data):
+def updateUserProfile(cookies, handle, put_data):
+
 	# Name all lowercase
 	handle = handle.lower()
 
@@ -42,21 +43,25 @@ def updateUserProfile(handle,put_data):
 	user_uid = database_data[0]["user_uid"]
 	
 	# Check user session is valid, otherwise return REQUIRE_AUTHORIZATION
+	if not jwt_valid(cookies):
+		return error_dict(ErrorCode.REQUIRE_AUTHORIZATION)
+	
+	cookies_data = jwt_decode(cookies)
+	cookies_handle = cookies_data["handle"]
 
-	print(put_data)
-	def getdata(i):
-		try:
-			return  put_data[i]
-		except:
-			return ""
+	if cookies_handle != handle:
+		return error_dict(ErrorCode.REQUIRE_AUTHORIZATION, "Cookies user handle not equals to the handle of put data.")
+
 	# Check data is all valid
 	# User Email: should exist and changeable, should check email is valid or not.
 	# User School: allow null value, should use some method to improve it, limit 70 words.
-	# User Bio: allow null value, limit 200 words.
-	data_type = getdata("data_type")
-	email_data = getdata("email")
-	school_data = getdata("school")
-	bio_data = getdata("about_me")
+	# User Bio: allow null value, limit 200 words.1
+	if ("email" not in put_data) or ("school" not in put_data) or ("about_me" not in put_data):
+		return error_dict(ErrorCode.INVALID_DATA)
+
+	email_data = put_data["email"]
+	school_data = put_data["school"]
+	bio_data = put_data["about_me"]
 
 	# Check Email is valid or not
 	email_valid = bool(re.match("^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$", email_data))
@@ -71,17 +76,13 @@ def updateUserProfile(handle,put_data):
 	if len(bio_data) > 200:
 		return error_dict(ErrorCode.INVALID_DATA, "Bio too long.")
 
-	# Create / Update User Data in storage, it should be exist when user complete register.
-	if not database_util.file_storage_tunnel_exist(user_uid + ".json", TunnelCode.USER_PROFILE):
-		return error_dict(ErrorCode.UNEXCEPT_ERROR, "User profile storage data not found.")
+	# Check need to update data or insert a new data
+	count = database_util.command_execute("SELECT COUNT(*) from `profile` where user_id=%s", (user_uid))[0]["COUNT(*)"]
 
-	data = json.loads(database_util.file_storage_tunnel_read(user_uid + ".json", TunnelCode.USER_PROFILE))
-	
-	data["email"] = email_data
-	data["school"] = school_data
-	data["bio"] = bio_data
-	print(data)
-	database_util.file_storage_tunnel_write(user_uid + ".json", json.dumps(data), TunnelCode.USER_PROFILE)
+	if count == 0:
+		database_util.command_execute("INSERT INTO `profile`(user_id, email, school, bio) VALUES(%s, %s, %s, %s)", (user_uid, email_data, school_data, bio_data))
+	else:
+		database_util.command_execute("UPDATE `profile` SET email=%s, school=%s, bio=%s WHERE user_id=%s", (email_data, school_data, bio_data, user_uid))
 
 	return {"status": "OK"}
 
@@ -90,7 +91,8 @@ def updateUserProfile(handle,put_data):
 def returnProfilePageWithName(name):
 	if request.method == "PUT":
 		put_data = request.json
-		return json.dumps(updateUserProfile(name,put_data))
+		cookies = request.cookies.get("SID")
+		return json.dumps(updateUserProfile(cookies, name, put_data))
 	return render_template("profile.html", **locals())
 
 # @profile.route("/update_user_img",method=["PUT"])

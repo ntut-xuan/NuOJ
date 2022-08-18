@@ -28,6 +28,7 @@ def password_cypto(password) -> str:
 def login(data):
 	account = data["account"]
 	password = crypto_util.Decrypt(data["password"])
+
 	password = password_cypto(password)
 
 	# Check Data Valid

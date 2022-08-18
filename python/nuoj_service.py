@@ -1,16 +1,19 @@
 #!/usr/bin/env python3
+from uuid import uuid4
 from flask import *
 from flask.wrappers import Response
 import os
 import json
 from flask_cors import CORS
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from dateutil import parser
 import time;
 import github_login_util as github_login_util
 import google_login_util as google_login_util
 import asana_util as asana_util
+import jwt
 import pytz
+import auth_util
 from error_code import error_dict, ErrorCode 
 import database_util as database_util
 import crypto_util as crypto_util
@@ -243,7 +246,13 @@ if __name__ == "__main__":
 	crypto_util.GenerateKey()
 	
 	app.debug = True
-	
+
+	if app.debug == True:
+		test_account_exist = database_util.command_execute('SELECT COUNT(*) FROM `user` WHERE handle="nuoj_test"', ())[0]["COUNT(*)"]
+		password = auth_util.password_cypto("nuoj223344")
+		if test_account_exist == 0:
+			database_util.command_execute('INSERT INTO `user`(user_uid, handle, password, email, role, email_verified) VALUES("40ff8688-4142-459f-8f3a-aaecb6312d87", "nuoj_test", %s, "nuoj_test@nuoj.net", 0, 1) ', (password))
+
 
 	if(settingJsonObject["cert"]["enable"] == False):
 		app.run(host="0.0.0.0", port=80, threaded=True)
