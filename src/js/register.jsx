@@ -84,7 +84,7 @@ class RegisterForm extends React.Component {
                 $.ajax({
                     url: "./register",
                     type: "POST",
-                    data: JSON.stringify({"handle": handle, "email": email, "password": forge.util.encode64(publick.encrypt(encodeURIComponent(password), 'RSA-OAEP', {md: forge.md.sha256.create(), mgf1: { md: forge.md.sha1.create() }}))}),
+                    data: JSON.stringify({"handle": handle, "email": email, "password": forge.util.encode64(publick.encrypt(forge.util.encodeUtf8(password), 'RSA-OAEP', {md: forge.md.sha256.create(), mgf1: { md: forge.md.sha1.create() }}))}),
                     dataType: "json",
                     contentType: "application/json",
                     success(data, status, xhr){
