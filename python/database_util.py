@@ -45,8 +45,14 @@ def file_storage_tunnel_read(filename: str, tunnel: TunnelCode) -> str:
     else:
         return ""
 
-def file_storage_tunnel_write(filename: str, data: str, tunnel: TunnelCode) -> None:
+def file_storage_tunnel_write(filename: str, data : str, tunnel: TunnelCode) -> None:
     path = "/etc/nuoj/storage/%s/%s" % (tunnel.value, filename)
     with open(path, "w") as file:
+        file.write(data)
+        file.close()
+
+def byte_storage_tunnel_write(filename: str, data) -> None:
+    path = "/etc/nuoj/storage/user_avater/%s" % (filename)
+    with open(path, "wb") as file:
         file.write(data)
         file.close()

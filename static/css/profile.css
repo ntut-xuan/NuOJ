@@ -1,4 +1,4 @@
-p,button{
+*{
     font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
     font-weight: 600;
 }
@@ -49,24 +49,9 @@ body{
     height: auto;
 }
 
-.logo-img{
-    /* height: 50px; */
-    width: 100px;
-}
 
-.main-img{
-    height: 250px;
-    width: 250px;
-    object-fit: cover;
-}
 
-.profile-picture-container{
-    height: 250px; 
-    width: 250px;
-    overflow: hidden;
-    border-radius: 100%;
-    box-shadow: rgba(0, 0, 0, 0.35) 0px 0px 5px;
-}
+
 
 .text-little_gray{
     color: rgb(117, 117, 117);
@@ -256,10 +241,6 @@ body{
     font-size: xx-large;
 }
 
-.page-info-title{
-
-}
-
 .page-info{
     width: 100px;
     text-align: center;
@@ -317,3 +298,41 @@ body{
     opacity: 0.8;
 }
 
+
+
+
+.profile-img{
+    height: 250px;
+    width: 250px;
+    object-fit: cover;
+    border-radius: 100%;
+    padding: 1px;
+}
+
+.logo-img{
+    /* height: 50px; */
+    width: 100px;
+}
+
+.img-cover{
+    height: 250px;
+    width: 250px;
+    position: absolute;
+    border-radius: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: rgb(0 0 0 / 0);
+}
+.img-cover:hover{
+    background-color: rgb(0 0 0 / 0.5);
+    color: rgba(255, 255, 255);
+}
+
+.profile-img-container{
+    height: auto; 
+    width: auto;
+    overflow: hidden;
+    border-radius: 100%;
+    box-shadow: rgba(0, 0, 0, 0.35) 0px 0px 5px;
+}

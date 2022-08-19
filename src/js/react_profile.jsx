@@ -61,37 +61,115 @@ class Introduce extends React.Component {
     constructor(pro){
         super(pro)
         this.state={
-            accountType : null,
+            profile_img : "",
             handle : null,
+            accountType : null,
             sub_data: {},
-            changing : false,
             input_tmp : {},
-            profile_img : "/static/logo-black.svg",
+            changing : false,
             upload_img : false,
+            img_type : null,
             img_data : null
         }
         this.render_subtitles = this.render_subtitles.bind(this)
         this.render_input = this.render_input.bind(this)
         this.changing_mode = this.changing_mode.bind(this)
-        this.get_user_data = this.get_user_data.bind(this)
-        this.handle_img = this.handle_img.bind(this)
+        this.get_profile = this.get_profile.bind(this)
         this.trigger_image_upload = this.trigger_image_upload.bind(this)
     }
 
     componentDidMount(){
-        this.get_user_data()
+        this.get_profile()
     }
 
-    get_user_data(){
-        fetch("/get_user").then((res)=>{
+    get_profile(){
+        fetch("/get_profile").then((res)=>{
             return res.json()
         }).then((json)=>{
+            console.log(json)
             this.setState({
                 accountType : json.main.accountType,
                 handle : json.main.handle,
-                sub_data : json.sub
+                profile_img : json.main.img,
+                sub_data : json.sub,
+                input_tmp : json.sub
             })
         })
+    }
+
+    setup_userdata(i,j){   
+        var temp =this.state.input_tmp
+        temp[i] = j
+        this.setState({
+            input_tmp : temp
+        })
+    }
+
+    changing_mode(){
+        this.setState({
+            changing : !this.state.changing
+        })
+    }
+
+    update_user_data(){
+        if(this.state.upload_img){
+            fetch("/update_user_img",
+                {
+                    method : "PUT",
+                    body : JSON.stringify({type : this.state.img_type,img : this.state.img_data}),
+                    headers: new Headers({
+                        'Content-Type': 'application/json'
+                    })
+                }
+            ).then(res => res.json())
+            .then((respons)=>{
+                if(respons.status == "OK"){
+                    
+                }
+            })
+        }
+
+        fetch("#",
+            {method : "PUT",
+            body : JSON.stringify(this.state.input_tmp),
+            headers: new Headers({
+                'Content-Type': 'application/json'
+              })}
+              ).then(res => res.json())
+        .then((respons)=>{
+            if(respons.status == "OK"){
+                this.get_profile()
+            }
+        });
+
+        this.setState({
+            upload_img : false
+        })
+
+        this.changing_mode()
+    }
+
+    trigger_image_upload(){
+        let file_input = document.createElement("input")
+        file_input.type = "file"
+        file_input.accept = "image/*"
+        file_input.onchange = e => {
+            var image = e.target.files[0];
+            var reader = new FileReader();
+            reader.readAsDataURL(image)
+
+            this.setState({img_type : image.type.slice(6)})
+
+            reader.onload = readerEvent => {
+                var content = readerEvent.target.result;
+                document.getElementById("user_avater").setAttribute("src", content)
+                this.setState({
+                    upload_img : true,
+                    img_data : content
+                })
+            }
+        }
+        file_input.click();
     }
 
     render_subtitles(){
@@ -113,73 +191,6 @@ class Introduce extends React.Component {
         return resp
     }
 
-    setup_userdata(i,j){
-        
-        var temp =this.state.input_tmp
-        temp[i] = j
-        this.setState({
-            input_tmp : temp
-        })
-    }
-
-    changing_mode(){
-        this.setState({
-            changing : !this.state.changing
-        })
-    }
-
-    update_user_data(){
-        fetch("#",
-            {method : "PUT",
-            body : JSON.stringify(this.state.input_tmp),
-            headers: new Headers({
-                'Content-Type': 'application/json'
-              })}
-              ).then(res => res.json())
-        .then((respons)=>{
-            if(respons.status == "OK"){
-                this.get_user_data()
-            }
-        });
-
-        if(this.state.upload_img){
-            
-        }
-        this.setState({
-            upload_img : false
-        })
-
-        this.changing_mode()
-    }
-
-    handle_img(file){
-        let form = new FormData();
-        form.append("product[photos][]",file[0])
-        this.setState({
-            profile_img : URL.createObjectURL(file[0])
-        })
-        this.setState({
-            upload_img : false
-        })
-        console.log(this.state.input_tmp)
-    }
-
-    trigger_image_upload(){
-        let file_input = document.createElement("input")
-        file_input.type = "file"
-        file_input.accept = "image/*"
-        file_input.onchange = e => {
-            var image = e.target.files[0];
-            var reader = new FileReader();
-            reader.readAsDataURL(image)
-
-            reader.onload = readerEvent => {
-                var content = readerEvent.target.result;
-                document.getElementById("user_avater").setAttribute("src", content)
-            }
-        }
-        file_input.click();
-    }
 
     render(){
         var main_showing;
@@ -194,6 +205,8 @@ class Introduce extends React.Component {
                     <button className="large-btu-bg w-full" onClick={()=>this.changing_mode()}>取消</button>
                 </div>
             ]
+
+            img_area = (<button className="img-cover text-size-normal" onClick={this.trigger_image_upload}>修改圖片</button>)
         }
         else{
             main_showing=[
@@ -210,19 +223,14 @@ class Introduce extends React.Component {
             ]
         }
 
-        img_area = (
-            <div className="profile-picture-container" >
-                <button className="main-img hover:bg-black hover:bg-opacity-50 z-20" onClick={this.trigger_image_upload} >
-                    <img id="user_avater" className="w-full h-full rounded-full object-scale-down" src={this.state.profile_img} alt=""/>
-                </button>
-            </div>
-        )
-
-        let pos = "container g-15 p-40 flex flex-col profile-area absolute"
+    
         let context = (
-            <div className={pos}>
+            <div className="container g-15 p-40 flex flex-col profile-area absolute">
                 <div className="m-auto">
-                    {img_area}
+                    <div className="profile-img-container" >
+                        {img_area}
+                        <img id="user_avater" className="profile-img" src={this.state.profile_img} alt=""/>
+                    </div>
                 </div>
                 {main_showing}
             </div>

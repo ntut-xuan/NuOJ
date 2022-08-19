@@ -49,11 +49,12 @@ DROP TABLE IF EXISTS `profile`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `profile` (
-  `user_id` varchar(36) NOT NULL,
+  `user_uid` varchar(36) NOT NULL,
+  `img_type` varchar(5) DEFAULT NULL,
   `email` text DEFAULT NULL,
   `school` text DEFAULT NULL,
   `bio` text DEFAULT NULL,
-  PRIMARY KEY (`user_id`)
+  PRIMARY KEY (`user_uid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -63,7 +64,7 @@ CREATE TABLE `profile` (
 
 LOCK TABLES `profile` WRITE;
 /*!40000 ALTER TABLE `profile` DISABLE KEYS */;
-INSERT INTO `profile` VALUES ('40ff8688-4142-459f-8f3a-aaecb6312d87','t109590031@ntut.org.tw','National Taipei University of Technology','哈囉哈囉');
+INSERT INTO `profile` VALUES ('40ff8688-4142-459f-8f3a-aaecb6312d87',"",'t109590031@ntut.org.tw','National Taipei University of Technology','哈囉哈囉');
 /*!40000 ALTER TABLE `profile` ENABLE KEYS */;
 UNLOCK TABLES;
 
