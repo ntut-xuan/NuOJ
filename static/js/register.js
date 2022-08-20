@@ -147,7 +147,7 @@ var RegisterForm = function (_React$Component2) {
                     $.ajax({
                         url: "./register",
                         type: "POST",
-                        data: JSON.stringify({ "handle": handle, "email": email, "password": forge.util.encode64(publick.encrypt(encodeURIComponent(password), 'RSA-OAEP', { md: forge.md.sha256.create(), mgf1: { md: forge.md.sha1.create() } })) }),
+                        data: JSON.stringify({ "handle": handle, "email": email, "password": forge.util.encode64(publick.encrypt(forge.util.encodeUtf8(password), 'RSA-OAEP', { md: forge.md.sha256.create(), mgf1: { md: forge.md.sha1.create() } })) }),
                         dataType: "json",
                         contentType: "application/json",
                         success: function success(data, status, xhr) {

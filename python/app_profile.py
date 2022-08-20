@@ -12,6 +12,7 @@ from tunnel_code import TunnelCode
 from functools import wraps
 import re
 import json
+import base64
 
 profile_page = Blueprint('profile_page', __name__)
 
@@ -56,12 +57,12 @@ def updateUserProfile(cookies, handle, put_data):
 	# User Email: should exist and changeable, should check email is valid or not.
 	# User School: allow null value, should use some method to improve it, limit 70 words.
 	# User Bio: allow null value, limit 200 words.1
-	if ("email" not in put_data) or ("school" not in put_data) or ("about_me" not in put_data):
+	if ("email" not in put_data) or ("school" not in put_data) or ("bio" not in put_data):
 		return error_dict(ErrorCode.INVALID_DATA)
 
 	email_data = put_data["email"]
 	school_data = put_data["school"]
-	bio_data = put_data["about_me"]
+	bio_data = put_data["bio"]
 
 	# Check Email is valid or not
 	email_valid = bool(re.match("^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$", email_data))
@@ -77,12 +78,12 @@ def updateUserProfile(cookies, handle, put_data):
 		return error_dict(ErrorCode.INVALID_DATA, "Bio too long.")
 
 	# Check need to update data or insert a new data
-	count = database_util.command_execute("SELECT COUNT(*) from `profile` where user_id=%s", (user_uid))[0]["COUNT(*)"]
+	count = database_util.command_execute("SELECT COUNT(*) from `profile` where user_uid=%s", (user_uid))[0]["COUNT(*)"]
 
 	if count == 0:
-		database_util.command_execute("INSERT INTO `profile`(user_id, email, school, bio) VALUES(%s, %s, %s, %s)", (user_uid, email_data, school_data, bio_data))
+		database_util.command_execute("INSERT INTO `profile`(user_uid, email, school, bio) VALUES(%s, %s, %s, %s)", (user_uid, email_data, school_data, bio_data))
 	else:
-		database_util.command_execute("UPDATE `profile` SET email=%s, school=%s, bio=%s WHERE user_id=%s", (email_data, school_data, bio_data, user_uid))
+		database_util.command_execute("UPDATE `profile` SET email=%s, school=%s, bio=%s WHERE user_uid=%s", (email_data, school_data, bio_data, user_uid))
 
 	return {"status": "OK"}
 
@@ -95,15 +96,9 @@ def returnProfilePageWithName(name):
 		return json.dumps(updateUserProfile(cookies, name, put_data))
 	return render_template("profile.html", **locals())
 
-# @profile.route("/update_user_img",method=["PUT"])
-# @require_session
-# def update_user_img():
-# 	put_data = request.json
-# 	database_util.file_storage_tunnel_write("")
-
-@profile_page.route("/get_user")
+@profile_page.route("/upload_img",methods=["PUT"])
 @require_session
-def getUserInfo():
+def update_user_img():
 	try:	
 		SID = request.cookies.get("SID")
 		handle = jwt_decode(SID)["handle"]
@@ -114,36 +109,85 @@ def getUserInfo():
 	count = database_util.command_execute("SELECT COUNT(*) FROM `user` WHERE handle=%s", (handle))[0]["COUNT(*)"]
 
 	if count == 0:
-		abort(404)
+		abort(400)
+
+	user_uid = database_util.command_execute("SELECT * FROM `user` WHERE handle=%s", (handle))[0]["user_uid"]
+
+	# 如有舊資料則刪除
+
+	old_img_type = database_util.command_execute("SELECT img_type FROM `profile` WHERE handle=%s", (user_uid))[0]["img_type"]
+	database_util.file_storage_tunnel_del(user_uid+"."+old_img_type,TunnelCode.USER_AVATER)
+
+	# 讀取新資料
+
+	put_data = request.json
+	raw_data = put_data['img']
+	file_name = user_uid+"."+put_data['type']
+
+	i=0
+	while(1):
+		if(raw_data[i]==","):
+			break
+		i+=1
+	img_data = raw_data[i+1:]
+	img_data = base64.b64decode(img_data)
+
+	# updata database 
+
+	database_util.byte_storage_tunnel_write(file_name,img_data)
+	database_util.command_execute("UPDATE `profile` SET img_type=%s WHERE user_uid=%s" , (put_data['type'] , user_uid))
+	return {"status" : "OK"}
+
+@profile_page.route("/get_profile",methods=["GET"])
+@require_session
+def getUserInfo():
+
+	# vertify user
+
+	try:	
+		SID = request.cookies.get("SID")
+		handle = jwt_decode(SID)["handle"]
+	except:
+		return "please login", 400
+
+	# Check user exist
+	count = database_util.command_execute("SELECT COUNT(*) FROM `user` WHERE handle=%s", (handle))[0]["COUNT(*)"]
+
+	if count == 0:
+		abort(400)
 
 	# Fetch user infomation
-	user_data = database_util.command_execute("SELECT role,email,user_uid FROM `user` WHERE handle=%s", (handle))[0]
-	admin = user_data["role"]
+	user_data = database_util.command_execute("SELECT * FROM `user` WHERE handle=%s", (handle))[0]
+	user_uid = user_data["user_uid"]
 	email = user_data["email"]
-	accountType = "User" if admin == 0 else "admin"
+	accountType = "User" if user_data["role"] == 0 else "admin"
+	
+	profile_data = database_util.command_execute("SELECT * FROM `profile` WHERE user_uid=%s", (user_uid))
 
-	user_pid = user_data["user_uid"]
-	user_raw_data = database_util.file_storage_tunnel_read("%s.json"%user_pid,TunnelCode.USER_PROFILE)
-	try:
-		user_data_json = json.loads(user_raw_data)
-	except:
-		abort(404)
-	school = user_data_json["school"]
+	if(len(profile_data)==0):
+		abort(400)
+	else:
+		profile_data = profile_data[0]
+
+	school = "" if profile_data["school"] == None else profile_data["school"]  
+	bio = "" if profile_data["bio"] == None else profile_data["bio"]
+	img = "/static/logo-black.svg" if profile_data["img_type"] == None else ("/storage/user_avater/"+user_uid+"."+profile_data["img_type"])
 
 	resp = {
 		"main":{
+			"img" : img,
 			"handle" : handle,
 			"accountType":accountType
 		},
 		"sub":{
 			"email" : email,	
 			"school" : school,
-			"about_me" : user_data_json["bio"]
+			"bio" : bio
 		}
 	}
 	return resp 
 
-@profile_page.route("/profile_problem_list")
+@profile_page.route("/profile_problem_list",methods=["GET"])
 @require_session
 def get_problem_list():
 	try:	
@@ -177,8 +221,7 @@ def get_problem_list():
 			i+=1
 	return {"data":result}
 
-
-@profile_page.route("/profile_problem_setting")
+@profile_page.route("/profile_problem_setting",methods=["GET"])
 @require_session
 def get_problem_list_setting():
 	try:	
@@ -196,3 +239,7 @@ def get_problem_list_setting():
 		"count":count[0]["count(*)"]
 	}
 	return response
+
+@profile_page.route("/storage/<path:path>")
+def returnStaticFile(path):
+	return send_from_directory('../storage', path)
