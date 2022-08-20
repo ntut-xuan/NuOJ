@@ -66,32 +66,13 @@ clean:
 	-sudo rm -rf /etc/systemd/system/nuoj.service
 
 db-socket:
-	# create database
-	sudo mysql -u root -h '127.0.0.1' --execute="CREATE DATABASE NuOJ"
-	# create database account to two python script
-	sudo mysql -u root -h '127.0.0.1' --execute="CREATE USER 'NuOJService'@'localhost' IDENTIFIED BY 'Nu0JS!@#$$';"
-	# grant privileges on two account
-	sudo mysql -u root -h '127.0.0.1' --execute="GRANT ALL PRIVILEGES ON *.* TO 'NuOJService'@'localhost';"
-	sudo mysql -u root -h '127.0.0.1' --execute="FLUSH PRIVILEGES;"
-	# create table
-	sudo mysql -u root -h '127.0.0.1' --database="NuOJ" --execute="CREATE TABLE \`user\`(\`user_uid\` VARCHAR(36) NOT NULL,\`handle\` VARCHAR(32),\`password\` VARCHAR(128) NOT NULL,\`email\` VARCHAR(320) NOT NULL,\`role\` INT NOT NULL,\`email_verified\` TINYINT(1) NOT NULL,PRIMARY KEY(user_uid));"
-	sudo mysql -u root -h '127.0.0.1' --database="NuOJ" --execute="CREATE TABLE \`submission\`(\`solution_id\` VARCHAR(40) NOT NULL,\`problem_id\` VARCHAR(40) NOT NULL, \`user_uid\` VARCHAR(40) NOT NULL,\`language\` VARCHAR(20) NOT NULL,\`date\` VARCHAR(40) NOT NULL, \`result\` VARCHAR(20), \`time\` VARCHAR(40), \`memory\` VARCHAR(40), \`judger_id\` VARCHAR(40), PRIMARY KEY(solution_id));"
-	sudo mysql -u root -h '127.0.0.1' --database="NuOJ" --execute="CREATE TABLE \`problem\` (\`ID\` int NOT NULL AUTO_INCREMENT, \`problem_pid\` VARCHAR(20) NOT NULL, \`problem_author\` VARCHAR(20) NOT NULL, PRIMARY KEY(ID));"
+	sudo mysql -u root -h '127.0.0.1' < database.sql
 	# create a new admin account
 	sudo mysql -u root -h '127.0.0.1' --database="NuOJ" --execute="INSERT INTO \`user\` (user_uid, handle, password, email, role, email_verified) VALUES ('7d4be98f-1792-4255-b3f9-42a32a201fbb', 'nuoj', 'f0affe539c194d46d66d96c4c7aab38d', 'NuOJ@ntut.edu.tw', 1, 1);"
 
 db-tcp:
-	# create database
-	sudo mysql -u root --execute="CREATE DATABASE NuOJ"
-	# create database account to two python script
-	sudo mysql -u root --execute="CREATE USER 'NuOJService'@'localhost' IDENTIFIED BY 'Nu0JS!@#$$';"
-	# grant privileges on two account
-	sudo mysql -u root --execute="GRANT ALL PRIVILEGES ON *.* TO 'NuOJService'@'localhost';"
-	sudo mysql -u root --execute="FLUSH PRIVILEGES;"
 	# create table
-	sudo mysql -u root --database="NuOJ" --execute="CREATE TABLE \`user\`(\`user_uid\` VARCHAR(36) NOT NULL,\`handle\` VARCHAR(32),\`password\` VARCHAR(128) NOT NULL,\`email\` VARCHAR(320) NOT NULL,\`role\` INT NOT NULL,\`email_verified\` TINYINT(1) NOT NULL,PRIMARY KEY(user_uid));"
-	sudo mysql -u root --database="NuOJ" --execute="CREATE TABLE \`submission\`(\`solution_id\` VARCHAR(40) NOT NULL,\`problem_id\` VARCHAR(40) NOT NULL, \`user_uid\` VARCHAR(40) NOT NULL,\`language\` VARCHAR(20) NOT NULL,\`date\` VARCHAR(40) NOT NULL, \`result\` VARCHAR(20), \`time\` VARCHAR(40), \`memory\` VARCHAR(40), \`judger_id\` VARCHAR(40), PRIMARY KEY(solution_id));"
-	sudo mysql -u root --database="NuOJ" --execute="CREATE TABLE \`problem\` (\`ID\` int NOT NULL AUTO_INCREMENT, \`problem_pid\` VARCHAR(20) NOT NULL, \`problem_author\` VARCHAR(20) NOT NULL, PRIMARY KEY(ID));"
+	sudo mysql -u root < database.sql
 	# create a new admin account
 	sudo mysql -u root --database="NuOJ" --execute="INSERT INTO \`user\` (user_uid, handle, password, email, role, email_verified) VALUES ('7d4be98f-1792-4255-b3f9-42a32a201fbb', 'nuoj', 'f0affe539c194d46d66d96c4c7aab38d', 'NuOJ@ntut.edu.tw', 1, 1);"
 

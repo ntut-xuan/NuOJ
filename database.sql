@@ -19,8 +19,13 @@
 -- Table structure for table `problem`
 --
 
-use NuOJ;
+DROP USER IF EXISTS 'NuOJService'@'localhost';
+CREATE USER 'NuOJService'@'localhost' IDENTIFIED BY 'Nu0JS!@#$';
 
+GRANT ALL PRIVILEGES ON *.* TO 'NuOJService'@'localhost';
+FLUSH PRIVILEGES;
+
+use NuOJ;
 DROP TABLE IF EXISTS `problem`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -58,16 +63,6 @@ CREATE TABLE `profile` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `profile`
---
-
-LOCK TABLES `profile` WRITE;
-/*!40000 ALTER TABLE `profile` DISABLE KEYS */;
-INSERT INTO `profile` VALUES ('40ff8688-4142-459f-8f3a-aaecb6312d87','t109590031@ntut.org.tw','National Taipei University of Technology','哈囉哈囉');
-/*!40000 ALTER TABLE `profile` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
 -- Table structure for table `submission`
 --
 
@@ -89,15 +84,6 @@ CREATE TABLE `submission` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `submission`
---
-
-LOCK TABLES `submission` WRITE;
-/*!40000 ALTER TABLE `submission` DISABLE KEYS */;
-/*!40000 ALTER TABLE `submission` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
 -- Table structure for table `user`
 --
 
@@ -114,15 +100,6 @@ CREATE TABLE `user` (
   PRIMARY KEY (`user_uid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `user`
---
-
-LOCK TABLES `user` WRITE;
-/*!40000 ALTER TABLE `user` DISABLE KEYS */;
-/*!40000 ALTER TABLE `user` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Dumping routines for database 'NuOJ'
