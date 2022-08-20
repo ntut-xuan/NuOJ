@@ -350,10 +350,12 @@ var Introduce = function (_React$Component4) {
                 reader.onload = function (readerEvent) {
                     var content = readerEvent.target.result;
                     // document.getElementById("user_avater").setAttribute("src", content)
+                    var temp = _this9.state.profile_data;
+                    temp.main.img = content;
                     _this9.setState({
                         upload_img: true,
                         img_data: content,
-                        profile_img: content
+                        profile_data: temp
                     });
                 };
             };

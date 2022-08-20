@@ -242,10 +242,12 @@ class Introduce extends React.Component {
             reader.onload = readerEvent => {
                 var content = readerEvent.target.result;
                 // document.getElementById("user_avater").setAttribute("src", content)
+                var temp = this.state.profile_data
+                temp.main.img = content
                 this.setState({
                     upload_img : true,
                     img_data : content,
-                    profile_img : content
+                    profile_data : temp
                 })
             }
         }
