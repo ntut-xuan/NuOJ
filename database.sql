@@ -19,6 +19,9 @@
 -- Table structure for table `problem`
 --
 
+DROP DATABASE IF EXISTS NuOJ;
+CREATE DATABASE NuOJ;
+
 DROP USER IF EXISTS 'NuOJService'@'localhost';
 CREATE USER 'NuOJService'@'localhost' IDENTIFIED BY 'Nu0JS!@#$';
 
@@ -36,15 +39,6 @@ CREATE TABLE `problem` (
   PRIMARY KEY (`ID`)
 ) ENGINE=InnoDB AUTO_INCREMENT=100000 DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `problem`
---
-
-LOCK TABLES `problem` WRITE;
-/*!40000 ALTER TABLE `problem` DISABLE KEYS */;
-/*!40000 ALTER TABLE `problem` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `profile`
