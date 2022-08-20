@@ -7,6 +7,8 @@ import os
 import re
 import base64
 import crypto_util
+import auth_util
+from flask import request
 from error_code import ErrorCode
 from uuid import uuid4
 from nuoj_service import app
@@ -36,7 +38,7 @@ class LoginUnitTest(unittest.TestCase):
         hash = hashlib.sha512(str("uriahxuan99").encode("utf-8")).hexdigest()
         database_util.command_execute("INSERT INTO `user`(user_uid, handle, password, email, role, email_verified) VALUES(%s, %s, %s, %s, %s, %s)", (str(uuid4()), "uriahxuan", password_cypto(hash), "nuoj@test.net", 0, True))
         return super().setUp()
-    
+
     def test_login_empty_handle(self):
         data = login_test("", str(uuid4()))
         self.assertEqual(data[0]["code"], ErrorCode.HANDLE_INVALID.value)
@@ -73,11 +75,23 @@ class LoginUnitTest(unittest.TestCase):
         hash = hashlib.sha512(str("uriahxuan99").encode("utf-8")).hexdigest()
         data = login_test("uriahxuan", hash)
         self.assertEqual(data[0]["status"], "OK")
+        cookie_exist = next((cookie for cookie in test_client.cookie_jar if cookie.name == "SID"), None)
+        self.assertIsNotNone(cookie_exist)
+        cookie_encode = str(cookie_exist.value).encode()
+        self.assertEqual(auth_util.jwt_valid(cookie_encode), True)
+        self.assertEqual(auth_util.jwt_decode(cookie_encode)["handle"], "uriahxuan")
+        self.assertEqual(auth_util.jwt_decode(cookie_encode)["email"], "nuoj@test.net")
     
     def test_login_regular_2(self):
         hash = hashlib.sha512(str("uriahxuan99").encode("utf-8")).hexdigest()
         data = login_test("nuoj@test.net", hash)
         self.assertEqual(data[0]["status"], "OK")
+        cookie_exist = next((cookie for cookie in test_client.cookie_jar if cookie.name == "SID"), None)
+        self.assertIsNotNone(cookie_exist)
+        cookie_encode = str(cookie_exist.value).encode()
+        self.assertEqual(auth_util.jwt_valid(cookie_encode), True)
+        self.assertEqual(auth_util.jwt_decode(cookie_encode)["handle"], "uriahxuan")
+        self.assertEqual(auth_util.jwt_decode(cookie_encode)["email"], "nuoj@test.net")
     
     def tearDown(self) -> None:
         database_util.command_execute("DELETE FROM `user` WHERE handle='uriahxuan'", ())
