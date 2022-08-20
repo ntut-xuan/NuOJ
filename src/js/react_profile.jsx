@@ -14,21 +14,19 @@ class Inputbox extends React.Component{
             title : this.props.title,
             value : this.props.value
         })
-        this.props.new(this.props.title,this.props.value)
     }
 
     onchange(event){
-        this.setState({
-            value : event.target.value
-        })
+        this.setState({value : event.target.value})
     }
 
     update(){
-        this.props.new(this.state.title,this.state.value)
+        this.props.update(this.state.title,this.state.value)
     }
+
     render(){
         var type;
-        if(this.state.title == "about_me"){
+        if(this.state.title == "bio"){
             type = <textarea cols="30" rows="5" value={this.state.value} onChange={this.onchange} onBlur={this.update}></textarea>
         }
         else{
@@ -46,13 +44,114 @@ class Inputbox extends React.Component{
     }
 } 
 
-class Subtitle extends React.Component{
+class UpdateProfileInterface extends React.Component{
+    constructor(props){
+        super(props)
+        this.state={}
+        this.render_inputs = this.render_inputs.bind(this)
+        this.setup_profile = this.setup_profile.bind(this)
+        this.upload_profile = this.upload_profile.bind(this)
+    }
+
+    componentDidMount(){
+        const datas = this.props.datas
+        this.setState({
+            email : datas.email,
+            school : datas.school,
+            bio : datas.bio
+        })
+    }
+
+    upload_profile(){
+
+        var need_to_upload = false;
+
+        var keys = Object.keys(this.state)
+        for(var i=0;i<keys.length;i++){
+            if(this.state[keys[i]] != this.props.datas[keys[i]]){
+                need_to_upload = true
+                break;
+            }
+        }
+
+        if(need_to_upload){
+            fetch("#",{
+                method : "PUT",
+                body : JSON.stringify(this.state),
+                headers: new Headers({
+                    'Content-Type': 'application/json'
+                })
+            }).then(res => res.json())
+            .then((respons)=>{
+                if(respons.status == "OK"){
+                }
+            });
+            this.props.change(1)
+            this.props.update(this.state)
+        }
+        else{
+            this.props.change(0)
+        }
+    }
+
+    setup_profile(title,content){
+        if(title=="email") this.setState({ email : content })
+        if(title=="school") this.setState({ school : content })
+        if(title=="bio") this.setState({ bio : content })
+    }
+
+    render_inputs(){
+        resp =[]
+        const sub_datas =  Object.entries(this.state)
+        sub_datas.forEach(element=>{
+            resp.push(<Inputbox title={element[0]} value={element[1]} update={(title,content)=>this.setup_profile(title,content)}></Inputbox>)  
+        })
+        return resp
+    }
+
     render(){
-        let main=(
-            <div className="over-flow-text">
-                <p className="text-size-small text-little_gray break-words">{this.props.content}</p>
+        var main=[
+            <this.render_inputs></this.render_inputs>,
+            <div className="flex w-full">
+                <button className="large-btu-bg w-full" onClick={()=>{this.upload_profile()}}>確認修改</button>
+            </div>,
+            <div className="flex w-full">
+                <button className="large-btu-bg w-full" onClick={()=>{this.props.change(0)}}>取消</button>
             </div>
-        )
+        ]
+        return main
+    }
+} 
+
+class Subtitle extends React.Component{
+    get_titles(titles){
+        const datas =  Object.values(titles)
+        resp =[]
+        datas.forEach(element=>{
+            if(element!="")
+                resp.push(
+                    <div className="over-flow-text">
+                        <p className="text-size-small text-little_gray break-words">{element}</p>
+                    </div>
+                ) 
+        })
+        return resp
+    }
+    render(){
+        var maintitles = this.props.maintitles
+        var main = [
+            <div className="w-full flex flex-col">
+                <p className="text-size-small font-mono">{maintitles.accountType}</p>
+                <p className="text-size-large font-mono ">{maintitles.handle}</p>
+            </div>,
+            <div className="flex flex-col">
+                {this.get_titles(this.props.subtitles)}
+            </div>,
+            <div className="flex">
+                <button className="large-btu-bg w-full" onClick={()=>this.props.change(0)}>修改個人資料</button>
+            </div>
+        ]
+
         return main
     }
 }
@@ -61,20 +160,27 @@ class Introduce extends React.Component {
     constructor(pro){
         super(pro)
         this.state={
-            profile_img : "",
-            handle : null,
-            accountType : null,
-            sub_data: {},
-            input_tmp : {},
-            changing : false,
+            profile_data : {
+                main:{
+                    img : "",
+                    handle : "",
+                    accountType : ""
+                },
+                sub:{
+                    email : "",	
+                    school : "",
+                    bio : ""
+                }
+            },
+            mode : false,
             upload_img : false,
             img_type : null,
             img_data : null
         }
-        this.render_subtitles = this.render_subtitles.bind(this)
-        this.render_input = this.render_input.bind(this)
-        this.changing_mode = this.changing_mode.bind(this)
+        this.changing_mode = this.change_mode.bind(this)
         this.get_profile = this.get_profile.bind(this)
+        this.upload_img = this.upload_img.bind(this)
+        this.update_profile = this.update_profile.bind(this)
         this.trigger_image_upload = this.trigger_image_upload.bind(this)
     }
 
@@ -86,67 +192,40 @@ class Introduce extends React.Component {
         fetch("/get_profile").then((res)=>{
             return res.json()
         }).then((json)=>{
+            console.log(this.state.profile_data)
             console.log(json)
             this.setState({
-                accountType : json.main.accountType,
-                handle : json.main.handle,
-                profile_img : json.main.img,
-                sub_data : json.sub,
-                input_tmp : json.sub
+                profile_data : json
             })
         })
+        
     }
-
-    setup_userdata(i,j){   
-        var temp =this.state.input_tmp
-        temp[i] = j
+    
+    update_profile(i){
+        var temp = this.state.profile_data
+        temp.sub = i
         this.setState({
-            input_tmp : temp
+            profile_data : temp
         })
     }
 
-    changing_mode(){
-        this.setState({
-            changing : !this.state.changing
-        })
-    }
-
-    update_user_data(){
+    upload_img(){
         if(this.state.upload_img){
-            fetch("/update_user_img",
-                {
-                    method : "PUT",
-                    body : JSON.stringify({type : this.state.img_type,img : this.state.img_data}),
-                    headers: new Headers({
-                        'Content-Type': 'application/json'
-                    })
-                }
-            ).then(res => res.json())
+            fetch("/update_user_img",{
+                method : "PUT",
+                body : JSON.stringify({type : this.state.img_type,img : this.state.img_data}),
+                headers: new Headers({
+                    'Content-Type': 'application/json'
+                })
+            }).then(res => res.json())
             .then((respons)=>{
                 if(respons.status == "OK"){
-                    
+
                 }
             })
         }
 
-        fetch("#",
-            {method : "PUT",
-            body : JSON.stringify(this.state.input_tmp),
-            headers: new Headers({
-                'Content-Type': 'application/json'
-              })}
-              ).then(res => res.json())
-        .then((respons)=>{
-            if(respons.status == "OK"){
-                this.get_profile()
-            }
-        });
-
-        this.setState({
-            upload_img : false
-        })
-
-        this.changing_mode()
+        this.setState({upload_img : false})
     }
 
     trigger_image_upload(){
@@ -162,74 +241,44 @@ class Introduce extends React.Component {
 
             reader.onload = readerEvent => {
                 var content = readerEvent.target.result;
-                document.getElementById("user_avater").setAttribute("src", content)
+                // document.getElementById("user_avater").setAttribute("src", content)
                 this.setState({
                     upload_img : true,
-                    img_data : content
+                    img_data : content,
+                    profile_img : content
                 })
             }
         }
         file_input.click();
     }
 
-    render_subtitles(){
-        const sub_datas =  Object.entries(this.state.sub_data)
-        resp =[]
-        sub_datas.forEach(element=>{
-            if(element[1]!="")
-                resp.push(<Subtitle key={element[0]} title={element[0]} content={element[1]} mode={this.state.changing}></Subtitle>)  
+    change_mode(i){
+        if(i==1){
+            this.upload_img()
+        }
+        this.setState({
+            changing : !this.state.changing
         })
-        return resp
     }
-
-    render_input(){
-        resp =[]
-        const sub_datas =  Object.entries(this.state.sub_data)
-        sub_datas.forEach(element=>{
-            resp.push(<Inputbox title={element[0]} value={element[1]} new={(i,j)=>this.setup_userdata(i,j)}></Inputbox>)  
-        })
-        return resp
-    }
-
 
     render(){
+        var subtitles = this.state.profile_data.sub
+        var maintitles = this.state.profile_data.main
         var main_showing;
         var img_area;
         if(this.state.changing){
-            main_showing=[
-                <this.render_input></this.render_input>,
-                <div className="flex w-full">
-                    <button className="large-btu-bg w-full" onClick={()=>{this.update_user_data()}}>確認修改</button>
-                </div>,
-                <div className="flex w-full">
-                    <button className="large-btu-bg w-full" onClick={()=>this.changing_mode()}>取消</button>
-                </div>
-            ]
-
+            main_showing=(<UpdateProfileInterface datas={subtitles} change={(i)=>this.change_mode(i)} update={(i)=>this.update_profile(i)}></UpdateProfileInterface>)
             img_area = (<button className="img-cover text-size-normal" onClick={this.trigger_image_upload}>修改圖片</button>)
         }
-        else{
-            main_showing=[
-                <div className="w-full flex flex-col">
-                    <p className="text-size-small font-mono">{this.state.accountType}</p>
-                    <p className="text-size-large font-mono ">{this.state.handle}</p>
-                </div>,
-                <div className="flex flex-col">
-                    <this.render_subtitles></this.render_subtitles>
-                </div>,
-                <div className="flex">
-                    <button className="large-btu-bg w-full" onClick={()=>this.changing_mode()}>修改個人資料</button>
-                </div>
-            ]
-        }
-
+        else
+            main_showing = (<Subtitle subtitles={subtitles} maintitles={maintitles} change={(i)=>this.change_mode(i)}></Subtitle>)
     
         let context = (
             <div className="container g-15 p-40 flex flex-col profile-area absolute">
                 <div className="m-auto">
                     <div className="profile-img-container" >
                         {img_area}
-                        <img id="user_avater" className="profile-img" src={this.state.profile_img} alt=""/>
+                        <img id="user_avater" className="profile-img" src={maintitles.img}/>
                     </div>
                 </div>
                 {main_showing}
@@ -548,7 +597,7 @@ class ToolBar extends React.Component{
         super(prop)
     }
     logout(){
-        fetch("/logout").then((res)=>{ return res.json()}).then((resp)=>{console.log(resp);if(resp.status == "OK"){ window.location.href = "/" }})
+        fetch("/logout").then((res)=>{ return res.json()}).then((resp)=>{if(resp.status == "OK"){ window.location.href = "/" }})
     }
     render(){
         let main = (

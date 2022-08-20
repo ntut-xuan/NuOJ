@@ -57,12 +57,12 @@ def updateUserProfile(cookies, handle, put_data):
 	# User Email: should exist and changeable, should check email is valid or not.
 	# User School: allow null value, should use some method to improve it, limit 70 words.
 	# User Bio: allow null value, limit 200 words.1
-	if ("email" not in put_data) or ("school" not in put_data) or ("about_me" not in put_data):
+	if ("email" not in put_data) or ("school" not in put_data) or ("bio" not in put_data):
 		return error_dict(ErrorCode.INVALID_DATA)
 
 	email_data = put_data["email"]
 	school_data = put_data["school"]
-	bio_data = put_data["about_me"]
+	bio_data = put_data["bio"]
 
 	# Check Email is valid or not
 	email_valid = bool(re.match("^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$", email_data))
@@ -96,7 +96,7 @@ def returnProfilePageWithName(name):
 		return json.dumps(updateUserProfile(cookies, name, put_data))
 	return render_template("profile.html", **locals())
 
-@profile_page.route("/update_user_img",methods=["PUT"])
+@profile_page.route("/upload_img",methods=["PUT"])
 @require_session
 def update_user_img():
 	try:	
@@ -105,12 +105,24 @@ def update_user_img():
 	except:
 		return "please login", 400
 
+	# Check user exist
+	count = database_util.command_execute("SELECT COUNT(*) FROM `user` WHERE handle=%s", (handle))[0]["COUNT(*)"]
+
+	if count == 0:
+		abort(400)
+
 	user_uid = database_util.command_execute("SELECT * FROM `user` WHERE handle=%s", (handle))[0]["user_uid"]
+
+	# 如有舊資料則刪除
+
+	old_img_type = database_util.command_execute("SELECT img_type FROM `profile` WHERE handle=%s", (user_uid))[0]["img_type"]
+	database_util.file_storage_tunnel_del(user_uid+"."+old_img_type,TunnelCode.USER_AVATER)
+
+	# 讀取新資料
 
 	put_data = request.json
 	raw_data = put_data['img']
 	file_name = user_uid+"."+put_data['type']
-	database_util.command_execute("UPDATE `profile` SET img_type=%s WHERE user_uid=%s" , (put_data['type'] , user_uid))
 
 	i=0
 	while(1):
@@ -119,7 +131,11 @@ def update_user_img():
 		i+=1
 	img_data = raw_data[i+1:]
 	img_data = base64.b64decode(img_data)
+
+	# updata database 
+
 	database_util.byte_storage_tunnel_write(file_name,img_data)
+	database_util.command_execute("UPDATE `profile` SET img_type=%s WHERE user_uid=%s" , (put_data['type'] , user_uid))
 	return {"status" : "OK"}
 
 @profile_page.route("/get_profile",methods=["GET"])
@@ -138,7 +154,7 @@ def getUserInfo():
 	count = database_util.command_execute("SELECT COUNT(*) FROM `user` WHERE handle=%s", (handle))[0]["COUNT(*)"]
 
 	if count == 0:
-		abort(404)
+		abort(400)
 
 	# Fetch user infomation
 	user_data = database_util.command_execute("SELECT * FROM `user` WHERE handle=%s", (handle))[0]
@@ -149,7 +165,7 @@ def getUserInfo():
 	profile_data = database_util.command_execute("SELECT * FROM `profile` WHERE user_uid=%s", (user_uid))
 
 	if(len(profile_data)==0):
-		abort(404)
+		abort(400)
 	else:
 		profile_data = profile_data[0]
 
@@ -166,7 +182,7 @@ def getUserInfo():
 		"sub":{
 			"email" : email,	
 			"school" : school,
-			"about_me" : bio
+			"bio" : bio
 		}
 	}
 	return resp 
