@@ -17,13 +17,13 @@ def GenerateKey():
         f.write(publicKey)
 
 def GetPrivkey():
-    key = open("/etc/nuoj/private.pem", "rb").read()
-    key = RSA.import_key(key)
+    with open("/etc/nuoj/private.pem", "rb") as key:
+        key = RSA.import_key(key.read())
     return key
 
 def GetPubkey():
-    key = open("/etc/nuoj/public.pem", "rb").read()
-    key = RSA.import_key(key)
+    with open("/etc/nuoj/public.pem", "rb") as key:   
+        key = RSA.import_key(key.read())
     return key
 
 def Decrypt(cipher):

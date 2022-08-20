@@ -7,7 +7,7 @@ import re
 import smtplib
 import threading
 import jwt
-import database_util as database_util
+import database_util
 import crypto_util as crypto_util
 from datetime import *
 from tunnel_code import TunnelCode
@@ -145,9 +145,8 @@ def register_db(data) -> dict:
 		database_util.file_storage_tunnel_write(user_uid + ".json", json.dumps({"handle": handle, "email": email, "school": "", "bio": ""}), TunnelCode.USER_PROFILE)
 
 	# Email verification
-	mail_info = json.loads(open("/etc/nuoj/setting.json", "r").read())["mail"]
-	response["mail_verification_require"] = mail_info["enable"]
-	if mail_info["enable"] == True:
+	response["mail_verification_require"] = setting_util.mail_verification_enable()
+	if setting_util.mail_verification_enable() == True:
 		# Make email with verification link:
 		verification_code = str(uuid4())
 		response["verification_code"] = verification_code

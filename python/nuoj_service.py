@@ -32,7 +32,7 @@ app.register_blueprint(problem_page)
 app.register_blueprint(profile_page)
 
 asana_util = asana_util.AsanatUil(json.loads(open("/etc/nuoj/setting.json", "r").read())["asana"]["token"])
-app.config['JSON_SORT_KEYS'] = False
+app.json.sort_keys = False
 app.config['SECRET_KEY'] = os.urandom(24)
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=31)
 app.secret_key = os.urandom(16).hex()

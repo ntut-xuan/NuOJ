@@ -41,6 +41,9 @@ def mail_verification_enable() -> bool:
     '''
     return setting["mail"]["enable"]
 
+def mail_info() -> str:
+    return setting["mail"]["info"]
+
 def database_info() -> list:
     '''
     回傳使用者設定的 database 連結序列

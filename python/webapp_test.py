@@ -173,7 +173,7 @@ class SubmitUnitTest(unittest.TestCase):
         self.assertEqual(json.loads(resp)["code"], ErrorCode.INVALID_DATA.value)
     
     def test_invalid_column(self):
-        data = json.dumps({"uriahxuan": "hehe"})
+        data = json.dumps({"rrr": "hehe"})
         resp = test_client.post("/submit", data=data, headers={"content-type": "application/json"}).data
         self.assertEqual(json.loads(resp)["code"], ErrorCode.UNEXCEPT_ERROR.value)
     

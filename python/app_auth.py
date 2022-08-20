@@ -44,7 +44,6 @@ def oauth_info():
 
 @auth.route("/login", methods=["GET", "POST"])
 def returnLoginPage():
-	settingJsonObject = json.loads(open("/etc/nuoj/setting.json", "r").read())
 
 	if request.method == "GET":
 		return render_template("login.html", **locals())
@@ -61,10 +60,6 @@ def returnLoginPage():
 
 @auth.route("/register", methods=["GET", "POST"])
 def returnRegisterPage():
-	settingJsonObject = json.loads(open("/etc/nuoj/setting.json", "r").read())
-
-	verifyStatus = setting_util.mail_verification_enable()
-
 	if request.method == "GET":
 		return render_template("register.html", **locals())
 

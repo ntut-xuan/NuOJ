@@ -73,7 +73,6 @@ def submitCode():
 		return Response(json.dumps({"status": "OK"}), mimetype="application/json")
 
 	except Exception as e:
-		print(e)
 		return Response(json.dumps(error_dict(ErrorCode.UNEXCEPT_ERROR)), mimetype="application/json")
 
 
