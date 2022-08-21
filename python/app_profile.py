@@ -99,34 +99,36 @@ def returnProfilePageWithName(name):
 @profile_page.route("/upload_img",methods=["PUT"])
 @require_session
 def update_user_img():
-	try:	
-		SID = request.cookies.get("SID")
-		handle = jwt_decode(SID)["handle"]
-	except:
-		return "please login", 400
+
+	SID = request.cookies.get("SID")
+	if SID == None or jwt_valid(SID) == False:
+		return Response(json.dumps(error_dict(ErrorCode.REQUIRE_AUTHORIZATION)), mimetype="application/json")
+
+	handle = jwt_decode(SID)["handle"]
 
 	# Check user exist
 	count = database_util.command_execute("SELECT COUNT(*) FROM `user` WHERE handle=%s", (handle))[0]["COUNT(*)"]
 
 	if count == 0:
-		abort(400)
+		return Response(json.dumps(error_dict(ErrorCode.HANDLE_NOT_FOUND)), mimetype="application/json")
 
 	user_uid = database_util.command_execute("SELECT * FROM `user` WHERE handle=%s", (handle))[0]["user_uid"]
 
 	# 如有舊資料則刪除
 
 	old_img_type = database_util.command_execute("SELECT img_type FROM `profile` WHERE user_uid=%s", (user_uid))[0]["img_type"]
-	if(old_img_type != None):
-		database_util.file_storage_tunnel_del(user_uid+"."+old_img_type,TunnelCode.USER_AVATER)
+	if (old_img_type is not None) and (database_util.file_storage_tunnel_exist(user_uid + "." + old_img_type, TunnelCode.USER_AVATER)):
+		database_util.file_storage_tunnel_del(user_uid + "." + old_img_type, TunnelCode.USER_AVATER)
+
 
 	# 讀取新資料
 	put_data = request.json
 	raw_data = put_data['img']
-	file_name = user_uid+"."+put_data['type']
+	file_name = user_uid + "." + put_data['type']
 
-	i=0
+	i = 0
 	while(1):
-		if(raw_data[i]==","):
+		if(raw_data[i] == ","):
 			break
 		i+=1
 	img_data = raw_data[i+1:]
@@ -136,7 +138,7 @@ def update_user_img():
 
 	database_util.byte_storage_tunnel_write(file_name,img_data)
 	database_util.command_execute("UPDATE `profile` SET img_type=%s WHERE user_uid=%s" , (put_data['type'] , user_uid))
-	return {"status" : "OK"}
+	return Response(json.dumps({"status": "OK"}), mimetype="application/json")
 
 @profile_page.route("/get_profile",methods=["GET"])
 @require_session
