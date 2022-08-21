@@ -200,6 +200,13 @@ class SubmitUnitTest(unittest.TestCase):
         database_util.command_execute("DELETE FROM `problem` WHERE ID=99999", ())
         return super().tearDown()
 
+'''PROFILE TEST START'''
+class SubmitUnitTest(unittest.TestCase):
+    def setUp(self) -> None:
+        # add account
+        database_util.command_execute("INSERT INTO `user`(user_uid, handle, password, email, role, email_verified) VALUES(%s, %s, %s, %s, %s, %s)", (str(uuid4()), "uriahxuan", password_cypto(crypto_util.Encrypt(str("uriahxuan99"))), "nuoj@test.net", 0, True))
+        
+
 if __name__ == "__main__":
     crypto_util.GenerateKey()
     unittest.main()

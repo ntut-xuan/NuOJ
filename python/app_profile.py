@@ -115,11 +115,11 @@ def update_user_img():
 
 	# 如有舊資料則刪除
 
-	old_img_type = database_util.command_execute("SELECT img_type FROM `profile` WHERE handle=%s", (user_uid))[0]["img_type"]
-	database_util.file_storage_tunnel_del(user_uid+"."+old_img_type,TunnelCode.USER_AVATER)
+	old_img_type = database_util.command_execute("SELECT img_type FROM `profile` WHERE user_uid=%s", (user_uid))[0]["img_type"]
+	if(old_img_type != None):
+		database_util.file_storage_tunnel_del(user_uid+"."+old_img_type,TunnelCode.USER_AVATER)
 
 	# 讀取新資料
-
 	put_data = request.json
 	raw_data = put_data['img']
 	file_name = user_uid+"."+put_data['type']
