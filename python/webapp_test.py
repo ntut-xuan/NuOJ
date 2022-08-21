@@ -1,3 +1,4 @@
+from cgi import test
 import unittest
 import json
 import random
@@ -13,6 +14,7 @@ from error_code import ErrorCode
 from uuid import uuid4
 from nuoj_service import app
 from auth_util import password_cypto
+from tunnel_code import TunnelCode
 
 test_client = app.test_client()
 
@@ -197,7 +199,70 @@ class SubmitUnitTest(unittest.TestCase):
         self.assertEqual(json.loads(resp)["status"], "OK")
     
     def tearDown(self) -> None:
+        database_util.command_execute("DELETE FROM `user` WHERE handle='uriahxuan'", ())
         database_util.command_execute("DELETE FROM `problem` WHERE ID=99999", ())
+        return super().tearDown()
+
+''' PROFILE TEST START '''
+class ProfileUnitTest(unittest.TestCase):
+    def setUp(self) -> None:
+        # add account and profile info
+        user_uid = str(uuid4())
+        database_util.command_execute("INSERT INTO `user`(user_uid, handle, password, email, role, email_verified) VALUES(%s, %s, %s, %s, %s, %s)", (user_uid, "uriahxuan", password_cypto(str("uriahxuan99")), "nuoj@test.net", 0, True))
+        database_util.command_execute("INSERT INTO `profile`(user_uid, email, school, bio) VALUES(%s, %s, %s, %s)", (user_uid, "nuoj@test.net", "", ""))
+        return super().setUp()
+    
+    def test_regular_profile_info_put(self):
+        # login account
+        data = json.dumps({"account": "uriahxuan", "password": crypto_util.Encrypt("uriahxuan99")})
+        resp = test_client.post("/login", data=data, headers={"content-type": "application/json"})
+        resp_json = json.loads(resp.data)
+        self.assertEqual(resp_json["status"], "OK")
+
+        # update info
+        data = {"email": "nuoj_test_32767@nuoj.net", "school": "nuoj test university", "bio": "unit test start"}
+        json_data = json.dumps(data)
+        resp = test_client.put("/profile/uriahxuan/", data=json_data, headers={"content-type": "application/json"})
+        resp_json = json.loads(resp.data)
+        self.assertEqual(resp_json["status"], "OK")
+
+        # check data is correct
+        user_uid = database_util.command_execute("SELECT user_uid FROM `user` WHERE handle='uriahxuan'", ())[0]["user_uid"]
+        profile_data = database_util.command_execute("SELECT * FROM `profile` where user_uid=%s", (user_uid))[0]
+        self.assertEqual(profile_data["email"], data["email"])
+        self.assertEqual(profile_data["school"], data["school"])
+        self.assertEqual(profile_data["bio"], data["bio"])
+
+    def test_regular_profile_put(self):
+        # login account
+        data = json.dumps({"account": "uriahxuan", "password": crypto_util.Encrypt("uriahxuan99")})
+        resp = test_client.post("/login", data=data, headers={"content-type": "application/json"})
+        resp_json = json.loads(resp.data)
+        self.assertEqual(resp_json["status"], "OK")
+
+        # upload image
+        with open("/etc/nuoj/static/index.jpg", "rb") as img:
+            img_data = "data:image/jpg;base64," + base64.b64encode(img.read()).decode("utf-8")
+        data = {"img": img_data, "type": "jpg"}
+        resp = test_client.put("/upload_img", data=json.dumps(data), headers={"content-type": "application/json"})
+        resp_json = json.loads(resp.data)
+        self.assertEqual(resp_json["status"], "OK")
+
+        # check image is exist
+        user_uid = database_util.command_execute("SELECT user_uid FROM `user` WHERE handle='uriahxuan'", ())[0]["user_uid"]
+        self.assertTrue(database_util.file_storage_tunnel_exist(user_uid + ".jpg", TunnelCode.USER_AVATER))
+
+        # check image is correct
+        with open("/etc/nuoj/static/index.jpg", "rb") as img:
+            original_img_b64 = base64.b64encode(img.read()).decode("utf-8")
+        saved_img = database_util.byte_storage_tunnel_read(user_uid + ".jpg", TunnelCode.USER_AVATER)
+        saved_img_b64 = base64.b64encode(saved_img).decode("utf-8")
+        self.assertEqual(original_img_b64, saved_img_b64)
+
+    def tearDown(self) -> None:
+        user_uid = database_util.command_execute("SELECT user_uid FROM `user` WHERE handle='uriahxuan'", ())[0]["user_uid"]
+        database_util.command_execute("DELETE FROM `user` WHERE handle='uriahxuan'", ())
+        database_util.file_storage_tunnel_del(user_uid + ".jpg", TunnelCode.USER_AVATER)
         return super().tearDown()
 
 if __name__ == "__main__":
