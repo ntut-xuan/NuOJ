@@ -2,7 +2,7 @@ name: Discord Webhook
 
 on:
   workflow_run:
-    workflows: [Test]
+    workflows: [Setup]
     types: [completed]
 
 jobs:
