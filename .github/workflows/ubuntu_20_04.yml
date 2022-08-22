@@ -22,7 +22,7 @@ jobs:
         make db-socket
   test:
     runs-on: ubuntu-latest
-    need: build
+    needs: build
     steps:      
     - name: Test
       run: make test-all
