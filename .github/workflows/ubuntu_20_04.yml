@@ -34,13 +34,3 @@ jobs:
       
     - name: Test
       run: make test-all
-    
-  webhook:
-    runs-on: ubuntu-latest
-    steps:
-    - name: Invoke deployment hook
-      uses: distributhor/workflow-webhook@v2
-      env:
-        webhook_url: ${{ secrets.WEBHOOK_URL }}
-        webhook_secret: ${{ secrets.WEBHOOK_SECRET }}
-        data: '"embeds": [{"title": "Test", "description": "Hello!"}]'
