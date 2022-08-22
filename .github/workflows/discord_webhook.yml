@@ -22,7 +22,6 @@ jobs:
           embed-title:  ${{ format('NuOJ {0} 建置成功', github.event.workflow.name) }}
           embed-description:  ${{ format('{0}', github.event.workflow_run.head_commit.message) }}
           embed-color: 65280
-          embed-timestamp: ${{ github.event.workflow_run.created_at }}
   on-failure:
     runs-on: ubuntu-latest
     if: ${{ github.event.workflow_run.conclusion == 'failure' }}
@@ -39,4 +38,3 @@ jobs:
           embed-title:  ${{ format('{0} 建置失敗', github.event.workflow.name) }}
           embed-description:  ${{ format('{0}', github.event.workflow_run.head_commit.message) }}
           embed-color: 16711680
-          embed-timestamp: ${{ github.event.workflow_run.created_at }}
