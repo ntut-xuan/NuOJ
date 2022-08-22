@@ -16,7 +16,9 @@ jobs:
           username: "NuOJ Github Action Bot"
           avatar-url: "https://cdn.discordapp.com/attachments/989547753606631486/1009179363025092679/33.jpg"
           webhook-url: ${{ secrets.WEBHOOK_URL }}
-          embed-title:  ${{ format('{0} 建置成功（#{1}）', github.event.name, github.event.number) }}
+          embed-title:  ${{ format('{0} 建置成功（#{1}）', 'github.event.workflow.name', 'github.event.run_number') }}
+          embed-description:  ${{ github.event.workflow_run.message  }}
+          embed-color: 65280
   on-failure:
     runs-on: ubuntu-latest
     if: ${{ github.event.workflow_run.conclusion == 'failure' }}
@@ -25,4 +27,6 @@ jobs:
         uses: tsickert/discord-webhook@v4.0.0
         with:
           webhook-url: ${{ secrets.WEBHOOK_URL }}
-          embed-title:  ${{ format('{0} 建置成功（#{1}）', github.event.name, github.event.number) }}
+          embed-title:  ${{ format('{0} 建置失敗（#{1}）', 'github.event.workflow.name', 'github.event.run_number') }}
+          embed-description:  ${{ github.event.workflow_run.message  }}
+          embed-color: 16711680
