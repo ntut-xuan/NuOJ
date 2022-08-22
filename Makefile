@@ -66,13 +66,13 @@ clean:
 	-sudo rm -rf /etc/systemd/system/nuoj.service
 
 db-socket:
-	sudo mysql -u root -h '127.0.0.1' < database.sql
+	sudo mysql -u root -h '127.0.0.1' < /etc/nuoj/database.sql
 	# create a new admin account
 	sudo mysql -u root -h '127.0.0.1' --database="NuOJ" --execute="INSERT INTO \`user\` (user_uid, handle, password, email, role, email_verified) VALUES ('7d4be98f-1792-4255-b3f9-42a32a201fbb', 'nuoj', 'f0affe539c194d46d66d96c4c7aab38d', 'NuOJ@ntut.edu.tw', 1, 1);"
 
 db-tcp:
 	# create table
-	sudo mysql -u root < database.sql
+	sudo mysql -u root < /etc/nuoj/database.sql
 	# create a new admin account
 	sudo mysql -u root --database="NuOJ" --execute="INSERT INTO \`user\` (user_uid, handle, password, email, role, email_verified) VALUES ('7d4be98f-1792-4255-b3f9-42a32a201fbb', 'nuoj', 'f0affe539c194d46d66d96c4c7aab38d', 'NuOJ@ntut.edu.tw', 1, 1);"
 
