@@ -84,14 +84,12 @@ class UpdateProfileInterface extends React.Component{
             }).then(res => res.json())
             .then((respons)=>{
                 if(respons.status == "OK"){
+                    this.props.update(this.state)
                 }
             });
-            this.props.change(1)
-            this.props.update(this.state)
         }
-        else{
-            this.props.change(0)
-        }
+        this.props.change()
+    
     }
 
     setup_profile(title,content){
@@ -116,7 +114,7 @@ class UpdateProfileInterface extends React.Component{
                 <button className="large-btu-bg w-full" onClick={()=>{this.upload_profile()}}>確認修改</button>
             </div>,
             <div className="flex w-full">
-                <button className="large-btu-bg w-full" onClick={()=>{this.props.change(0)}}>取消</button>
+                <button className="large-btu-bg w-full" onClick={()=>{this.props.change()}}>取消</button>
             </div>
         ]
         return main
@@ -148,7 +146,7 @@ class Subtitle extends React.Component{
                 {this.get_titles(this.props.subtitles)}
             </div>,
             <div className="flex">
-                <button className="large-btu-bg w-full" onClick={()=>this.props.change(0)}>修改個人資料</button>
+                <button className="large-btu-bg w-full" onClick={()=>this.props.change()}>修改個人資料</button>
             </div>
         ]
 
@@ -220,7 +218,7 @@ class Introduce extends React.Component {
             }).then(res => res.json())
             .then((respons)=>{
                 if(respons.status == "OK"){
-
+                    this.get_profile()
                 }
             })
         }
@@ -254,8 +252,8 @@ class Introduce extends React.Component {
         file_input.click();
     }
 
-    change_mode(i){
-        if(i==1){
+    change_mode(){
+        if(this.state.upload_img){
             this.upload_img()
         }
         this.setState({
@@ -269,11 +267,11 @@ class Introduce extends React.Component {
         var main_showing;
         var img_area;
         if(this.state.changing){
-            main_showing=(<UpdateProfileInterface datas={subtitles} change={(i)=>this.change_mode(i)} update={(i)=>this.update_profile(i)}></UpdateProfileInterface>)
+            main_showing=(<UpdateProfileInterface datas={subtitles} change={()=>this.change_mode()} update={(i)=>this.update_profile(i)}></UpdateProfileInterface>)
             img_area = (<button className="img-cover text-size-normal" onClick={this.trigger_image_upload}>修改圖片</button>)
         }
         else
-            main_showing = (<Subtitle subtitles={subtitles} maintitles={maintitles} change={(i)=>this.change_mode(i)}></Subtitle>)
+            main_showing = (<Subtitle subtitles={subtitles} maintitles={maintitles} change={()=>this.change_mode()}></Subtitle>)
     
         let context = (
             <div className="container g-15 p-40 flex flex-col profile-area absolute">

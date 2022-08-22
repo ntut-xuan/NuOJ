@@ -120,6 +120,7 @@ def update_user_img():
 	if (old_img_type is not None) and (database_util.file_storage_tunnel_exist(user_uid + "." + old_img_type, TunnelCode.USER_AVATER)):
 		database_util.file_storage_tunnel_del(user_uid + "." + old_img_type, TunnelCode.USER_AVATER)
 
+
 	# 讀取新資料
 	put_data = request.json
 	raw_data = put_data['img']
