@@ -8,10 +8,9 @@ on:
 
 jobs:
   build:
-  
     runs-on: ubuntu-latest
-
     steps:
+
     - name: Checkout
       uses: actions/checkout@v3
     
@@ -19,18 +18,16 @@ jobs:
       with:
         mysql-version: 'mariadb-10.6'
 
-    - name: Install
+    - name: Build
       run: |
         make install
         make sandbox-install
         make db-socket
 
-    - name: Check NuOJ status
-      run: |
-        sudo systemctl start nuoj
-        sudo systemctl start nuoj-sandbox
-        sudo systemctl status nuoj
-        sudo systemctl status nuoj-sandbox
-      
+  test:
+    runs-on: ubuntu-latest
+    need: build
+    step:      
+    
     - name: Test
       run: make test-all
