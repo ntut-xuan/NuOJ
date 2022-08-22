@@ -10,24 +10,19 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-
     - name: Checkout
-      uses: actions/checkout@v3
-    
+      uses: actions/checkout@v3  
     - uses: shogo82148/actions-setup-mysql@v1
       with:
-        mysql-version: 'mariadb-10.6'
-
+      mysql-version: 'mariadb-10.6'
     - name: Build
       run: |
         make install
         make sandbox-install
         make db-socket
-
   test:
     runs-on: ubuntu-latest
     need: build
-    step:      
-    
+    steps:      
     - name: Test
       run: make test-all
