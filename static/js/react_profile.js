@@ -317,7 +317,7 @@ var Introduce = function (_React$Component4) {
         key: "upload_img",
         value: function upload_img() {
             if (this.state.upload_img) {
-                fetch("/update_user_img", {
+                fetch("/upload_img", {
                     method: "PUT",
                     body: JSON.stringify({ type: this.state.img_type, img: this.state.img_data }),
                     headers: new Headers({
