@@ -10,9 +10,19 @@ jobs:
     runs-on: ubuntu-latest
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
     steps:
-      - run: echo 'The triggering workflow passed'
+      - name: Discord Webhook Action
+        uses: tsickert/discord-webhook@v4.0.0
+        with:
+          webhook-url: ${{ secrets.WEBHOOK_URL }}
+          embed-title: "建置成功"
+          embed-description: ${{ github.event.workflow.name }}
   on-failure:
     runs-on: ubuntu-latest
     if: ${{ github.event.workflow_run.conclusion == 'failure' }}
     steps:
-      - run: echo 'The triggering workflow failed'
+      - name: Discord Webhook Action
+        uses: tsickert/discord-webhook@v4.0.0
+        with:
+          webhook-url: ${{ secrets.WEBHOOK_URL }}
+          embed-title: "建置失敗"
+          embed-description: ${{ github.event.workflow.name }}
