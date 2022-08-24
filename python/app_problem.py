@@ -6,6 +6,8 @@ import auth_util
 import database_util
 from error_code import error_dict, ErrorCode
 import setting_util
+import hashlib
+import requests
 from auth_util import jwt_decode, jwt_valid
 from datetime import datetime
 from uuid import uuid4
@@ -75,6 +77,38 @@ def submitCode():
 	except Exception as e:
 		return Response(json.dumps(error_dict(ErrorCode.UNEXCEPT_ERROR)), mimetype="application/json")
 
+@problem_page.route("/testcase_upload", methods=["POST"])
+def problemTestcaseSubmit():
+	data = request.json
+	
+	# check data is valid
+	if ("problem_pid" not in data) or ("chunk" not in data) or ("hash" not in data):
+		return Response(json.dumps(error_dict(ErrorCode.INVALID_DATA)), mimetype="application/json")
+
+	# fetch data
+	problem_pid = data["problem_pid"]
+	testcase_data = bytes(data["chunk"])
+	testcase_hash = data["hash"]
+
+	# hash data
+	result = hashlib.md5(testcase_data).hexdigest()
+	
+	# validate data
+	if result != testcase_hash:
+		return Response(json.dumps(error_dict(ErrorCode.UPLOAD_FAILED, "Hash not match.")), mimetype="application/json", status=400)
+	
+	# validate problem_pid exist
+	count = database_util.command_execute("SELECT COUNT(*) FROM `problem` WHERE problem_pid=%s", (problem_pid))[0]["COUNT(*)"]
+	if count == 0:
+		return Response(json.dumps(error_dict(ErrorCode.INVALID_DATA, "Problem PID not exist")), mimetype="application/json", status=400)
+
+	# pass testcase to sandbox
+	resp = requests.post("http://localhost:4439/tc_upload", data=json.dumps(data), headers={"content-type": "application/json"})
+
+	if(resp.status_code != 200):
+		return Response(json.dumps(error_dict(ErrorCode.UNEXCEPT_ERROR, "sandbox return status code " + str(resp.status_code))), mimetype="application/json", status=400)
+
+	return Response(resp.text, mimetype="application/json")
 
 @problem_page.route("/problem_page_num")
 @require_session

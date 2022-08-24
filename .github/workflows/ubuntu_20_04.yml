@@ -1,4 +1,4 @@
-name: Ubuntu 20.04
+name: Setup
 
 on:
   push:
@@ -8,29 +8,18 @@ on:
 
 jobs:
   build:
-  
     runs-on: ubuntu-latest
-
     steps:
     - name: Checkout
-      uses: actions/checkout@v3
-    
+      uses: actions/checkout@v3  
     - uses: shogo82148/actions-setup-mysql@v1
       with:
         mysql-version: 'mariadb-10.6'
-
-    - name: Install
+    - name: Build
       run: |
         make install
         make sandbox-install
         make db-socket
-
-    - name: Check NuOJ status
-      run: |
-        sudo systemctl start nuoj
-        sudo systemctl start nuoj-sandbox
-        sudo systemctl status nuoj
-        sudo systemctl status nuoj-sandbox
-      
     - name: Test
       run: make test-all
+    

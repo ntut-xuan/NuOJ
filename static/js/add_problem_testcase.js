@@ -164,6 +164,8 @@ var App = function (_React$Component2) {
     }, {
         key: "upload_test_case",
         value: function upload_test_case() {
+            var problem_token = window.location.pathname.split("/")[2];
+            console.log(problem_token);
             var file_input = document.createElement("input");
             file_input.type = "file";
             file_input.accept = "application/json";
@@ -193,12 +195,14 @@ var App = function (_React$Component2) {
                                 promise.then(function (data) {
                                     for (var i = 0; i <= file.size / step; i++) {
                                         var array_buffer = new Int8Array(data.slice(start, Math.min(start + step, file.size)));
+                                        var success = true;
                                         $.ajax({
-                                            url: "/file_test/upload",
+                                            url: "/testcase_upload",
                                             type: "POST",
-                                            data: JSON.stringify({ "hash": SparkMD5.ArrayBuffer.hash(array_buffer), "data": Array.from(array_buffer) }),
+                                            data: JSON.stringify({ "problem_pid": problem_token, "hash": SparkMD5.ArrayBuffer.hash(array_buffer), "chunk": Array.from(array_buffer) }),
                                             dataType: "json",
                                             contentType: "application/json",
+                                            async: false,
                                             success: function success(data) {
                                                 count += 1;
                                                 Swal.getTitle().textContent = "上傳中（" + count + "/" + Math.ceil(file.size / step) + "）";
@@ -218,8 +222,12 @@ var App = function (_React$Component2) {
                                                     timer: 2000,
                                                     showConfirmButton: false
                                                 });
+                                                success = false;
                                             }
                                         });
+                                        if (success == false) {
+                                            break;
+                                        }
                                         start += step;
                                     }
                                 });

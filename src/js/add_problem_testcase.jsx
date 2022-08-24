@@ -85,6 +85,8 @@ class App extends React.Component {
         document.getElementById("add_testcase_platform").classList.remove("top-0");
     }
     upload_test_case(){
+        let problem_token = window.location.pathname.split("/")[2]
+        console.log(problem_token)
         let file_input = document.createElement("input")
         file_input.type = "file"
         file_input.accept = "application/json"
@@ -114,12 +116,14 @@ class App extends React.Component {
                             promise.then((data) => {
                                 for(let i = 0; i <= file.size / step; i++){
                                     let array_buffer = new Int8Array(data.slice(start, Math.min(start + step, file.size)))
+                                    let success = true;
                                     $.ajax({
-                                        url: "/file_test/upload",
+                                        url: "/testcase_upload",
                                         type: "POST",
-                                        data: JSON.stringify({"hash": SparkMD5.ArrayBuffer.hash(array_buffer), "data": Array.from(array_buffer)}),
+                                        data: JSON.stringify({"problem_pid": problem_token, "hash": SparkMD5.ArrayBuffer.hash(array_buffer), "chunk": Array.from(array_buffer)}),
                                         dataType: "json",
                                         contentType: "application/json",
+                                        async: false,
                                         success: function(data){
                                             count += 1;
                                             Swal.getTitle().textContent = "上傳中（" + count + "/" + Math.ceil(file.size / step) + "）"
@@ -139,8 +143,12 @@ class App extends React.Component {
                                                 timer: 2000,
                                                 showConfirmButton: false
                                             })
+                                            success = false;
                                         }
                                     })
+                                    if(success == false){
+                                        break;
+                                    }
                                     start += step;
                                 }
                             })

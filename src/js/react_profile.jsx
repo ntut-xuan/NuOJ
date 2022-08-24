@@ -375,7 +375,7 @@ class Problem_info extends React.Component{
         else{
             status=<p>未公開</p>
         }
-        let url ="/edit/"+this.props.problem_pid
+        let url ="/edit_problem/" + this.props.problem_pid + "/basic"
 
         var main=(
             <div className="w-50">
@@ -502,7 +502,7 @@ class Problem_List extends React.Component{
         let main=(
             <div>
                 <div className="m-b-10">
-                    <p>Problrm list</p>
+                    <p>Problem list</p>
                 </div>
                 <div className="flex flex-col">
                     <this.get_problem_list ></this.get_problem_list>
@@ -578,7 +578,7 @@ class OverView_problem extends React.Component {
         let main=(
             <div>
                 <div className="m-b-10">
-                    <p>Problrm list</p>
+                    <p>Problem list</p>
                 </div>
                 <div className="">
                     <this.getProblems></this.getProblems>
