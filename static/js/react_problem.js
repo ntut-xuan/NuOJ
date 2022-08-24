@@ -176,7 +176,7 @@ var Problem_list = function (_React$Component3) {
                         " ",
                         React.createElement(
                             "a",
-                            { href: "/problem/{{item.problem_ID}}" },
+                            { href: "/problem/" + element.id },
                             element.title
                         ),
                         " "
@@ -187,7 +187,7 @@ var Problem_list = function (_React$Component3) {
                         " ",
                         React.createElement(
                             "a",
-                            { href: "/profile/{{item.problem_author}}" },
+                            { href: "/profile/" + element.author },
                             element.author
                         ),
                         " "
