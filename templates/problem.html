@@ -32,47 +32,13 @@
                 </div>
             </div>
             <div id="user_title" class="px-3 flex justify-end gap-10">
-                {%- if login -%}
-                <div class="w-full h-fit my-auto text-center">
-                    <p class="text-base lg:text-2xl inline-block align-middle leading-normal my-0 font-['Noto_Sans_TC'] border-b-2 border-black border-opacity-0 duration-500 hover:border-black hover:border-opacity-100 cursor-pointer"> <a href="/profile/{{username}}">{{username}}</a> </p>
-                </div>
-                {% else %}
-                <div class="w-full h-fit my-auto text-center">
-                    <p class="text-base lg:text-2xl inline-block align-middle leading-normal my-0 font-['Noto_Sans_TC'] border-b-2 border-black border-opacity-0 duration-500 hover:border-black hover:border-opacity-100 cursor-pointer"> <a href="/login">登入</a> </p>
-                </div>
-                <div class="w-full h-fit my-auto text-center">
-                    <p class="text-base lg:text-2xl inline-block align-middle leading-normal my-0 font-['Noto_Sans_TC'] border-b-2 border-black border-opacity-0 duration-500 hover:border-black hover:border-opacity-100 cursor-pointer"> <a href="/register">註冊</a> </p>
-                </div>
-                {% endif %}
+                
             </div>
         </div>
         <div class="mt-10 rounded-xl w-full h-full flex justify-between gap-10 font-['Noto_Sans_TC']">
             <div class="w-[80%] h-[75vh] p-10 bg-white rounded-xl ">
-                <div class="w-full h-full bg-white rounded-xl inline-block overflow-y-auto">
-                    <table class="w-full text-lg text-black dark:text-gray-400 text-center relative table-auto whitespace-nowrap leading-normal">
-                        <thead>
-                            <tr>
-                                <th scope="col" class="sticky top-0 bg-orange-200 px-6 py-3 w-[10%]">題目 ID</th>
-                                <th scope="col" class="sticky top-0 bg-orange-200 px-6 py-3 w-[40%]">題目名稱</th>
-                                <th scope="col" class="sticky top-0 bg-orange-200 px-6 py-3 w-[10%]">題目作者</th>
-                                <th scope="col" class="sticky top-0 bg-orange-200 px-6 py-3 w-[40%]">題目標籤</th>
-                            </tr>
-                        </thead>
-                        <tbody id="table">
-                            {%- for item in problem -%}
-                            <tr class="hover:bg-slate-100 z-40 border">
-                                <td class="px-6 py-4 z-10"> {{item.problem_ID}} </td>
-                                <td class="px-6 py-4 z-10 text-blue-700"> <a href="/problem/{{item.problem_ID}}">{{item.problem_name}}</a> </td>
-                                <td class="px-6 py-4 z-10 text-blue-700"> <a href="/profile/{{item.problem_author}}">{{item.problem_author}}</a> </td>
-                                <td class="px-6 py-4 z-10 flex gap-5 justify-center text-base"> 
-                                    {%- for item in item.problem_tag -%}
-                                    <span class="p-1 bg-gray-200 rounded-lg hover:bg-orange-100 duration-300 cursor-pointer"> {{item}} </span>
-                                    {% endfor %}
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
+                <div id="table" class="w-full h-full bg-white rounded-xl inline-block overflow-y-auto flex flex-col justify-between" >
+                    
                 </div>
             </div>
             <div class="w-[20%] p-5 h-full bg-white rounded-xl">

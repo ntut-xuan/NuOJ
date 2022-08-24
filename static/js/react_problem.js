@@ -99,11 +99,104 @@ var User_info = function (_React$Component) {
 var Page_selecter = function (_React$Component2) {
     _inherits(Page_selecter, _React$Component2);
 
-    function Page_selecter() {
+    function Page_selecter(props) {
         _classCallCheck(this, Page_selecter);
 
-        return _possibleConstructorReturn(this, (Page_selecter.__proto__ || Object.getPrototypeOf(Page_selecter)).apply(this, arguments));
+        var _this3 = _possibleConstructorReturn(this, (Page_selecter.__proto__ || Object.getPrototypeOf(Page_selecter)).call(this, props));
+
+        _this3.state = {};
+        _this3.render_btu = _this3.render_btu.bind(_this3);
+        return _this3;
     }
+
+    _createClass(Page_selecter, [{
+        key: "render_btu",
+        value: function render_btu() {
+            var showing = this.props.showing;
+            var max = this.props.max;
+            var main = [];
+            if (showing >= 5) {
+                main.push(React.createElement(
+                    "button",
+                    null,
+                    "1"
+                ));
+                main.push(React.createElement(
+                    "button",
+                    null,
+                    "2"
+                ));
+                if (showing - 5 > 0) {
+                    main.push(React.createElement(
+                        "div",
+                        null,
+                        "..."
+                    ));
+                }
+            }
+
+            for (var i = -2; i < 3; i++) {
+                var index = showing + i;
+                if (index > 0 && index <= max) {
+                    main.push(React.createElement(
+                        "button",
+                        null,
+                        index
+                    ));
+                }
+            }
+
+            if (showing <= max - 3) {
+                if (showing + 4 < max) {
+                    main.push(React.createElement(
+                        "div",
+                        null,
+                        "..."
+                    ));
+                }
+                for (var i = -1; i < 1; i++) {
+                    if (max + i > showing + 2) {
+                        main.push(React.createElement(
+                            "button",
+                            null,
+                            max + i
+                        ));
+                    }
+                }
+            }
+            return main;
+        }
+    }, {
+        key: "render",
+        value: function render() {
+            var main = React.createElement(
+                "div",
+                { className: "flex justify-center gap-10" },
+                React.createElement(
+                    "button",
+                    null,
+                    "<<"
+                ),
+                React.createElement(
+                    "button",
+                    null,
+                    "<"
+                ),
+                React.createElement(this.render_btu, null),
+                React.createElement(
+                    "button",
+                    null,
+                    ">"
+                ),
+                React.createElement(
+                    "button",
+                    null,
+                    ">>"
+                )
+            );
+            return main;
+        }
+    }]);
 
     return Page_selecter;
 }(React.Component);
@@ -119,8 +212,10 @@ var Problem_list = function (_React$Component3) {
         _this4.state = {
             problems: [],
             total_problem_num: 0,
-            page_now: 1
+            page_now: 1,
+            max: 1
         };
+        _this4.render_col = _this4.render_col.bind(_this4);
         return _this4;
     }
 
@@ -136,9 +231,14 @@ var Problem_list = function (_React$Component3) {
 
             fetch("/all_problem_list?" + new URLSearchParams({ numbers: i, from: j })).then(function (res) {
                 return res.json();
-            }).then(function (list) {
+            }).then(function (json) {
+
+                var index = Math.ceil(json.data.length / 9);
+                if (index == 0) index = 1;
+
                 _this5.setState({
-                    problems: _this5.state.problems.concat(list.data)
+                    problems: _this5.state.problems.concat(json.data),
+                    max: index
                 });
             });
         }
@@ -156,8 +256,8 @@ var Problem_list = function (_React$Component3) {
             });
         }
     }, {
-        key: "render",
-        value: function render() {
+        key: "render_col",
+        value: function render_col() {
             var main = [];
             this.state.problems.forEach(function (element) {
                 var col = React.createElement(
@@ -194,8 +294,91 @@ var Problem_list = function (_React$Component3) {
                     ),
                     React.createElement("td", { className: "px-6 py-4 z-10 flex gap-5 justify-center text-base" })
                 );
-                main.push(col);
+                // main.push(col)
             });
+            var problems = this.state.problems;
+            for (var i = 0; i < 9; i++) {
+                if (i >= problems.length - 1) {
+                    break;
+                }
+                var col = React.createElement(
+                    "tr",
+                    { className: "hover:bg-slate-100 z-40 border" },
+                    React.createElement(
+                        "td",
+                        { className: "px-6 py-4 z-10" },
+                        " ",
+                        problems[i].id,
+                        " "
+                    ),
+                    React.createElement(
+                        "td",
+                        { className: "px-6 py-4 z-10 text-blue-700" },
+                        " ",
+                        React.createElement(
+                            "a",
+                            { href: "/profile/" + problems[i].id },
+                            problems[i].title
+                        ),
+                        " "
+                    ),
+                    React.createElement(
+                        "td",
+                        { className: "px-6 py-4 z-10 text-blue-700" },
+                        " ",
+                        React.createElement(
+                            "a",
+                            { href: "/profile/" + problems[i].author },
+                            problems[i].author
+                        ),
+                        " "
+                    ),
+                    React.createElement("td", { className: "px-6 py-4 z-10 flex gap-5 justify-center text-base" })
+                );
+                main.push(col);
+            }
+            return main;
+        }
+    }, {
+        key: "render",
+        value: function render() {
+            var main = [React.createElement(
+                "table",
+                { className: "w-full text-lg text-black dark:text-gray-400 text-center relative table-auto whitespace-nowrap leading-normal" },
+                React.createElement(
+                    "thead",
+                    null,
+                    React.createElement(
+                        "tr",
+                        null,
+                        React.createElement(
+                            "th",
+                            { scope: "col", className: "sticky top-0 bg-orange-200 px-6 py-3 w-[10%]" },
+                            "\u984C\u76EE ID"
+                        ),
+                        React.createElement(
+                            "th",
+                            { scope: "col", className: "sticky top-0 bg-orange-200 px-6 py-3 w-[40%]" },
+                            "\u984C\u76EE\u540D\u7A31"
+                        ),
+                        React.createElement(
+                            "th",
+                            { scope: "col", className: "sticky top-0 bg-orange-200 px-6 py-3 w-[10%]" },
+                            "\u984C\u76EE\u4F5C\u8005"
+                        ),
+                        React.createElement(
+                            "th",
+                            { scope: "col", className: "sticky top-0 bg-orange-200 px-6 py-3 w-[40%]" },
+                            "\u984C\u76EE\u6A19\u7C64"
+                        )
+                    )
+                ),
+                React.createElement(
+                    "tbody",
+                    null,
+                    React.createElement(this.render_col, null)
+                )
+            ), React.createElement(Page_selecter, { showing: this.state.page_now, max: this.state.max })];
             return main;
         }
     }]);

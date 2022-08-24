@@ -106,7 +106,6 @@ def getAllProblemList():
 	offset = int(args["from"])
 
 	problems = database_util.command_execute("select * from problem limit %s offset %s;",(number_of_problem,offset))
-	print("RRRRRRRRR",problems)
 	result =[]
 	i=0
 	for problem in problems:
