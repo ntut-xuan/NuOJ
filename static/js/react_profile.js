@@ -558,7 +558,7 @@ var Problem_info = function (_React$Component6) {
                     "\u672A\u516C\u958B"
                 );
             }
-            var url = "/edit/" + this.props.problem_pid;
+            var url = "/edit_problem/" + this.props.problem_pid + "/basic";
 
             var main = React.createElement(
                 "div",
@@ -714,7 +714,7 @@ var Problem_List = function (_React$Component7) {
                     React.createElement(
                         "p",
                         null,
-                        "Problrm list"
+                        "Problem list"
                     )
                 ),
                 React.createElement(
