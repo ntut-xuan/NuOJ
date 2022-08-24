@@ -136,7 +136,7 @@ def update_user_img():
 
 	# updata database 
 
-	database_util.byte_storage_tunnel_write(file_name,img_data)
+	database_util.byte_storage_tunnel_write(file_name, img_data, TunnelCode.USER_AVATER)
 	database_util.command_execute("UPDATE `profile` SET img_type=%s WHERE user_uid=%s" , (put_data['type'] , user_uid))
 	return Response(json.dumps({"status": "OK"}), mimetype="application/json")
 

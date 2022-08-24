@@ -578,7 +578,7 @@ class OverView_problem extends React.Component {
         let main=(
             <div>
                 <div className="m-b-10">
-                    <p>Problrm list</p>
+                    <p>Problem list</p>
                 </div>
                 <div className="">
                     <this.getProblems></this.getProblems>
