@@ -4,6 +4,8 @@ import auth_util
 import jwt
 import database_util
 import setting_util
+import github_login_util
+import google_login_util
 from auth_util import jwt_decode, jwt_valid, payload_generator
 from datetime import timedelta, datetime, timezone
 from flask import *
@@ -143,3 +145,44 @@ def handle_setup():
 		return redirect("/")
 
 	return render_template("handle_setup.html", **locals())
+
+@auth.route("/github_login", methods=["GET", "POST"])
+def processGithubLogin():
+	
+	settingJsonObject = json.loads(open("/etc/nuoj/setting.json", "r").read())
+	data = github_login_util.githubLogin(request.args.get("code"), settingJsonObject)
+
+	if(data["status"] == "OK"):
+		if "handle" not in data or data["handle"] == None:
+			resp = redirect("/handle-setup")
+			sessionID = os.urandom(16).hex()
+			resp.set_cookie("HS", value = sessionID, expires=time.time()+24*60*60)
+			session[sessionID] = {"email": data["email"]}
+		else:
+			resp = redirect("/")
+			jwt_cookie = auth_util.payload_generator(data["handle"], data["email"])
+			resp.set_cookie("SID", value = jwt_cookie, expires=time.time()+24*60*60)
+		return resp
+	else:
+		return Response(json.dumps(data), mimetype="application/json")
+
+@auth.route("/google_login", methods=["GET", "POST"])
+def processGoogleLogin():
+
+	settingJsonObject = json.loads(open("/etc/nuoj/setting.json", "r").read())
+	data = google_login_util.googleLogin(request.args, settingJsonObject)
+	resp = None
+
+	if(data["status"] == "OK"):
+		if "handle" not in data or data["handle"] == None:
+			resp = redirect("/handle-setup")
+			sessionID = os.urandom(16).hex()
+			resp.set_cookie("HS", value = sessionID, expires=time.time()+24*60*60)
+			session[sessionID] = {"email": data["email"]}
+		else:
+			resp = redirect("/")
+			jwt_cookie = auth_util.payload_generator(data["handle"], data["email"])
+			resp.set_cookie("SID", value = jwt_cookie, expires=time.time()+24*60*60)
+		return resp
+	else:
+		return Response(json.dumps(data), mimetype="application/json")

@@ -17,7 +17,7 @@ import requests
 import database_util
 from tunnel_code import TunnelCode
 
-def githubLogin(conn, code, settingJsonObject):
+def githubLogin(code, settingJsonObject):
 
     client_id = settingJsonObject["oauth"]["github"]["client_id"]
     client_secret = settingJsonObject["oauth"]["github"]["secret"]

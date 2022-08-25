@@ -7,7 +7,7 @@ import database_util
 from uuid import uuid4
 from tunnel_code import TunnelCode
 
-def googleLogin(conn, args, settingJsonObject):
+def googleLogin(args, settingJsonObject):
     
     if(args.get("error")):
         data = {"status": "error", "message": args.get("error")}

@@ -117,49 +117,7 @@ def logout():
 	resp = Response(json.dumps({"status": "OK"}))
 	resp.set_cookie("SID", value = "", expires=0)
 	return resp
-	
-@app.route("/github_login", methods=["GET", "POST"])
-def processGithubLogin():
-	
-	settingJsonObject = json.loads(open("/etc/nuoj/setting.json", "r").read())
-	data = github_login_util.githubLogin(conn, request.args.get("code"), settingJsonObject)
 
-	if(data["status"] == "OK"):
-		if "handle" not in data or data["handle"] == None:
-			resp = redirect("/handle-setup")
-			sessionID = os.urandom(16).hex()
-			resp.set_cookie("HS", value = sessionID, expires=time.time()+24*60*60)
-			session[sessionID] = {"email": data["email"]}
-		else:
-			resp = redirect("/")
-			sessionID = os.urandom(16).hex()
-			resp.set_cookie("SID", value = sessionID, expires=time.time()+24*60*60)
-			session[sessionID] = {"handle": data["handle"], "email": data["email"]}
-		return resp
-	else:
-		return Response(json.dumps(data), mimetype="application/json")
-
-@app.route("/google_login", methods=["GET", "POST"])
-def processGoogleLogin():
-
-	settingJsonObject = json.loads(open("/etc/nuoj/setting.json", "r").read())
-	data = google_login_util.googleLogin(conn, request.args, settingJsonObject)
-	resp = None
-
-	if(data["status"] == "OK"):
-		if "handle" not in data or data["handle"] == None:
-			resp = redirect("/handle-setup")
-			sessionID = os.urandom(16).hex()
-			resp.set_cookie("HS", value = sessionID, expires=time.time()+24*60*60)
-			session[sessionID] = {"email": data["email"]}
-		else:
-			resp = redirect("/")
-			sessionID = os.urandom(16).hex()
-			resp.set_cookie("SID", value = sessionID, expires=time.time()+24*60*60)
-			session[sessionID] = {"handle": data["handle"], "email": data["email"]}
-		return resp
-	else:
-		return Response(json.dumps(data), mimetype="application/json")
 
 @app.route("/dev_progress", methods=["GET"])
 def progressPage():
@@ -237,17 +195,6 @@ def getStatusPage():
 @app.route("/heartbeat", methods=["GET"])
 def getHeartbeat():
 	return Response(json.dumps({"status": "OK"}), mimetype="application/json")
-
-@app.route("/file_test/upload", methods=["POST"])
-def file():
-	open("./testcase.json", "w").write("")
-	bytes_data = bytes(request.json["data"])
-	result = hashlib.md5(bytes_data).hexdigest()
-	if(result == request.json["hash"]):
-		open("./testcase.json", "ab").write(bytes_data)
-		return Response(json.dumps({"status": "OK"}))
-	else:
-		return Response(json.dumps({"status": "Failed", "message": "hash not equals (%s != %s)" % (result, request.json["hash"])}), status=403)
 
 if __name__ == "__main__":
 
