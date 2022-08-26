@@ -3,8 +3,11 @@ from flask import *
 from tunnel_code import TunnelCode
 from auth_util import jwt_decode, jwt_valid
 import database_util as database_util
+from uuid import uuid4
 from functools import wraps
+from datetime import datetime
 import os
+import requests
 
 problem = Blueprint("problem", __name__)
 
@@ -102,3 +105,31 @@ def return_solution_page(PID):
 @session_name_auth
 def return_testcase_page(PID):
 	return render_template("add_problem_testcase.html", **locals())
+
+@problem.route("/edit_problem/<PID>/solution_pre_compile", methods=["GET", "POST"])
+@require_session_or_redirect_index
+@session_name_auth
+def pre_compile(PID):
+	# fetch data
+	json_post_data = request.json
+	jwt_data = jwt_decode(request.cookies.get("SID"))
+	code_list = []
+	# collect code to list
+	for data in json_post_data["data"]:
+		code_list.append(data["code"])
+	# register into database 
+	for code in code_list:
+		submission_uuid = str(uuid4())
+		problem_id = json_post_data["problem_pid"]
+		user_uid = jwt_data["handle"]
+		language = "C++"
+		date = datetime.now().timestamp()
+		submission_type = "PC"
+		# Register into SQL
+		database_util.command_execute("INSERT `submission`(solution_id, problem_id, user_uid, language, date, type) VALUES(%s, %s, %s, %s, %s, %s)", (submission_uuid, problem_id, user_uid, language, date, submission_type))
+		# Storage code to Storage
+		database_util.file_storage_tunnel_write(submission_uuid + ".cpp", code, TunnelCode.SUBMISSION)
+		# Doing POST to sandbox
+		resp = requests.post("http://localhost:4439/judge", data=json.dumps({"code": code, "execution": "C", "option": {"threading": True, "time": 4, "wall_time": 4}}), headers={"content-type": "application/json"})
+		print(resp.text)
+	return Response({"status": "OK"}, mimetype="application/json")

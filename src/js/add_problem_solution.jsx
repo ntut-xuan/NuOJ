@@ -1,3 +1,17 @@
+function StatusRender(props){
+    console.log(props.value)
+    switch(props.value){
+        case "AC":
+            return <p className="border-2 p-3 w-full text-center text-xl font-mono text-bold text-green-600 border-green-600 rotate-45 translate-y-[150%]"> Accepted </p>
+        case "WA":
+            return <p className="border-2 p-3 w-full text-center text-xl font-mono text-bold text-red-600 border-red-600 rotate-45 translate-y-[150%]"> Wrong Answer </p>
+        case "TLE":
+            return <p className="border-2 p-3 w-full text-center text-xl font-mono text-bold text-red-600 border-red-600 rotate-45 translate-y-[150%]"> Time Limit Exceeded </p>
+        case "MLE":
+            return <p className="border-2 p-3 w-full text-center text-xl font-mono text-bold text-red-600 border-red-600 rotate-45 translate-y-[150%]"> Memory Limit Exceeded </p>
+    }
+}
+
 class SolutionArea extends React.Component {
     constructor(props){
         super(props)
@@ -30,9 +44,18 @@ class SolutionArea extends React.Component {
                 let component = (
                     <div id="card" class="p-5 border-2 rounded-lg">
                         <p id={"card_" + (i+1)} value={(i+1)} class="text-center py-5 cursor-pointer hover:bg-gray-200" onClick={() => {this.expend(i+1)}}> 解答 {(i+1)} </p>
-                        <div id={"solution_area_" + (i+1)} class="h-0 overflow-hidden transition-all duration-500">
-                            <textarea id={"code_area_" + (i+1)} class="resize-none w-full h-10" readonly>{solution_data[i]}</textarea>
-                            <button class="bg-red-500 text-white transition-colors duration-200 hover:bg-red-400 w-full p-3 text-lg rounded-lg mt-5" onClick={() => {delete_data(i)}}> 刪除 </button>
+                        <div id={"solution_area_" + (i+1)} class="h-0 overflow-hidden transition-all duration-500 flex flex-row gap-5">
+                            <div className="w-[80%]">
+                                <textarea id={"code_area_" + (i+1)} class="resize-none w-full h-10" defaultValue={solution_data[i]["code"]} readonly></textarea>
+                            </div>
+                            <div className="w-[20%] flex flex-col gap-5">
+                                <div className="flex flex-col justify-start h-full">
+                                    <StatusRender value={solution_data[i]["status"]} />
+                                </div>
+                                <div className="flex flex-col justify-end h-full">
+                                    <button class="bg-red-500 text-white transition-colors duration-200 hover:bg-red-400 w-full p-3 text-lg rounded-lg" onClick={() => {delete_data(i)}}> 刪除 </button>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 )
@@ -55,6 +78,7 @@ class App extends React.Component {
         this.submit = this.submit.bind(this)
         this.add_problem = this.add_problem.bind(this)
         this.delete_data = this.delete_data.bind(this)
+        this.compile_test = this.compile_test.bind(this)
     }
     cancel(){
         $("#dark").removeClass("h-screen")
@@ -65,9 +89,25 @@ class App extends React.Component {
     submit(){
         let {codearea_editor, solution_data} = this.state
         var code = codearea_editor.getValue();
-        solution_data.push(code)
+        var status = document.getElementById("except_result").value
+        solution_data.push({"code": code, "status": status})
         this.cancel()
+        codearea_editor.getDoc().setValue("")
         this.setState({solution_data: solution_data})
+    }
+    compile_test(){
+        let {PID, solution_data} = this.state
+        let data = {"problem_pid": PID, "data": solution_data}
+        $.ajax({
+            url: "/edit_problem/" + PID + "/solution_pre_compile",
+            data: JSON.stringify(data),
+            type: "POST",
+            dataType: "json",
+            contentType: "application/json",
+            success(data, status, xhr){
+                console.log("OK")
+            }
+        })
     }
     add_problem(){
         let {solution_data} = this.state
@@ -103,6 +143,7 @@ class App extends React.Component {
                 continue;
             }
             codearea_editor = CodeMirror.fromTextArea(document.getElementById("code_area_" + (i+1)), read_only_setting);
+            codearea_editor.setSize("100%", "100%")
         }
     }
     delete_data(index){
@@ -122,7 +163,7 @@ class App extends React.Component {
                             <SolutionArea delete_data={this.delete_data} solution_data={solution_data} />
                         </div>
                         <button class="bg-amber-500 text-white transition-colors duration-200 hover:bg-amber-400 w-full p-3 text-lg rounded-lg my-3" onClick={this.add_problem}> 新增解答 </button>
-                        <button id="compile_button" class="enabled:bg-blue-500 disabled:bg-slate-400 text-white transition-colors duration-200 enabled:hover:bg-blue-400 w-full p-3 text-lg rounded-lg my-3" disabled> 編譯測試 </button>
+                        <button id="compile_button" class="enabled:bg-blue-500 disabled:bg-slate-400 text-white transition-colors duration-200 enabled:hover:bg-blue-400 w-full p-3 text-lg rounded-lg my-3" onClick={this.compile_test}> 編譯測試 </button>
                         <button id="save_button" class="enabled:bg-green-500 disabled:bg-slate-400 text-white transition-colors duration-200 hover:bg-green-400 w-full p-3 text-lg rounded-lg my-3" disabled> 存檔 </button>
                     </div>
                 </div>
@@ -140,11 +181,11 @@ class App extends React.Component {
                             <textarea id="code_area" className="resize-none h-20"></textarea>
                         </div>
                         <div id="option" className="w-[20%] flex flex-col gap-3">
-                            <select className="w-full p-3 text-center border-2 rounded-lg">
-                                <option> 通過測試（AC） </option>
-                                <option> 無法通過測試（WA） </option>
-                                <option> 超時（TLE） </option>
-                                <option> 超過記憶體限制（MLE） </option>
+                            <select id="except_result" className="w-full p-3 text-center border-2 rounded-lg">
+                                <option value="AC"> 通過測試（AC） </option>
+                                <option value="WA"> 無法通過測試（WA） </option>
+                                <option value="TLE"> 超時（TLE） </option>
+                                <option value="MLE"> 超過記憶體限制（MLE） </option>
                             </select>
                             <button class="bg-amber-500 text-white transition-colors duration-200 hover:bg-amber-400 w-full p-3 text-lg rounded-lg" onClick={this.submit}> 存檔 </button>
                             <button class="bg-red-500 text-white transition-colors duration-200 hover:bg-red-400 w-full p-3 text-lg rounded-lg" onClick={this.cancel}> 取消 </button>

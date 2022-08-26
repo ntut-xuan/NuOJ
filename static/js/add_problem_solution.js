@@ -6,6 +6,36 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
+function StatusRender(props) {
+    console.log(props.value);
+    switch (props.value) {
+        case "AC":
+            return React.createElement(
+                "p",
+                { className: "border-2 p-3 w-full text-center text-xl font-mono text-bold text-green-600 border-green-600 rotate-45 translate-y-[150%]" },
+                " Accepted "
+            );
+        case "WA":
+            return React.createElement(
+                "p",
+                { className: "border-2 p-3 w-full text-center text-xl font-mono text-bold text-red-600 border-red-600 rotate-45 translate-y-[150%]" },
+                " Wrong Answer "
+            );
+        case "TLE":
+            return React.createElement(
+                "p",
+                { className: "border-2 p-3 w-full text-center text-xl font-mono text-bold text-red-600 border-red-600 rotate-45 translate-y-[150%]" },
+                " Time Limit Exceeded "
+            );
+        case "MLE":
+            return React.createElement(
+                "p",
+                { className: "border-2 p-3 w-full text-center text-xl font-mono text-bold text-red-600 border-red-600 rotate-45 translate-y-[150%]" },
+                " Memory Limit Exceeded "
+            );
+    }
+}
+
 var SolutionArea = function (_React$Component) {
     _inherits(SolutionArea, _React$Component);
 
@@ -70,18 +100,31 @@ var SolutionArea = function (_React$Component) {
                         ),
                         React.createElement(
                             "div",
-                            { id: "solution_area_" + (i + 1), "class": "h-0 overflow-hidden transition-all duration-500" },
+                            { id: "solution_area_" + (i + 1), "class": "h-0 overflow-hidden transition-all duration-500 flex flex-row gap-5" },
                             React.createElement(
-                                "textarea",
-                                { id: "code_area_" + (i + 1), "class": "resize-none w-full h-10", readonly: true },
-                                solution_data[i]
+                                "div",
+                                { className: "w-[80%]" },
+                                React.createElement("textarea", { id: "code_area_" + (i + 1), "class": "resize-none w-full h-10", defaultValue: solution_data[i]["code"], readonly: true })
                             ),
                             React.createElement(
-                                "button",
-                                { "class": "bg-red-500 text-white transition-colors duration-200 hover:bg-red-400 w-full p-3 text-lg rounded-lg mt-5", onClick: function onClick() {
-                                        delete_data(i);
-                                    } },
-                                " \u522A\u9664 "
+                                "div",
+                                { className: "w-[20%] flex flex-col gap-5" },
+                                React.createElement(
+                                    "div",
+                                    { className: "flex flex-col justify-start h-full" },
+                                    React.createElement(StatusRender, { value: solution_data[i]["status"] })
+                                ),
+                                React.createElement(
+                                    "div",
+                                    { className: "flex flex-col justify-end h-full" },
+                                    React.createElement(
+                                        "button",
+                                        { "class": "bg-red-500 text-white transition-colors duration-200 hover:bg-red-400 w-full p-3 text-lg rounded-lg", onClick: function onClick() {
+                                                delete_data(i);
+                                            } },
+                                        " \u522A\u9664 "
+                                    )
+                                )
                             )
                         )
                     );
@@ -117,6 +160,7 @@ var App = function (_React$Component2) {
         _this3.submit = _this3.submit.bind(_this3);
         _this3.add_problem = _this3.add_problem.bind(_this3);
         _this3.delete_data = _this3.delete_data.bind(_this3);
+        _this3.compile_test = _this3.compile_test.bind(_this3);
         return _this3;
     }
 
@@ -136,9 +180,30 @@ var App = function (_React$Component2) {
                 solution_data = _state2.solution_data;
 
             var code = codearea_editor.getValue();
-            solution_data.push(code);
+            var status = document.getElementById("except_result").value;
+            solution_data.push({ "code": code, "status": status });
             this.cancel();
+            codearea_editor.getDoc().setValue("");
             this.setState({ solution_data: solution_data });
+        }
+    }, {
+        key: "compile_test",
+        value: function compile_test() {
+            var _state3 = this.state,
+                PID = _state3.PID,
+                solution_data = _state3.solution_data;
+
+            var data = { "problem_pid": PID, "data": solution_data };
+            $.ajax({
+                url: "/edit_problem/" + PID + "/solution_pre_compile",
+                data: JSON.stringify(data),
+                type: "POST",
+                dataType: "json",
+                contentType: "application/json",
+                success: function success(data, status, xhr) {
+                    console.log("OK");
+                }
+            });
         }
     }, {
         key: "add_problem",
@@ -183,6 +248,7 @@ var App = function (_React$Component2) {
                     continue;
                 }
                 codearea_editor = CodeMirror.fromTextArea(document.getElementById("code_area_" + (i + 1)), read_only_setting);
+                codearea_editor.setSize("100%", "100%");
             }
         }
     }, {
@@ -196,9 +262,9 @@ var App = function (_React$Component2) {
     }, {
         key: "render",
         value: function render() {
-            var _state3 = this.state,
-                PID = _state3.PID,
-                solution_data = _state3.solution_data;
+            var _state4 = this.state,
+                PID = _state4.PID,
+                solution_data = _state4.solution_data;
 
             return [React.createElement(
                 "div",
@@ -227,7 +293,7 @@ var App = function (_React$Component2) {
                         ),
                         React.createElement(
                             "button",
-                            { id: "compile_button", "class": "enabled:bg-blue-500 disabled:bg-slate-400 text-white transition-colors duration-200 enabled:hover:bg-blue-400 w-full p-3 text-lg rounded-lg my-3", disabled: true },
+                            { id: "compile_button", "class": "enabled:bg-blue-500 disabled:bg-slate-400 text-white transition-colors duration-200 enabled:hover:bg-blue-400 w-full p-3 text-lg rounded-lg my-3", onClick: this.compile_test },
                             " \u7DE8\u8B6F\u6E2C\u8A66 "
                         ),
                         React.createElement(
@@ -276,25 +342,25 @@ var App = function (_React$Component2) {
                             { id: "option", className: "w-[20%] flex flex-col gap-3" },
                             React.createElement(
                                 "select",
-                                { className: "w-full p-3 text-center border-2 rounded-lg" },
+                                { id: "except_result", className: "w-full p-3 text-center border-2 rounded-lg" },
                                 React.createElement(
                                     "option",
-                                    null,
+                                    { value: "AC" },
                                     " \u901A\u904E\u6E2C\u8A66\uFF08AC\uFF09 "
                                 ),
                                 React.createElement(
                                     "option",
-                                    null,
+                                    { value: "WA" },
                                     " \u7121\u6CD5\u901A\u904E\u6E2C\u8A66\uFF08WA\uFF09 "
                                 ),
                                 React.createElement(
                                     "option",
-                                    null,
+                                    { value: "TLE" },
                                     " \u8D85\u6642\uFF08TLE\uFF09 "
                                 ),
                                 React.createElement(
                                     "option",
-                                    null,
+                                    { value: "MLE" },
                                     " \u8D85\u904E\u8A18\u61B6\u9AD4\u9650\u5236\uFF08MLE\uFF09 "
                                 )
                             ),
