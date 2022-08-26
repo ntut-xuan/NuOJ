@@ -127,14 +127,7 @@ def getProblemNum():
 
 
 @problem_page.route("/all_problem_list")
-@require_session
 def getAllProblemList():
-	try:	
-		SID = request.cookies.get("SID")
-		handle = jwt_decode(SID)["handle"]
-	except:
-		return "please login", 400
-	
 	args = request.args
 	number_of_problem = int(args["numbers"])
 	offset = int(args["from"])
