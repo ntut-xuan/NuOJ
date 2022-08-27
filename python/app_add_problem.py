@@ -129,7 +129,14 @@ def pre_compile(PID):
 		database_util.command_execute("INSERT `submission`(solution_id, problem_id, user_uid, language, date, type) VALUES(%s, %s, %s, %s, %s, %s)", (submission_uuid, problem_id, user_uid, language, date, submission_type))
 		# Storage code to Storage
 		database_util.file_storage_tunnel_write(submission_uuid + ".cpp", code, TunnelCode.SUBMISSION)
-		# Doing POST to sandbox
-		resp = requests.post("http://localhost:4439/judge", data=json.dumps({"code": code, "execution": "C", "option": {"threading": True, "time": 4, "wall_time": 4}}), headers={"content-type": "application/json"})
+		# Doing POST to sandbox]
+		webhook_url = "https://nuoj.ntut-xuan.net/result_webhook/%s/" % (submission_uuid)
+		resp = requests.post("http://localhost:4439/judge", data=json.dumps({"code": code, "execution": "C", "option": {"threading": True, "time": 4, "wall_time": 4, "webhook_url": webhook_url}}), headers={"content-type": "application/json"})
 		print(resp.text)
-	return Response({"status": "OK"}, mimetype="application/json")
+	return Response(json.dumps({"status": "OK"}), mimetype="application/json")
+
+
+@problem.route("/result_webhook/<submission_uuid>/", methods=["POST"])
+def result_webhook(submission_uuid):
+	print(submission_uuid, request.json)
+	return Response(json.dumps({"status": "OK"}), mimetype="application/json")
