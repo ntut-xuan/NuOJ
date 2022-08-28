@@ -2,6 +2,7 @@ from importlib.metadata import requires
 from flask import *
 from tunnel_code import TunnelCode
 from auth_util import jwt_decode, jwt_valid
+from error_code import error_dict, ErrorCode
 import database_util as database_util
 from uuid import uuid4
 from functools import wraps
@@ -117,26 +118,36 @@ def pre_compile(PID):
 	# collect code to list
 	for data in json_post_data["data"]:
 		code_list.append(data["code"])
-	# register into database 
+	# register every code into database 
 	for code in code_list:
 		submission_uuid = str(uuid4())
 		problem_id = json_post_data["problem_pid"]
 		user_uid = jwt_data["handle"]
 		language = "C++"
-		date = datetime.now().timestamp()
+		date = datetime.now()
 		submission_type = "PC"
 		# Register into SQL
 		database_util.command_execute("INSERT `submission`(solution_id, problem_id, user_uid, language, date, type) VALUES(%s, %s, %s, %s, %s, %s)", (submission_uuid, problem_id, user_uid, language, date, submission_type))
 		# Storage code to Storage
 		database_util.file_storage_tunnel_write(submission_uuid + ".cpp", code, TunnelCode.SUBMISSION)
-		# Doing POST to sandbox]
+		# Doing POST to sandbox
 		webhook_url = "https://nuoj.ntut-xuan.net/result_webhook/%s/" % (submission_uuid)
-		resp = requests.post("http://localhost:4439/judge", data=json.dumps({"code": code, "execution": "C", "option": {"threading": True, "time": 4, "wall_time": 4, "webhook_url": webhook_url}}), headers={"content-type": "application/json"})
-		print(resp.text)
+		requests.post("http://localhost:4439/judge", data=json.dumps({"code": code, "execution": "C", "option": {"threading": True, "time": 4, "wall_time": 4, "webhook_url": webhook_url}}), headers={"content-type": "application/json"})
 	return Response(json.dumps({"status": "OK"}), mimetype="application/json")
 
 
 @problem.route("/result_webhook/<submission_uuid>/", methods=["POST"])
 def result_webhook(submission_uuid):
-	print(submission_uuid, request.json)
+	# Check submission uuid exists
+	count = database_util.command_execute("SELECT COUNT(*) FROM `submission` WHERE solution_id=%s", (submission_uuid))[0]["COUNT(*)"]
+	if count == 0:
+		return Response(json.dumps(error_dict(ErrorCode.INVALID_DATA, "submission_uuid not exist.")), mimetype="application/json")
+	resp_data = request.json
+	if resp_data["status"] != "OK":
+		return Response(json.dumps(error_dict(ErrorCode.UNEXCEPT_ERROR)), mimetype="application/json")
+	compile_result_data = resp_data["data"]["result"]
+	compile_result = compile_result_data["compile-result"]
+	compile_time = compile_result_data["time"]
+	compile_memory = "%.2f" % (float(compile_result_data["cg-mem"]) / 1024)
+	database_util.command_execute("UPDATE submission SET result=%s, time=%s, memory=%s WHERE solution_id=%s", (compile_result, compile_time, compile_memory, submission_uuid))
 	return Response(json.dumps({"status": "OK"}), mimetype="application/json")
