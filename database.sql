@@ -25,7 +25,6 @@ GRANT ALL PRIVILEGES ON *.* TO 'NuOJService'@'localhost';
 FLUSH PRIVILEGES;
 
 use NuOJ;
-
 --
 -- Table structure for table `problem`
 --
