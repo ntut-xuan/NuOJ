@@ -128,9 +128,9 @@ def pre_compile_and_save(PID):
 		# Register into SQL
 		database_util.command_execute("INSERT `submission`(solution_id, problem_id, user_uid, language, date, type, solution_group) VALUES(%s, %s, %s, %s, %s, %s, %s)", (submission_uuid, problem_id, user_uid, language, date, submission_type, solution_group))
 		# Storage code to Storage
-		database_util.file_storage_tunnel_write(submission_uuid + ".cpp", code_data["code"], TunnelCode.SUBMISSION)
+		database_util.file_storage_tunnel_write(submission_uuid + ".cpp", code_data["code"], TunnelCode.SOLUTION)
 		# Doing POST to sandbox
-		webhook_url = "https://nuoj.ntut-xuan.net/result_webhook/%s/" % (submission_uuid)
+		webhook_url = "https://nuoj.ntut-xuan.net/compile_result_webhook/%s/" % (submission_uuid)
 		requests.post("http://localhost:4439/judge", data=json.dumps({"code": code_data["code"], "execution": "C", "option": {"threading": True, "time": 4, "wall_time": 4, "webhook_url": webhook_url}}), headers={"content-type": "application/json"})
 	return Response(json.dumps({"status": "OK"}), mimetype="application/json")
 
@@ -140,15 +140,18 @@ def fetch_solution(PID):
 	solution_group = database_util.command_execute("SELECT solution_group from `problem` WHERE problem_pid=%s", (PID))[0]["solution_group"]
 	# fetch submissions status
 	submissions = database_util.command_execute("SELECT * FROM `submission` WHERE solution_group=%s", (solution_group))
+	complie_status = "Finish"
 	solution_group_data = []
 	for submission in submissions:
 		solution_id = submission["solution_id"]
 		code = database_util.file_storage_tunnel_read(solution_id + ".cpp", TunnelCode.SUBMISSION)
 		result = database_util.command_execute("SELECT result FROM `submission` WHERE solution_id=%s", (solution_id))[0]["result"]
+		if result == "" or result == None:
+			complie_status = "Running"
 		solution_group_data.append({"code": code, "result": result, "uuid": solution_id})
-	return Response(json.dumps({"status": "OK", "data": solution_group_data}), mimetype="application/json")
+	return Response(json.dumps({"status": "OK", "compile_status": complie_status, "data": solution_group_data}), mimetype="application/json")
 
-@problem.route("/result_webhook/<submission_uuid>/", methods=["POST"])
+@problem.route("/compile_result_webhook/<submission_uuid>/", methods=["POST"])
 def result_webhook(submission_uuid):
 	# Check submission uuid exists
 	count = database_util.command_execute("SELECT COUNT(*) FROM `submission` WHERE solution_id=%s", (submission_uuid))[0]["COUNT(*)"]

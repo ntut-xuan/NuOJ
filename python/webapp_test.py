@@ -163,8 +163,8 @@ class RegisterUnitTest(unittest.TestCase):
         data = json.dumps({"uriahxuan": "=="})
         resp = test_client.post("/register", data=data, headers={"content-type": "application/json"}).data
         self.assertEqual(json.loads(resp)["code"], ErrorCode.INVALID_DATA.value)
-
-''' SUBMIT TEST START '''
+'''
+SUBMIT TEST START
 class SubmitUnitTest(unittest.TestCase):
 
     def setUp(self) -> None:
@@ -204,7 +204,6 @@ class SubmitUnitTest(unittest.TestCase):
         ID = database_util.command_execute("SELECT ID FROM `problem` WHERE problem_author='uriahxuan'", ())[0]["ID"]
         data = json.dumps({"code": "#include<bits/stdc++.h>using namespace std;int main(){int a, b;cin >> a >> b;cout << a + b << endl;}", "problem_id": ID})
         resp = test_client.post("/submit", data=data, headers={"content-type": "application/json"}).data
-        print(json.loads(resp))
         self.assertEqual(json.loads(resp)["status"], "OK")
     
     def tearDown(self) -> None:
@@ -212,6 +211,7 @@ class SubmitUnitTest(unittest.TestCase):
         database_util.command_execute("DELETE FROM `problem` WHERE problem_author='uriahxuan'", ())
         database_util.command_execute("DELETE FROM `submission` WHERE user_uid=%s", (self.uid))
         return super().tearDown()
+'''
 
 ''' PROFILE TEST START '''
 class ProfileUnitTest(unittest.TestCase):

@@ -15,6 +15,8 @@ function CompileResultRender(props){
     switch(props.value){
         case "":
             return <p className="border-2 p-3 w-full text-center text-lg font-mono text-bold text-gray-600 border-gray-600"> Compile Status: Unknown </p>
+        case "Pending":
+            return <p className="border-2 p-3 w-full text-center text-lg font-mono text-bold text-gray-600 border-gray-600"> Compile Status: Pending </p>
         case "OK":
             return <p className="border-2 p-3 w-full text-center text-lg font-mono text-bold text-green-600 border-green-600"> Compile Status: OK </p>
         case "Failed":
@@ -27,12 +29,23 @@ class SolutionArea extends React.Component {
         super(props)
         this.state = {
             solution_data: props.solution_data,
-            delete_data: props.delete_data
+            delete_data: props.delete_data,
         }
         this.expend = this.expend.bind(this)
+        this.onclick_expend = this.onclick_expend.bind(this)
     }
-    expend(ID){
-        if($("#solution_area_" + ID).hasClass("h-0")){
+    onclick_expend(event){
+        let status = 0
+        ID = event.target.getAttribute("value")
+        if(document.getElementById("solution_area_" + ID).classList.contains("h-0")){
+            status = 1
+        }else{
+            status = 0
+        }
+        this.expend(ID, status)
+    }
+    expend(ID, status){
+        if(status == 1){
             $("#solution_area_" + ID).removeClass("h-0");
             $("#solution_area_" + ID).addClass("h-[40vh]");
         }else{
@@ -53,7 +66,7 @@ class SolutionArea extends React.Component {
             for(let i = 0; i < solution_data.length; i++){
                 let component = (
                     <div id="card" class="p-5 border-2 rounded-lg">
-                        <p id={"card_" + (i+1)} value={(i+1)} class="text-center py-5 cursor-pointer hover:bg-gray-200" onClick={() => {this.expend(i+1)}}> 解答 {(i+1)} </p>
+                        <p id={"card_" + (i+1)} value={i+1} class="text-center py-5 cursor-pointer hover:bg-gray-200" onClick={this.onclick_expend}> 解答 {(i+1)} </p>
                         <div id={"solution_area_" + (i+1)} class="h-0 overflow-hidden transition-all duration-500 flex flex-row gap-5">
                             <div className="w-[80%]">
                                 <textarea id={"code_area_" + (i+1)} class="resize-none w-full h-10" defaultValue={solution_data[i]["code"]} readonly></textarea>
@@ -61,7 +74,6 @@ class SolutionArea extends React.Component {
                             <div className="w-[20%] flex flex-col gap-5">
                                 <div className="flex flex-col justify-start h-full gap-3">
                                     <p className="border-2 p-3 w-full text-center text-xl font-mono text-bold">{solution_data[i]["uuid"].split("-")[4]}</p>
-                                    <StatusRender value={solution_data[i]["status"]} />
                                     <CompileResultRender value={solution_data[i]["result"]} />
                                 </div>
                                 <div className="flex flex-col justify-end h-full">
@@ -116,20 +128,30 @@ class App extends React.Component {
             type: "POST",
             dataType: "json",
             contentType: "application/json",
-            success(data, status, xhr){
-                Swal2.fire({
-                    title: "Please wait",
-                    timer: 2000,
-                    timerProgressBar: true,
-                    didOpen: () => {
-                        Swal.showLoading()
-                    },
-                    willClose: () => {
-                        window.location.reload();
-                    }
-                })
+        })
+        Swal.fire({
+            title: "編譯中...",
+            didOpen: () => {
+                Swal.showLoading()
+                timerInterval = setInterval(() => {
+                    $.ajax({
+                        url: "/fetch_solutions/" + PID,
+                        type: "GET",
+                        success: function(data, status, xhr){
+                            if(data["status"] == "OK"){
+                                console.log(data)
+                                if(data["compile_status"] == "Finish"){
+                                    clearInterval(timerInterval)
+                                    swal.close()
+                                    window.location.reload();
+                                }
+                            }
+                        }
+                    })
+                }, 1000)
             }
         })
+        this.setState({solution_data: solution_data})
     }
     add_problem(){
         let {solution_data} = this.state

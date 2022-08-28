@@ -71,12 +71,58 @@ def submitCode():
 		database_util.file_storage_tunnel_write(submission_id + ".cpp", code, TunnelCode.SUBMISSION)
 
 		# Save info to SQL
-		database_util.command_execute("INSERT INTO `submission`(solution_id, problem_id, user_uid, language, date, type) VALUE(%s, %s, %s, %s, %s, %s)", (submission_id, problem_id, user_uid, language, date, type))
+		database_util.command_execute("INSERT INTO `submission`(solution_id, problem_id, user_uid, language, date, type, result) VALUE(%s, %s, %s, %s, %s, %s, %s)", (submission_id, problem_id, user_uid, language, date, type, "Pending"))
+
+		# fetch solution code
+		solution_group = database_util.command_execute("SELECT solution_group FROM `problem` WHERE ID=%s", (problem_id))[0]["solution_group"]
+		solutions = database_util.command_execute("SELECT * FROM `submission` WHERE solution_group=%s", (solution_group))
+		main_solution_id = None
+
+		for solution in solutions:
+			if solution["result"] == "OK":
+				main_solution_id = solution["solution_id"]
+		
+		if main_solution_id == None:
+			return Response(json.dumps(error_dict(ErrorCode.UNEXCEPT_ERROR, "No valid solution.")), mimetype="application/json")
+		
+		main_solution = database_util.file_storage_tunnel_read(main_solution_id + ".cpp", TunnelCode.SOLUTION)
+
+		#fetch checker code (temp)
+		checker = open("/etc/nuoj/example_code/temp_checker.cpp", "r").read()
+
+		webhook_url = "https://nuoj.ntut-xuan.net/judge_result_webhook/%s/" % (submission_id)
+		requests.post("http://localhost:4439/judge", data=json.dumps({
+			"code": code, 
+			"solution": main_solution,
+			"checker": checker,
+			"execution": "J", 
+			"option": {
+				"threading": True, 
+				"time": 4, 
+				"wall_time": 4, 
+				"webhook_url": webhook_url
+			}
+		}), headers={"content-type": "application/json"})
 
 		return Response(json.dumps({"status": "OK"}), mimetype="application/json")
 
 	except Exception as e:
-		return Response(json.dumps(error_dict(ErrorCode.UNEXCEPT_ERROR, str(e))), mimetype="application/json")
+		return Response(json.dumps(error_dict(ErrorCode.UNEXCEPT_ERROR, str(e))), mimetype="application/json", status=500)
+
+@problem_page.route("/judge_result_webhook/<submission_uuid>/", methods=["POST"])
+def result_webhook(submission_uuid):
+	json_data = request.json
+	report = json_data["data"]["result"]["report"]
+	verdict = json_data["data"]["result"]["verdict"]
+	total_time = 0
+	total_memory = 0
+	for report_data in report:
+		total_time += float(report_data["time"])
+		total_memory += float(report_data["memory"])
+	average_time = total_time / len(report)
+	average_memory = total_memory // len(report)
+	database_util.command_execute("UPDATE submission SET result=%s, time=%s, memory=%s WHERE solution_id=%s", (verdict, "%.3f" % float(average_time), average_memory, submission_uuid))
+	return Response(json.dumps({"status": "OK"}))
 
 @problem_page.route("/testcase_upload", methods=["POST"])
 def problemTestcaseSubmit():

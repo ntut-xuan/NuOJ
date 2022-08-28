@@ -43,6 +43,12 @@ function CompileResultRender(props) {
                 { className: "border-2 p-3 w-full text-center text-lg font-mono text-bold text-gray-600 border-gray-600" },
                 " Compile Status: Unknown "
             );
+        case "Pending":
+            return React.createElement(
+                "p",
+                { className: "border-2 p-3 w-full text-center text-lg font-mono text-bold text-gray-600 border-gray-600" },
+                " Compile Status: Pending "
+            );
         case "OK":
             return React.createElement(
                 "p",
@@ -71,13 +77,26 @@ var SolutionArea = function (_React$Component) {
             delete_data: props.delete_data
         };
         _this.expend = _this.expend.bind(_this);
+        _this.onclick_expend = _this.onclick_expend.bind(_this);
         return _this;
     }
 
     _createClass(SolutionArea, [{
+        key: "onclick_expend",
+        value: function onclick_expend(event) {
+            var status = 0;
+            ID = event.target.getAttribute("value");
+            if (document.getElementById("solution_area_" + ID).classList.contains("h-0")) {
+                status = 1;
+            } else {
+                status = 0;
+            }
+            this.expend(ID, status);
+        }
+    }, {
         key: "expend",
-        value: function expend(ID) {
-            if ($("#solution_area_" + ID).hasClass("h-0")) {
+        value: function expend(ID, status) {
+            if (status == 1) {
                 $("#solution_area_" + ID).removeClass("h-0");
                 $("#solution_area_" + ID).addClass("h-[40vh]");
             } else {
@@ -113,9 +132,7 @@ var SolutionArea = function (_React$Component) {
                         { id: "card", "class": "p-5 border-2 rounded-lg" },
                         React.createElement(
                             "p",
-                            { id: "card_" + (i + 1), value: i + 1, "class": "text-center py-5 cursor-pointer hover:bg-gray-200", onClick: function onClick() {
-                                    _this2.expend(i + 1);
-                                } },
+                            { id: "card_" + (i + 1), value: i + 1, "class": "text-center py-5 cursor-pointer hover:bg-gray-200", onClick: _this2.onclick_expend },
                             " \u89E3\u7B54 ",
                             i + 1,
                             " "
@@ -139,7 +156,6 @@ var SolutionArea = function (_React$Component) {
                                         { className: "border-2 p-3 w-full text-center text-xl font-mono text-bold" },
                                         solution_data[i]["uuid"].split("-")[4]
                                     ),
-                                    React.createElement(StatusRender, { value: solution_data[i]["status"] }),
                                     React.createElement(CompileResultRender, { value: solution_data[i]["result"] })
                                 ),
                                 React.createElement(
@@ -227,21 +243,31 @@ var App = function (_React$Component2) {
                 data: JSON.stringify(data),
                 type: "POST",
                 dataType: "json",
-                contentType: "application/json",
-                success: function success(data, status, xhr) {
-                    Swal2.fire({
-                        title: "Please wait",
-                        timer: 2000,
-                        timerProgressBar: true,
-                        didOpen: function didOpen() {
-                            Swal.showLoading();
-                        },
-                        willClose: function willClose() {
-                            window.location.reload();
-                        }
-                    });
+                contentType: "application/json"
+            });
+            Swal.fire({
+                title: "編譯中...",
+                didOpen: function didOpen() {
+                    Swal.showLoading();
+                    timerInterval = setInterval(function () {
+                        $.ajax({
+                            url: "/fetch_solutions/" + PID,
+                            type: "GET",
+                            success: function success(data, status, xhr) {
+                                if (data["status"] == "OK") {
+                                    console.log(data);
+                                    if (data["compile_status"] == "Finish") {
+                                        clearInterval(timerInterval);
+                                        swal.close();
+                                        window.location.reload();
+                                    }
+                                }
+                            }
+                        });
+                    }, 1000);
                 }
             });
+            this.setState({ solution_data: solution_data });
         }
     }, {
         key: "add_problem",
