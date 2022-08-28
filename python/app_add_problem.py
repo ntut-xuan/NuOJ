@@ -110,31 +110,43 @@ def return_testcase_page(PID):
 @problem.route("/edit_problem/<PID>/solution_pre_compile", methods=["GET", "POST"])
 @require_session_or_redirect_index
 @session_name_auth
-def pre_compile(PID):
+def pre_compile_and_save(PID):
 	# fetch data
 	json_post_data = request.json
 	jwt_data = jwt_decode(request.cookies.get("SID"))
-	code_list = []
-	# collect code to list
-	for data in json_post_data["data"]:
-		code_list.append(data["code"])
+	solution_group = uuid4()
+	problem_id = json_post_data["problem_pid"]
+	# register new solution_group to database
+	database_util.command_execute("UPDATE problem SET solution_group=%s WHERE problem_pid=%s", (solution_group, problem_id))
 	# register every code into database 
-	for code in code_list:
+	for code_data in json_post_data["data"]:
 		submission_uuid = str(uuid4())
-		problem_id = json_post_data["problem_pid"]
 		user_uid = jwt_data["handle"]
 		language = "C++"
 		date = datetime.now()
 		submission_type = "PC"
 		# Register into SQL
-		database_util.command_execute("INSERT `submission`(solution_id, problem_id, user_uid, language, date, type) VALUES(%s, %s, %s, %s, %s, %s)", (submission_uuid, problem_id, user_uid, language, date, submission_type))
+		database_util.command_execute("INSERT `submission`(solution_id, problem_id, user_uid, language, date, type, solution_group) VALUES(%s, %s, %s, %s, %s, %s, %s)", (submission_uuid, problem_id, user_uid, language, date, submission_type, solution_group))
 		# Storage code to Storage
-		database_util.file_storage_tunnel_write(submission_uuid + ".cpp", code, TunnelCode.SUBMISSION)
+		database_util.file_storage_tunnel_write(submission_uuid + ".cpp", code_data["code"], TunnelCode.SUBMISSION)
 		# Doing POST to sandbox
 		webhook_url = "https://nuoj.ntut-xuan.net/result_webhook/%s/" % (submission_uuid)
-		requests.post("http://localhost:4439/judge", data=json.dumps({"code": code, "execution": "C", "option": {"threading": True, "time": 4, "wall_time": 4, "webhook_url": webhook_url}}), headers={"content-type": "application/json"})
+		requests.post("http://localhost:4439/judge", data=json.dumps({"code": code_data["code"], "execution": "C", "option": {"threading": True, "time": 4, "wall_time": 4, "webhook_url": webhook_url}}), headers={"content-type": "application/json"})
 	return Response(json.dumps({"status": "OK"}), mimetype="application/json")
 
+@problem.route("/fetch_solutions/<PID>", methods=["GET"])
+def fetch_solution(PID):
+	# fetch solution_group
+	solution_group = database_util.command_execute("SELECT solution_group from `problem` WHERE problem_pid=%s", (PID))[0]["solution_group"]
+	# fetch submissions status
+	submissions = database_util.command_execute("SELECT * FROM `submission` WHERE solution_group=%s", (solution_group))
+	solution_group_data = []
+	for submission in submissions:
+		solution_id = submission["solution_id"]
+		code = database_util.file_storage_tunnel_read(solution_id + ".cpp", TunnelCode.SUBMISSION)
+		result = database_util.command_execute("SELECT result FROM `submission` WHERE solution_id=%s", (solution_id))[0]["result"]
+		solution_group_data.append({"code": code, "result": result, "uuid": solution_id})
+	return Response(json.dumps({"status": "OK", "data": solution_group_data}), mimetype="application/json")
 
 @problem.route("/result_webhook/<submission_uuid>/", methods=["POST"])
 def result_webhook(submission_uuid):
