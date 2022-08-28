@@ -166,16 +166,22 @@ class RegisterUnitTest(unittest.TestCase):
 
 ''' SUBMIT TEST START '''
 class SubmitUnitTest(unittest.TestCase):
+
     def setUp(self) -> None:
+
+        self.problem_pid = os.urandom(10).hex()
+        
         # add problem
-        database_util.command_execute("INSERT INTO `problem`(ID, problem_pid, problem_author) VALUES(%s, %s, %s)", (99999, os.urandom(10).hex(), "uriahxuan"))
+        database_util.command_execute("INSERT INTO `problem`(problem_pid, problem_author) VALUES(%s, %s)", (self.problem_pid, "uriahxuan"))
 
         # add account
-        database_util.command_execute("INSERT INTO `user`(user_uid, handle, password, email, role, email_verified) VALUES(%s, %s, %s, %s, %s, %s)", (str(uuid4()), "uriahxuan", password_cypto(crypto_util.Encrypt(str("uriahxuan99"))), "nuoj@test.net", 0, True))
+        self.uid = str(uuid4())
+        database_util.command_execute("INSERT INTO `user`(user_uid, handle, password, email, role, email_verified) VALUES(%s, %s, %s, %s, %s, %s)", (self.uid, "uriahxuan", password_cypto(crypto_util.Encrypt(str("uriahxuan99"))), "nuoj@test.net", 0, True))
         
         # login account
         data = json.dumps({"account": "uriahxuan", "password": crypto_util.Encrypt(str("uriahxuan99"))})
         resp = test_client.post("/login", data=data, headers={"content-type": "application/json"})
+
         return super().setUp()
     
     def test_invalid_id(self):
@@ -194,13 +200,17 @@ class SubmitUnitTest(unittest.TestCase):
         self.assertEqual(json.loads(resp)["code"], ErrorCode.UNEXCEPT_ERROR.value)
     
     def test_invalid_normal_submit(self):
-        data = json.dumps({"code": "#include<bits/stdc++.h>using namespace std;int main(){int a, b;cin >> a >> b;cout << a + b << endl;}", "problem_id": 99999})
+        # fetch problem id
+        ID = database_util.command_execute("SELECT ID FROM `problem` WHERE problem_author='uriahxuan'", ())[0]["ID"]
+        data = json.dumps({"code": "#include<bits/stdc++.h>using namespace std;int main(){int a, b;cin >> a >> b;cout << a + b << endl;}", "problem_id": ID})
         resp = test_client.post("/submit", data=data, headers={"content-type": "application/json"}).data
+        print(json.loads(resp))
         self.assertEqual(json.loads(resp)["status"], "OK")
     
     def tearDown(self) -> None:
         database_util.command_execute("DELETE FROM `user` WHERE handle='uriahxuan'", ())
-        database_util.command_execute("DELETE FROM `problem` WHERE ID=99999", ())
+        database_util.command_execute("DELETE FROM `problem` WHERE problem_author='uriahxuan'", ())
+        database_util.command_execute("DELETE FROM `submission` WHERE user_uid=%s", (self.uid))
         return super().tearDown()
 
 ''' PROFILE TEST START '''

@@ -59,6 +59,7 @@ def submitCode():
 		user_uid = database_util.command_execute("SELECT user_uid FROM `user` WHERE email=%s", (session_data["email"]))[0]["user_uid"]
 		language = "C++"
 		date = datetime.now()
+		type = "NS"
 
 		# Check problem exist
 		problem_count = database_util.command_execute("SELECT COUNT(*) FROM `problem` WHERE ID=%s", (data["problem_id"]))[0]["COUNT(*)"]
@@ -70,12 +71,12 @@ def submitCode():
 		database_util.file_storage_tunnel_write(submission_id + ".cpp", code, TunnelCode.SUBMISSION)
 
 		# Save info to SQL
-		database_util.command_execute("INSERT INTO `submission`(solution_id, problem_id, user_uid, language, date) VALUE(%s, %s, %s, %s, %s)", (submission_id, problem_id, user_uid, language, date))
+		database_util.command_execute("INSERT INTO `submission`(solution_id, problem_id, user_uid, language, date, type) VALUE(%s, %s, %s, %s, %s, %s)", (submission_id, problem_id, user_uid, language, date, type))
 
 		return Response(json.dumps({"status": "OK"}), mimetype="application/json")
 
 	except Exception as e:
-		return Response(json.dumps(error_dict(ErrorCode.UNEXCEPT_ERROR)), mimetype="application/json")
+		return Response(json.dumps(error_dict(ErrorCode.UNEXCEPT_ERROR, str(e))), mimetype="application/json")
 
 @problem_page.route("/testcase_upload", methods=["POST"])
 def problemTestcaseSubmit():
