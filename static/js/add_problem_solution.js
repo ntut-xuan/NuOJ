@@ -7,31 +7,53 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
 function StatusRender(props) {
-    console.log(props.value);
     switch (props.value) {
         case "AC":
             return React.createElement(
                 "p",
-                { className: "border-2 p-3 w-full text-center text-xl font-mono text-bold text-green-600 border-green-600 rotate-45 translate-y-[150%]" },
+                { className: "border-2 p-3 w-full text-center text-xl font-mono text-bold text-green-600 border-green-600" },
                 " Accepted "
             );
         case "WA":
             return React.createElement(
                 "p",
-                { className: "border-2 p-3 w-full text-center text-xl font-mono text-bold text-red-600 border-red-600 rotate-45 translate-y-[150%]" },
+                { className: "border-2 p-3 w-full text-center text-xl font-mono text-bold text-red-600 border-red-600]" },
                 " Wrong Answer "
             );
         case "TLE":
             return React.createElement(
                 "p",
-                { className: "border-2 p-3 w-full text-center text-xl font-mono text-bold text-red-600 border-red-600 rotate-45 translate-y-[150%]" },
+                { className: "border-2 p-3 w-full text-center text-xl font-mono text-bold text-red-600 border-red-600" },
                 " Time Limit Exceeded "
             );
         case "MLE":
             return React.createElement(
                 "p",
-                { className: "border-2 p-3 w-full text-center text-xl font-mono text-bold text-red-600 border-red-600 rotate-45 translate-y-[150%]" },
+                { className: "border-2 p-3 w-full text-center text-xl font-mono text-bold text-red-600 border-red-600" },
                 " Memory Limit Exceeded "
+            );
+    }
+}
+
+function CompileResultRender(props) {
+    switch (props.value) {
+        case "":
+            return React.createElement(
+                "p",
+                { className: "border-2 p-3 w-full text-center text-lg font-mono text-bold text-gray-600 border-gray-600" },
+                " Compile Status: Unknown "
+            );
+        case "OK":
+            return React.createElement(
+                "p",
+                { className: "border-2 p-3 w-full text-center text-lg font-mono text-bold text-green-600 border-green-600" },
+                " Compile Status: OK "
+            );
+        case "Failed":
+            return React.createElement(
+                "p",
+                { className: "border-2 p-3 w-full text-center text-lg font-mono text-bold text-red-600 border-red-600" },
+                " Compile Status: Failed "
             );
     }
 }
@@ -111,8 +133,14 @@ var SolutionArea = function (_React$Component) {
                                 { className: "w-[20%] flex flex-col gap-5" },
                                 React.createElement(
                                     "div",
-                                    { className: "flex flex-col justify-start h-full" },
-                                    React.createElement(StatusRender, { value: solution_data[i]["status"] })
+                                    { className: "flex flex-col justify-start h-full gap-3" },
+                                    React.createElement(
+                                        "p",
+                                        { className: "border-2 p-3 w-full text-center text-xl font-mono text-bold" },
+                                        solution_data[i]["uuid"].split("-")[4]
+                                    ),
+                                    React.createElement(StatusRender, { value: solution_data[i]["status"] }),
+                                    React.createElement(CompileResultRender, { value: solution_data[i]["result"] })
                                 ),
                                 React.createElement(
                                     "div",
@@ -181,7 +209,7 @@ var App = function (_React$Component2) {
 
             var code = codearea_editor.getValue();
             var status = document.getElementById("except_result").value;
-            solution_data.push({ "code": code, "status": status });
+            solution_data.push({ "code": code, "status": status, "uuid": uuid.v4(), "result": "" });
             this.cancel();
             codearea_editor.getDoc().setValue("");
             this.setState({ solution_data: solution_data });
@@ -193,7 +221,7 @@ var App = function (_React$Component2) {
                 PID = _state3.PID,
                 solution_data = _state3.solution_data;
 
-            var data = { "problem_pid": PID, "data": solution_data };
+            var data = { "problem_pid": PID, "save_uuid": uuid.v4(), "data": solution_data };
             $.ajax({
                 url: "/edit_problem/" + PID + "/solution_pre_compile",
                 data: JSON.stringify(data),
@@ -201,7 +229,17 @@ var App = function (_React$Component2) {
                 dataType: "json",
                 contentType: "application/json",
                 success: function success(data, status, xhr) {
-                    console.log("OK");
+                    Swal2.fire({
+                        title: "Please wait",
+                        timer: 2000,
+                        timerProgressBar: true,
+                        didOpen: function didOpen() {
+                            Swal.showLoading();
+                        },
+                        willClose: function willClose() {
+                            window.location.reload();
+                        }
+                    });
                 }
             });
         }
@@ -219,7 +257,10 @@ var App = function (_React$Component2) {
     }, {
         key: "componentDidMount",
         value: function componentDidMount() {
-            var codearea_editor = this.state.codearea_editor;
+            var _state4 = this.state,
+                codearea_editor = _state4.codearea_editor,
+                PID = _state4.PID,
+                solution_data = _state4.solution_data;
 
             var setting = {
                 lineNumbers: true,
@@ -229,6 +270,22 @@ var App = function (_React$Component2) {
             };
             codearea_editor = CodeMirror.fromTextArea(document.getElementById("code_area"), setting);
             codearea_editor.setSize("100%", "100%");
+
+            $.ajax({
+                url: "/fetch_solutions/" + PID,
+                type: "GET",
+                success: function (data, status, xhr) {
+                    if (data["status"] == "OK") {
+                        for (var i = 0; i < data["data"].length; i++) {
+                            solution_data_element = data["data"][i];
+                            solution_data.push({ "code": solution_data_element["code"], "status": "AC", "result": solution_data_element["result"], "uuid": solution_data_element["uuid"] });
+                        }
+                        this.setState({ solution_data: solution_data });
+                    }
+                    console.log("fetch");
+                }.bind(this)
+            });
+
             this.setState({ codearea_editor: codearea_editor });
         }
     }, {
@@ -243,6 +300,7 @@ var App = function (_React$Component2) {
                 theme: "darcula",
                 readOnly: true
             };
+            console.log(solution_data);
             for (var i = 0; i < solution_data.length; i++) {
                 if (document.getElementById("code_area_" + (i + 1)).hasAttribute("style")) {
                     continue;
@@ -262,9 +320,9 @@ var App = function (_React$Component2) {
     }, {
         key: "render",
         value: function render() {
-            var _state4 = this.state,
-                PID = _state4.PID,
-                solution_data = _state4.solution_data;
+            var _state5 = this.state,
+                PID = _state5.PID,
+                solution_data = _state5.solution_data;
 
             return [React.createElement(
                 "div",
@@ -294,12 +352,7 @@ var App = function (_React$Component2) {
                         React.createElement(
                             "button",
                             { id: "compile_button", "class": "enabled:bg-blue-500 disabled:bg-slate-400 text-white transition-colors duration-200 enabled:hover:bg-blue-400 w-full p-3 text-lg rounded-lg my-3", onClick: this.compile_test },
-                            " \u7DE8\u8B6F\u6E2C\u8A66 "
-                        ),
-                        React.createElement(
-                            "button",
-                            { id: "save_button", "class": "enabled:bg-green-500 disabled:bg-slate-400 text-white transition-colors duration-200 hover:bg-green-400 w-full p-3 text-lg rounded-lg my-3", disabled: true },
-                            " \u5B58\u6A94 "
+                            " \u7DE8\u8B6F\u6E2C\u8A66\u4E26\u5B58\u6A94 "
                         )
                     )
                 ),

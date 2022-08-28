@@ -1,14 +1,24 @@
 function StatusRender(props){
-    console.log(props.value)
     switch(props.value){
         case "AC":
-            return <p className="border-2 p-3 w-full text-center text-xl font-mono text-bold text-green-600 border-green-600 rotate-45 translate-y-[150%]"> Accepted </p>
+            return <p className="border-2 p-3 w-full text-center text-xl font-mono text-bold text-green-600 border-green-600"> Accepted </p>
         case "WA":
-            return <p className="border-2 p-3 w-full text-center text-xl font-mono text-bold text-red-600 border-red-600 rotate-45 translate-y-[150%]"> Wrong Answer </p>
+            return <p className="border-2 p-3 w-full text-center text-xl font-mono text-bold text-red-600 border-red-600]"> Wrong Answer </p>
         case "TLE":
-            return <p className="border-2 p-3 w-full text-center text-xl font-mono text-bold text-red-600 border-red-600 rotate-45 translate-y-[150%]"> Time Limit Exceeded </p>
+            return <p className="border-2 p-3 w-full text-center text-xl font-mono text-bold text-red-600 border-red-600"> Time Limit Exceeded </p>
         case "MLE":
-            return <p className="border-2 p-3 w-full text-center text-xl font-mono text-bold text-red-600 border-red-600 rotate-45 translate-y-[150%]"> Memory Limit Exceeded </p>
+            return <p className="border-2 p-3 w-full text-center text-xl font-mono text-bold text-red-600 border-red-600"> Memory Limit Exceeded </p>
+    }
+}
+
+function CompileResultRender(props){
+    switch(props.value){
+        case "":
+            return <p className="border-2 p-3 w-full text-center text-lg font-mono text-bold text-gray-600 border-gray-600"> Compile Status: Unknown </p>
+        case "OK":
+            return <p className="border-2 p-3 w-full text-center text-lg font-mono text-bold text-green-600 border-green-600"> Compile Status: OK </p>
+        case "Failed":
+            return <p className="border-2 p-3 w-full text-center text-lg font-mono text-bold text-red-600 border-red-600"> Compile Status: Failed </p>
     }
 }
 
@@ -49,8 +59,10 @@ class SolutionArea extends React.Component {
                                 <textarea id={"code_area_" + (i+1)} class="resize-none w-full h-10" defaultValue={solution_data[i]["code"]} readonly></textarea>
                             </div>
                             <div className="w-[20%] flex flex-col gap-5">
-                                <div className="flex flex-col justify-start h-full">
+                                <div className="flex flex-col justify-start h-full gap-3">
+                                    <p className="border-2 p-3 w-full text-center text-xl font-mono text-bold">{solution_data[i]["uuid"].split("-")[4]}</p>
                                     <StatusRender value={solution_data[i]["status"]} />
+                                    <CompileResultRender value={solution_data[i]["result"]} />
                                 </div>
                                 <div className="flex flex-col justify-end h-full">
                                     <button class="bg-red-500 text-white transition-colors duration-200 hover:bg-red-400 w-full p-3 text-lg rounded-lg" onClick={() => {delete_data(i)}}> 刪除 </button>
@@ -90,14 +102,14 @@ class App extends React.Component {
         let {codearea_editor, solution_data} = this.state
         var code = codearea_editor.getValue();
         var status = document.getElementById("except_result").value
-        solution_data.push({"code": code, "status": status})
+        solution_data.push({"code": code, "status": status, "uuid": uuid.v4(), "result": ""})
         this.cancel()
         codearea_editor.getDoc().setValue("")
         this.setState({solution_data: solution_data})
     }
     compile_test(){
         let {PID, solution_data} = this.state
-        let data = {"problem_pid": PID, "data": solution_data}
+        let data = {"problem_pid": PID, "save_uuid": uuid.v4(), "data": solution_data}
         $.ajax({
             url: "/edit_problem/" + PID + "/solution_pre_compile",
             data: JSON.stringify(data),
@@ -105,7 +117,17 @@ class App extends React.Component {
             dataType: "json",
             contentType: "application/json",
             success(data, status, xhr){
-                console.log("OK")
+                Swal2.fire({
+                    title: "Please wait",
+                    timer: 2000,
+                    timerProgressBar: true,
+                    didOpen: () => {
+                        Swal.showLoading()
+                    },
+                    willClose: () => {
+                        window.location.reload();
+                    }
+                })
             }
         })
     }
@@ -118,7 +140,7 @@ class App extends React.Component {
         $("#dark").addClass("h-screen")
     }
     componentDidMount(){
-        let {codearea_editor} = this.state
+        let {codearea_editor, PID, solution_data} = this.state
         let setting = {
             lineNumbers: true,
             matchBrackets: true,
@@ -127,8 +149,25 @@ class App extends React.Component {
         }
         codearea_editor = CodeMirror.fromTextArea(document.getElementById("code_area"), setting);
         codearea_editor.setSize("100%", "100%")
+
+        $.ajax({
+            url: "/fetch_solutions/" + PID,
+            type: "GET",
+            success: function(data, status, xhr){
+                if(data["status"] == "OK"){
+                    for(let i = 0; i < data["data"].length; i++){
+                        solution_data_element = data["data"][i]
+                        solution_data.push({"code": solution_data_element["code"], "status": "AC", "result": solution_data_element["result"], "uuid": solution_data_element["uuid"]})
+                    }
+                    this.setState({solution_data: solution_data})
+                }
+                console.log("fetch")
+            }.bind(this)
+        })
+
         this.setState({codearea_editor: codearea_editor})
     }
+
     componentDidUpdate(){
         let {solution_data} = this.state
         let read_only_setting = {
@@ -138,6 +177,7 @@ class App extends React.Component {
             theme: "darcula",
             readOnly: true,
         }
+        console.log(solution_data)
         for(let i = 0; i < solution_data.length; i++){
             if(document.getElementById("code_area_" + (i+1)).hasAttribute("style")){
                 continue;
@@ -163,8 +203,7 @@ class App extends React.Component {
                             <SolutionArea delete_data={this.delete_data} solution_data={solution_data} />
                         </div>
                         <button class="bg-amber-500 text-white transition-colors duration-200 hover:bg-amber-400 w-full p-3 text-lg rounded-lg my-3" onClick={this.add_problem}> 新增解答 </button>
-                        <button id="compile_button" class="enabled:bg-blue-500 disabled:bg-slate-400 text-white transition-colors duration-200 enabled:hover:bg-blue-400 w-full p-3 text-lg rounded-lg my-3" onClick={this.compile_test}> 編譯測試 </button>
-                        <button id="save_button" class="enabled:bg-green-500 disabled:bg-slate-400 text-white transition-colors duration-200 hover:bg-green-400 w-full p-3 text-lg rounded-lg my-3" disabled> 存檔 </button>
+                        <button id="compile_button" class="enabled:bg-blue-500 disabled:bg-slate-400 text-white transition-colors duration-200 enabled:hover:bg-blue-400 w-full p-3 text-lg rounded-lg my-3" onClick={this.compile_test}> 編譯測試並存檔 </button>
                     </div>
                 </div>
                 <div class="w-full text-center py-10">
