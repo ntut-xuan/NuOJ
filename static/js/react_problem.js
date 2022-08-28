@@ -294,7 +294,7 @@ var Problem_list = function (_React$Component3) {
                     ),
                     React.createElement("td", { className: "px-6 py-4 z-10 flex gap-5 justify-center text-base" })
                 );
-                // main.push(col)
+                main.push(col);
             });
             var problems = this.state.problems;
             for (var i = 0; i < 9; i++) {

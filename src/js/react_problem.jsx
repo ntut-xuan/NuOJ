@@ -165,7 +165,7 @@ class Problem_list extends React.Component{
                 </td>
             </tr>
             )
-            // main.push(col)
+            main.push(col)
         })
         const problems = this.state.problems
         for(var i=0;i<9;i++){
