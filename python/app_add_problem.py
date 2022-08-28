@@ -131,7 +131,11 @@ def pre_compile_and_save(PID):
 		database_util.file_storage_tunnel_write(submission_uuid + ".cpp", code_data["code"], TunnelCode.SOLUTION)
 		# Doing POST to sandbox
 		webhook_url = "https://nuoj.ntut-xuan.net/compile_result_webhook/%s/" % (submission_uuid)
-		requests.post("http://localhost:4439/judge", data=json.dumps({"code": code_data["code"], "execution": "C", "option": {"threading": True, "time": 4, "wall_time": 4, "webhook_url": webhook_url}}), headers={"content-type": "application/json"})
+		requests.post("http://localhost:4439/judge", data=json.dumps({
+			"code": code_data["code"], 
+			"execution": "C",
+			"code_language": "cpp",
+			"option": {"threading": True, "time": 4, "wall_time": 4, "webhook_url": webhook_url}}), headers={"content-type": "application/json"})
 	return Response(json.dumps({"status": "OK"}), mimetype="application/json")
 
 @problem.route("/fetch_solutions/<PID>", methods=["GET"])
@@ -144,7 +148,7 @@ def fetch_solution(PID):
 	solution_group_data = []
 	for submission in submissions:
 		solution_id = submission["solution_id"]
-		code = database_util.file_storage_tunnel_read(solution_id + ".cpp", TunnelCode.SUBMISSION)
+		code = database_util.file_storage_tunnel_read(solution_id + ".cpp", TunnelCode.SOLUTION)
 		result = database_util.command_execute("SELECT result FROM `submission` WHERE solution_id=%s", (solution_id))[0]["result"]
 		if result == "" or result == None:
 			complie_status = "Running"

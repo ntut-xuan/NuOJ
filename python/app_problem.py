@@ -96,6 +96,9 @@ def submitCode():
 			"solution": main_solution,
 			"checker": checker,
 			"execution": "J", 
+			"code_language": "cpp",
+			"solution_language": "cpp",
+			"checker_language": "cpp",
 			"option": {
 				"threading": True, 
 				"time": 4, 
