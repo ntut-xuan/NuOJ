@@ -280,7 +280,7 @@ var Problem_list = function (_React$Component3) {
                         " ",
                         React.createElement(
                             "a",
-                            { href: "/profile/" + problems[i].id },
+                            { href: "/problem/" + problems[i].id },
                             problems[i].title
                         ),
                         " "
