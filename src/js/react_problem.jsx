@@ -162,7 +162,7 @@ class Problem_list extends React.Component{
             var col=(
                 <tr className="hover:bg-slate-100 z-40 border">
                     <td className="px-6 py-4 z-10"> {problems[i].id} </td>
-                    <td className="px-6 py-4 z-10 text-blue-700"> <a href={`/profile/${problems[i].id}`}>{problems[i].title}</a> </td>
+                    <td className="px-6 py-4 z-10 text-blue-700"> <a href={`/problem/${problems[i].id}`}>{problems[i].title}</a> </td>
                     <td className="px-6 py-4 z-10 text-blue-700"> <a href={`/profile/${problems[i].author}`}>{problems[i].author}</a> </td>
                     <td className="px-6 py-4 z-10 flex gap-5 justify-center text-base"> 
                         {/* <span class="p-1 bg-gray-200 rounded-lg hover:bg-orange-100 duration-300 cursor-pointer"> </span> */}
