@@ -90,11 +90,18 @@ def updateUserProfile(cookies, handle, put_data):
 @profile_page.route("/profile/<name>", methods=["GET", "PUT"])
 @profile_page.route("/profile/<name>/", methods=["GET", "PUT"])
 def returnProfilePageWithName(name):
-	if request.method == "PUT":
+	
+	# Check user exist
+	count = database_util.command_execute("SELECT COUNT(*) FROM `user` WHERE handle=%s", (name))[0]["COUNT(*)"]
+	if (count == 0):
+		return abort(404)
+
+	if (request.method == "PUT"):
 		put_data = request.json
 		cookies = request.cookies.get("SID")
 		return json.dumps(updateUserProfile(cookies, name, put_data))
-	return render_template("profile.html", **locals())
+	else:
+		return render_template("profile.html", **locals())
 
 @profile_page.route("/upload_img",methods=["PUT"])
 @require_session
@@ -145,18 +152,11 @@ def update_user_img():
 def getUserInfo():
 
 	# vertify user
-
 	try:	
 		SID = request.cookies.get("SID")
 		handle = jwt_decode(SID)["handle"]
 	except:
-		return "please login", 400
-
-	# Check user exist
-	count = database_util.command_execute("SELECT COUNT(*) FROM `user` WHERE handle=%s", (handle))[0]["COUNT(*)"]
-
-	if count == 0:
-		abort(400)
+		return Response(json.dumps(error_dict(ErrorCode.REQUIRE_AUTHORIZATION)), mimetype="application/json")
 
 	# Fetch user infomation
 	user_data = database_util.command_execute("SELECT * FROM `user` WHERE handle=%s", (handle))[0]
@@ -167,7 +167,7 @@ def getUserInfo():
 	profile_data = database_util.command_execute("SELECT * FROM `profile` WHERE user_uid=%s", (user_uid))
 
 	if(len(profile_data)==0):
-		abort(400)
+		return Response(json.dumps(error_dict(ErrorCode.ACCOUNT_INVALID)), mimetype="application/json")
 	else:
 		profile_data = profile_data[0]
 
@@ -187,7 +187,7 @@ def getUserInfo():
 			"bio" : bio
 		}
 	}
-	return resp 
+	return Response(json.dumps({"status":"OK","data": resp}), mimetype="application/json")
 
 @profile_page.route("/profile_problem_list",methods=["GET"])
 @require_session
@@ -221,8 +221,8 @@ def get_problem_list():
 			subdata = {"id":i, "title" : problem_json["problem_content"]["title"], "permission" :	permission , "author" : problem["problem_author"], "problem_pid":problem_pid}
 			result.append(subdata)
 			i+=1
-	return {"data":result}
-
+	return Response(json.dumps({"status":"OK","data": result}), mimetype="application/json")
+	
 @profile_page.route("/profile_problem_setting",methods=["GET"])
 @require_session
 def get_problem_list_setting():
@@ -234,8 +234,7 @@ def get_problem_list_setting():
 	
 
 	args = request.args
-
-
+	
 	count = database_util.command_execute("select count(*) from problem where problem_author = %s",(handle))
 	response={
 		"count":count[0]["count(*)"]

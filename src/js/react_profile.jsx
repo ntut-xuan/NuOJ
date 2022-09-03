@@ -1,3 +1,21 @@
+function success_swal(title){
+    return Swal.fire({
+        icon: "success",
+        title: title,
+        timer: 1500,
+        showConfirmButton: false
+    })
+}
+
+function error_swal(title){
+    return Swal.fire({
+        icon: "error",
+        title: title,
+        timer: 1500,
+        showConfirmButton: false
+    })
+}
+
 class Inputbox extends React.Component{
     constructor(pro){
         super(pro)
@@ -47,23 +65,33 @@ class Inputbox extends React.Component{
 class UpdateProfileInterface extends React.Component{
     constructor(props){
         super(props)
-        this.state={}
+        this.state={
+            img : "",
+            upload_img : false,
+            img_type : null,
+            img_data : null,
+            sub : []
+        }
         this.render_inputs = this.render_inputs.bind(this)
         this.setup_profile = this.setup_profile.bind(this)
         this.upload_profile = this.upload_profile.bind(this)
+        this.trigger_image_upload = this.trigger_image_upload.bind(this)
     }
 
     componentDidMount(){
         const datas = this.props.datas
         this.setState({
-            email : datas.email,
-            school : datas.school,
-            bio : datas.bio
+            sub: {
+                email : datas.email,
+                school : datas.school,
+                bio : datas.bio,
+                
+            },
+            img : this.props.img
         })
     }
 
     upload_profile(){
-
         var need_to_upload = false;
 
         var keys = Object.keys(this.state)
@@ -74,62 +102,130 @@ class UpdateProfileInterface extends React.Component{
             }
         }
 
-        if(need_to_upload){
-            fetch("#",{
+        // 先上傳圖片 
+
+        if(this.state.upload_img){
+            fetch("/upload_img",{
                 method : "PUT",
-                body : JSON.stringify(this.state),
+                body : JSON.stringify({type : this.state.img_type,img : this.state.img}),
                 headers: new Headers({
                     'Content-Type': 'application/json'
                 })
-            }).then(res => res.json())
-            .then((respons)=>{
-                if(respons.status == "OK"){
-                    this.props.update(this.state)
+            }).then((res)=>{ 
+                if(res.status == 200){
+                    return res.json() 
+                }
+                else{
+                    error_swal("上傳圖片錯誤").then(()=>{ this.props.change(false) })
+                }
+            })
+            .then((json)=>{
+                const status = json.status
+                if(status == "OK"){
+                    this.setState({upload_img : false})
+                }
+                else{
+                    error_swal("上傳圖片錯誤").then(()=>{ this.props.change(false) })
+                    return
+                }
+            })
+        }
+
+        // 上傳個人資料 
+        
+        if(need_to_upload){
+            fetch("#",{
+                method : "PUT",
+                body : JSON.stringify(this.state.sub),
+                headers: new Headers({
+                    'Content-Type': 'application/json'
+                })
+            }).then((res) => {
+                return res.json()
+            })
+            .then((json)=>{
+                const status = json.status;
+                if(status == "OK"){
+                    success_swal("上傳個人資料成功").then(()=>{ this.props.change(true) })
+                }
+                else{
+                    error_swal("上傳個人資料錯誤").then(()=>{this.props.change(false)})
                 }
             });
         }
-        this.props.change()
-    
+    }
+
+    trigger_image_upload(){
+        let file_input = document.createElement("input")
+        file_input.type = "file"
+        file_input.accept = "image/*"
+        file_input.onchange = e => {
+            var image = e.target.files[0];
+            var reader = new FileReader();
+            reader.readAsDataURL(image)
+
+            this.setState({img_type : image.type.slice(6)})
+
+            reader.onload = readerEvent => {
+                var content = readerEvent.target.result;
+                this.setState({
+                    upload_img : true,
+                    img : content,
+                })
+            }
+        }
+        file_input.click();
     }
 
     setup_profile(title,content){
-        if(title=="email") this.setState({ email : content })
-        if(title=="school") this.setState({ school : content })
-        if(title=="bio") this.setState({ bio : content })
+        var temp = this.state.sub
+        temp[title] = content
+        this.setState({ sub : temp })
+        // if(title=="email") this.setState({ email : content })
+        // if(title=="school") this.setState({ school : content })
+        // if(title=="bio") this.setState({ bio : content })
     }
 
     render_inputs(){
         resp =[]
-        const sub_datas =  Object.entries(this.state)
+        const sub_datas =  Object.entries(this.state.sub)
         sub_datas.forEach(element=>{
-            resp.push(<Inputbox title={element[0]} value={element[1]} update={(title,content)=>this.setup_profile(title,content)}></Inputbox>)  
+            resp.push(<Inputbox key={element[0]} title={element[0]} value={element[1]} update={(title,content)=>this.setup_profile(title,content)}></Inputbox>)  
         })
         return resp
     }
 
     render(){
-        var main=[
-            <this.render_inputs></this.render_inputs>,
-            <div className="flex w-full">
-                <button className="large-btu-bg w-full" onClick={()=>{this.upload_profile()}}>確認修改</button>
-            </div>,
-            <div className="flex w-full">
-                <button className="large-btu-bg w-full" onClick={()=>{this.props.change()}}>取消</button>
+        var main=(
+            <div className="container g-15 p-40 flex flex-col profile-area absolute">
+                <div className="m-auto">
+                    <div className="profile-img-container" >
+                        <button className="img-cover text-size-normal" onClick={this.trigger_image_upload}>修改圖片</button>
+                        <img id="user_avater" className="profile-img" src={this.state.img}/>
+                    </div>
+                </div>
+                <this.render_inputs></this.render_inputs>
+                <div className="flex w-full">
+                    <button className="large-btu-bg w-full" onClick={()=>{this.upload_profile()}}>確認修改</button>
+                </div>
+                <div className="flex w-full">
+                    <button className="large-btu-bg w-full" onClick={()=>{this.props.change(false)}}>取消</button>
+                </div>
             </div>
-        ]
+        )
         return main
     }
 } 
 
 class Subtitle extends React.Component{
     get_titles(titles){
-        const datas =  Object.values(titles)
+        const lines = Object.entries(titles)
         resp =[]
-        datas.forEach(element=>{
-            if(element!="")
+        lines.forEach(element=>{
+            if(element[1]!="")
                 resp.push(
-                    <div className="over-flow-text">
-                        <p className="text-size-small text-little_gray break-words">{element}</p>
+                    <div key={element[0]} className="over-flow-text">
+                        <p className="text-size-small text-little_gray break-words">{element[1]}</p>
                     </div>
                 ) 
         })
@@ -137,19 +233,25 @@ class Subtitle extends React.Component{
     }
     render(){
         var maintitles = this.props.maintitles
-        var main = [
-            <div className="w-full flex flex-col">
-                <p className="text-size-small font-mono">{maintitles.accountType}</p>
-                <p className="text-size-large font-mono ">{maintitles.handle}</p>
-            </div>,
-            <div className="flex flex-col">
-                {this.get_titles(this.props.subtitles)}
-            </div>,
-            <div className="flex">
-                <button className="large-btu-bg w-full" onClick={()=>this.props.change()}>修改個人資料</button>
+        var main = (
+            <div className="container g-15 p-40 flex flex-col profile-area absolute">
+                <div className="m-auto">
+                    <div className="profile-img-container" >
+                        <img id="user_avater" className="profile-img" src={maintitles.img}/>
+                    </div>
+                </div>
+                <div className="w-full flex flex-col">
+                    <p className="text-size-small font-mono">{maintitles.accountType}</p>
+                    <p className="text-size-large font-mono ">{maintitles.handle}</p>
+                </div>
+                <div className="flex flex-col">
+                    {this.get_titles(this.props.subtitles)}
+                </div>
+                <div className="flex">
+                    <button className="large-btu-bg w-full" onClick={()=>this.props.change()}>修改個人資料</button>
+                </div>
             </div>
-        ]
-
+        )
         return main
     }
 }
@@ -170,16 +272,11 @@ class Introduce extends React.Component {
                     bio : ""
                 }
             },
-            mode : false,
-            upload_img : false,
-            img_type : null,
-            img_data : null
+            mode : false
         }
         this.changing_mode = this.change_mode.bind(this)
         this.get_profile = this.get_profile.bind(this)
-        this.upload_img = this.upload_img.bind(this)
         this.update_profile = this.update_profile.bind(this)
-        this.trigger_image_upload = this.trigger_image_upload.bind(this)
     }
 
     componentDidMount(){
@@ -190,11 +287,13 @@ class Introduce extends React.Component {
         fetch("/get_profile").then((res)=>{
             return res.json()
         }).then((json)=>{
-            console.log(this.state.profile_data)
-            console.log(json)
-            this.setState({
-                profile_data : json
-            })
+            const status = json.status;
+            if( status == "OK"){
+                this.setState({profile_data : json.data})
+            }
+            else{
+                error_swal("請先登入").then(() => {window.location.href = "/" })
+            }
         })
         
     }
@@ -207,84 +306,22 @@ class Introduce extends React.Component {
         })
     }
 
-    upload_img(){
-        if(this.state.upload_img){
-            fetch("/upload_img",{
-                method : "PUT",
-                body : JSON.stringify({type : this.state.img_type,img : this.state.img_data}),
-                headers: new Headers({
-                    'Content-Type': 'application/json'
-                })
-            }).then(res => res.json())
-            .then((respons)=>{
-                if(respons.status == "OK"){
-                    this.get_profile()
-                }
-            })
+    change_mode(i){
+        if(i){
+            this.get_profile()
         }
-
-        this.setState({upload_img : false})
-    }
-
-    trigger_image_upload(){
-        let file_input = document.createElement("input")
-        file_input.type = "file"
-        file_input.accept = "image/*"
-        file_input.onchange = e => {
-            var image = e.target.files[0];
-            var reader = new FileReader();
-            reader.readAsDataURL(image)
-
-            this.setState({img_type : image.type.slice(6)})
-
-            reader.onload = readerEvent => {
-                var content = readerEvent.target.result;
-                // document.getElementById("user_avater").setAttribute("src", content)
-                var temp = this.state.profile_data
-                temp.main.img = content
-                this.setState({
-                    upload_img : true,
-                    img_data : content,
-                    profile_data : temp
-                })
-            }
-        }
-        file_input.click();
-    }
-
-    change_mode(){
-        if(this.state.upload_img){
-            this.upload_img()
-        }
-        this.setState({
-            changing : !this.state.changing
-        })
+        this.setState({ changing : !this.state.changing })
     }
 
     render(){
-        var subtitles = this.state.profile_data.sub
-        var maintitles = this.state.profile_data.main
-        var main_showing;
-        var img_area;
+        const subtitles = this.state.profile_data.sub
+        const maintitles = this.state.profile_data.main
         if(this.state.changing){
-            main_showing=(<UpdateProfileInterface datas={subtitles} change={()=>this.change_mode()} update={(i)=>this.update_profile(i)}></UpdateProfileInterface>)
-            img_area = (<button className="img-cover text-size-normal" onClick={this.trigger_image_upload}>修改圖片</button>)
+            return (<UpdateProfileInterface datas={subtitles} img = {maintitles.img} change={(i)=>this.change_mode(i)} update={(i)=>this.update_profile(i)}></UpdateProfileInterface>)
         }
-        else
-            main_showing = (<Subtitle subtitles={subtitles} maintitles={maintitles} change={()=>this.change_mode()}></Subtitle>)
-    
-        let context = (
-            <div className="container g-15 p-40 flex flex-col profile-area absolute">
-                <div className="m-auto">
-                    <div className="profile-img-container" >
-                        {img_area}
-                        <img id="user_avater" className="profile-img" src={maintitles.img}/>
-                    </div>
-                </div>
-                {main_showing}
-            </div>
-        )
-        return context
+        else{
+            return (<Subtitle subtitles={subtitles} maintitles={maintitles} change={()=>this.change_mode()}></Subtitle>)
+        }
     }
 }
 
@@ -435,10 +472,11 @@ class Problem_List extends React.Component{
     getProblems(i,j){
         fetch("/profile_problem_list?"+new URLSearchParams({numbers:i,from:j})).then((res)=>{
             return res.json()
-        }).then((list)=>{
-            this.setState({
-                problems : this.state.problems.concat(list.data)
-            })
+        }).then((json)=>{
+            const status = json.status;
+            if(status == "OK"){
+                this.setState({ problems : this.state.problems.concat(json.data) })
+            }
         })
     }
 
@@ -528,10 +566,14 @@ class OverView_problem extends React.Component {
     componentDidMount(){
         fetch("/profile_problem_list?"+new URLSearchParams({numbers:4,from:0})).then((res)=>{
             return res.json()
-        }).then((list)=>{
-            this.setState({
-                problems : list["data"]
-            })
+        }).then((json)=>{
+            const status = json.status;
+            if(status == "OK"){
+                this.setState({ problems : json.data })
+            }
+            else{
+                this.setState({ problems : [] })
+            }
         })
     }
 
@@ -597,7 +639,14 @@ class ToolBar extends React.Component{
         super(prop)
     }
     logout(){
-        fetch("/logout").then((res)=>{ return res.json()}).then((resp)=>{if(resp.status == "OK"){ window.location.href = "/" }})
+        fetch("/logout").then((res)=>{ return res.json()}).then((json)=>{
+            if(json.status == "OK"){ 
+                success_swal("登出成功").then(() => {window.location.href = "/" })
+            }
+            else{
+                error_swal("登出失敗")
+            }
+        })
     }
     render(){
         let main = (
@@ -659,20 +708,21 @@ class Main extends React.Component{
     }
 
     componentDidMount(){
-        fetch("/profile_problem_setting").then((res)=>{
-            return res.json()
-        }).then((data)=>{
-            this.setState({
-                problem_number : data["count"]
-            })
+        fetch("/profile_problem_setting").then((res)=>{ return res.json() }).then((json)=>{
+            const status = json.status
+            if(status == "OK"){
+                this.setState({ problem_number : json.count })
+            }
+            else{
+                this.setState({ problem_number : 0})     
+            }
         })
     }
 
     get_maincontent(){
         if(this.state.showing=="OverView"){
-            const html = [
-                <OverView_problem position={""} num_of_problem={this.state.problem_number} onclick={(i)=>this.change_Info(i)}></OverView_problem>
-            ]
+            const html = [ <OverView_problem position={""} num_of_problem={this.state.problem_number} onclick={(i)=>this.change_Info(i)}></OverView_problem> ]
+
             return html
         }
         else if(this.state.showing == "Problem"){

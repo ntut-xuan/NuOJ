@@ -259,46 +259,9 @@ var Problem_list = function (_React$Component3) {
         key: "render_col",
         value: function render_col() {
             var main = [];
-            this.state.problems.forEach(function (element) {
-                var col = React.createElement(
-                    "tr",
-                    { className: "hover:bg-slate-100 z-40 border" },
-                    React.createElement(
-                        "td",
-                        { className: "px-6 py-4 z-10" },
-                        " ",
-                        element.id,
-                        " "
-                    ),
-                    React.createElement(
-                        "td",
-                        { className: "px-6 py-4 z-10 text-blue-700" },
-                        " ",
-                        React.createElement(
-                            "a",
-                            { href: "/problem/" + element.id },
-                            element.title
-                        ),
-                        " "
-                    ),
-                    React.createElement(
-                        "td",
-                        { className: "px-6 py-4 z-10 text-blue-700" },
-                        " ",
-                        React.createElement(
-                            "a",
-                            { href: "/profile/" + element.author },
-                            element.author
-                        ),
-                        " "
-                    ),
-                    React.createElement("td", { className: "px-6 py-4 z-10 flex gap-5 justify-center text-base" })
-                );
-                main.push(col);
-            });
             var problems = this.state.problems;
             for (var i = 0; i < 9; i++) {
-                if (i >= problems.length - 1) {
+                if (i >= problems.length) {
                     break;
                 }
                 var col = React.createElement(
