@@ -101,6 +101,16 @@ def returnProfilePageWithName(name):
 		cookies = request.cookies.get("SID")
 		return json.dumps(updateUserProfile(cookies, name, put_data))
 	else:
+		userType = False
+		try:
+			SID = request.cookies.get("SID")
+			handle = jwt_decode(SID)["handle"]
+		except:
+			pass
+		if(handle == name):
+			userType = True
+		else:
+			userType = False
 		return render_template("profile.html", **locals())
 
 @profile_page.route("/upload_img",methods=["PUT"])
@@ -147,17 +157,15 @@ def update_user_img():
 	database_util.command_execute("UPDATE `profile` SET img_type=%s WHERE user_uid=%s" , (put_data['type'] , user_uid))
 	return Response(json.dumps({"status": "OK"}), mimetype="application/json")
 
-@profile_page.route("/get_profile",methods=["GET"])
+@profile_page.route("/get_profile/<handle>",methods=["GET"])
 @require_session
-def getUserInfo():
+def getUserInfo(handle):
 
-	# vertify user
-	try:	
-		SID = request.cookies.get("SID")
-		handle = jwt_decode(SID)["handle"]
-	except:
+	# 確認使用者身分
+	SID = request.cookies.get("SID")
+	if (not jwt_valid(SID)):
 		return Response(json.dumps(error_dict(ErrorCode.REQUIRE_AUTHORIZATION)), mimetype="application/json")
-
+	
 	# Fetch user infomation
 	user_data = database_util.command_execute("SELECT * FROM `user` WHERE handle=%s", (handle))[0]
 	user_uid = user_data["user_uid"]
@@ -167,7 +175,7 @@ def getUserInfo():
 	profile_data = database_util.command_execute("SELECT * FROM `profile` WHERE user_uid=%s", (user_uid))
 
 	if(len(profile_data)==0):
-		return Response(json.dumps(error_dict(ErrorCode.ACCOUNT_INVALID)), mimetype="application/json")
+		return Response(json.dumps(error_dict(ErrorCode.UNEXCEPT_ERROR)), mimetype="application/json")
 	else:
 		profile_data = profile_data[0]
 
@@ -176,33 +184,38 @@ def getUserInfo():
 	img = "/static/logo-black.svg" if profile_data["img_type"] == None else ("/storage/user_avater/"+user_uid+"."+profile_data["img_type"])
 
 	resp = {
-		"main":{
-			"img" : img,
-			"handle" : handle,
-			"accountType":accountType
-		},
-		"sub":{
-			"email" : email,	
-			"school" : school,
-			"bio" : bio
-		}
+		"main":{ "img" : img,"handle" : handle,"accountType":accountType},
+		"sub":{ "email" : email, "school" : school, "bio" : bio}
 	}
-	return Response(json.dumps({"status":"OK","data": resp}), mimetype="application/json")
+
+	count = database_util.command_execute("select count(*) from problem where problem_author = %s",(handle))[0]["count(*)"]
+
+	return Response(json.dumps({"status":"OK","data": resp,"count":count}), mimetype="application/json")
 
 @profile_page.route("/profile_problem_list",methods=["GET"])
 @require_session
 def get_problem_list():
-	try:	
-		SID = request.cookies.get("SID")
-		handle = jwt_decode(SID)["handle"]
-	except:
-		return "please login", 400
-	
-	args = request.args
-	number_of_problem = int(args["numbers"])
-	offset = int(args["from"])
 
-	problems = database_util.command_execute("select * from problem where problem_author=%s limit %s offset %s;",(handle,number_of_problem,offset))
+	# 確認登入狀況
+	SID = request.cookies.get("SID")
+	if(not jwt_valid(SID)):
+		return Response(json.dumps(error_dict(ErrorCode.REQUIRE_AUTHORIZATION)), mimetype="application/json")
+
+	handle = jwt_decode(SID)["handle"]
+	
+	# 取出題目列表
+	args = request.args
+	num_per_page = 0
+	index = 0
+	try:
+		num_per_page = int(args["mode"])
+		index = int(args["page"])
+	except:
+		problems = []
+	finally:
+		problems = database_util.command_execute("select * from problem where problem_author=%s limit %s offset %s;",(handle,num_per_page,(index-1)*num_per_page))
+	
+	# 取出題目詳細資訊
 	result =[]
 	i=0
 	for problem in problems:
@@ -214,32 +227,13 @@ def get_problem_list():
 			problem_json = json.loads(problem_raw_data)
 
 			permission = False
-
 			if(problem_json["basic_setting"]["permission"] == "1"):
 				permission = True
 			
-			subdata = {"id":i, "title" : problem_json["problem_content"]["title"], "permission" :	permission , "author" : problem["problem_author"], "problem_pid":problem_pid}
+			subdata = {"id": problem["id"] , "title" : problem_json["problem_content"]["title"], "permission" :	permission , "problem_pid": problem_pid}
 			result.append(subdata)
 			i+=1
 	return Response(json.dumps({"status":"OK","data": result}), mimetype="application/json")
-	
-@profile_page.route("/profile_problem_setting",methods=["GET"])
-@require_session
-def get_problem_list_setting():
-	try:	
-		SID = request.cookies.get("SID")
-		handle = jwt_decode(SID)["handle"]
-	except:
-		return "please login", 400
-	
-
-	args = request.args
-	
-	count = database_util.command_execute("select count(*) from problem where problem_author = %s",(handle))
-	response={
-		"count":count[0]["count(*)"]
-	}
-	return response
 
 @profile_page.route("/storage/<path:path>")
 def returnStaticFile(path):

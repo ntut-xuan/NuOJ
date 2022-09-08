@@ -36,7 +36,7 @@ CREATE TABLE `problem` (
   `ID` int(11) NOT NULL AUTO_INCREMENT,
   `problem_pid` varchar(20) NOT NULL,
   `problem_author` varchar(20) NOT NULL,
-  `solution_group` varchar(40) DEFAULT NULL,
+  `solution_group` varchar(40) DEFAULT NULL
   PRIMARY KEY (`ID`)
 ) ENGINE=InnoDB AUTO_INCREMENT=100004 DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;

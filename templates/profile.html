@@ -13,7 +13,11 @@
         <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
         <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
         <!-- <script src="/static/js/error_code.js"></script> -->
-        <script src="/static/js/react_profile.js"></script>
+        {% if userType == True %}
+        <script src="/static/js/react_profile_owner.js"></script>
+        {% else %}
+        <script src="/static/js/react_profile_guest.js"></script>
+        {% endif%}
     </body>
 </html>
 
