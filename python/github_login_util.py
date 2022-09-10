@@ -50,6 +50,7 @@ def githubLogin(code, settingJsonObject):
     if int(result["COUNT(*)"]) == 0:
         user_uid = str(uuid4())
         database_util.command_execute("INSERT INTO `user`(user_uid, password, email, role, email_verified) VALUES(%s, %s, %s, %s, %s)", (user_uid, str(uuid4()), email, 0, True))
+        database_util.command_execute("INSERT INTO `profile` (user_uid) VALUES(%s)", (user_uid))
         # Write into storage (init, unset handle)
         if not database_util.file_storage_tunnel_exist(user_uid + ".json", TunnelCode.USER_PROFILE):
             database_util.file_storage_tunnel_write(user_uid + ".json", json.dumps({"handle": "", "email": email, "school": "", "bio": ""}), TunnelCode.USER_PROFILE)
