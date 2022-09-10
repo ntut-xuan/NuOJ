@@ -230,7 +230,7 @@ def get_problem_list():
 			if(problem_json["basic_setting"]["permission"] == "1"):
 				permission = True
 			
-			subdata = {"id": problem["id"] , "title" : problem_json["problem_content"]["title"], "permission" :	permission , "problem_pid": problem_pid}
+			subdata = {"id": problem["ID"] , "title" : problem_json["problem_content"]["title"], "permission" :	permission , "problem_pid": problem_pid}
 			result.append(subdata)
 			i+=1
 	return Response(json.dumps({"status":"OK","data": result}), mimetype="application/json")
