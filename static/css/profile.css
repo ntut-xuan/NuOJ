@@ -28,179 +28,22 @@ body{
     overflow: hidden;
 }
 
-.flex{
+/* 通用項目 */
+
+.container{
     display: flex;
+    margin: 0px;
 }
 
-.flex-col{
-    flex-direction: column;
+/* 主要葉面 */
+
+.main-page{
+    max-width: 1280px;
+    margin-left: auto;
+    margin-right: auto;
 }
 
-.flex-wrap{
-    flex-wrap: wrap;
-}
-
-.over-flow-text{
-    text-align: start;
-}
-
-.subtitle-container{
-    width: 270px;
-    height: auto;
-}
-
-
-
-
-
-.text-little_gray{
-    color: rgb(117, 117, 117);
-}
-
-.text-bule{
-    color: rgb(101, 132, 168);
-}
-
-.text-size-large{
-    font-size: 40px;
-}
-
-.text-size-normal{
-    font-size: 25px;
-}
-
-.text-size-small{
-    font-size: 18px;
-}
-
-.text-align-end{
-    text-align: end;
-}
-
-.justify-content-end{
-    justify-content:flex-end;
-}
-
-.align-items-center{
-    align-items: center;
-}
-
-.absolute{
-    position: absolute;
-}
-
-.btu{
-    border-radius: 2px;
-    padding: 5px;
-}
-
-.large-btu-bg{
-    background-color: rgb(135, 171, 212);
-}   
-
-.little-btu-bg{
-    background-color: rgb(210, 220, 233);
-}
-
-.bg-red{
-    background-color: red; 
-}
-
-.bg-green{
-    background-color: green;
-}
-
-.subtitle{
-    font-weight: 700;
-    opacity: 0.6;
-}
-
-.w-full{
-    width: 100%;
-}
-
-.w-80{
-    width: 80%;
-}
-
-.w-60{
-    width: 60%;
-}
-
-.w-50{
-    width: 50%;
-}
-
-.w-40{
-    width: 40%;
-}
-
-.w-33{
-    width: 33%;
-}
-
-.w-20{
-    width: 20%;
-}
-
-.h-50{
-    height: 50px;
-}
-
-.g-10{
-    gap: 10px;
-}
-
-.g-15{
-    gap: 15px;
-}
-
-.g-20{
-    gap:20px;
-}
-
-.g-40{
-    gap: 40px;
-}
-
-.p-auto{
-    padding: auto;
-}
-
-.p-10{
-    padding: 10px;
-}
-
-.p-40{
-    padding: 2.5rem;
-}
-
-.m-auto{
-    margin: auto;
-}
-
-.m-b-10{
-    margin-bottom: 10px;
-}
-
-.align-items-center{
-    align-items:center;
-}
-
-.border-sd{
-    border-width: 2px;
-    border-radius: 0.25rem;
-    box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-}
-
-.main-content{
-    margin-left: 360px;
-}
-
-.profile-area{
-    width: 350px;
-}
-
+/* 工具欄相關 */
 
 .tool_bar{
     width: 100vw;
@@ -209,16 +52,99 @@ body{
     border-width: 2px;
     box-shadow: 0 0px 2px 0 rgb(0 0 0 / 0.05);
     background-color: rgb(249 250 251 / 1);
+    justify-content: space-between;
+    align-items: center;
 }
+
+
+/* 內容工具列相關 */
+
+.page-info-container{
+    display: flex;
+    gap: 10px;
+}
+
+.page-info{
+    width: 100px;
+    text-align: center;
+    position: relative;
+    z-index: 2;
+}
+
+.page-info-indecater{
+    justify-content: space-between;
+    position: absolute;
+    z-index: 0;
+    transition-property: all;
+    transition-duration: 500ms;
+}
+
+.page-info-btn{
+    padding: 0px;
+}
+
+/* 使用者顯示profile相關 */
+
+.profile-area{
+    width: 350px;
+    position: absolute;
+}
+
+.profile-img-container{
+    height: auto; 
+    width: auto;
+    overflow: hidden;
+    border-radius: 100%;
+    box-shadow: rgba(0, 0, 0, 0.35) 0px 0px 5px;
+}
+
+.profile-img{
+    height: 250px;
+    width: 250px;
+    object-fit: cover;
+    border-radius: 100%;
+    padding: 1px;
+}
+
+/* 修改profile頁面相關 */
+
+.img-cover{
+    height: 250px;
+    width: 250px;
+    position: absolute;
+    border-radius: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: rgb(0 0 0 / 0);
+}
+
+.img-cover:hover{
+    background-color: rgb(0 0 0 / 0.5);
+    color: rgba(255, 255, 255);
+}
+
+/* 題目顯示介面 */
 
 .problem-overview-list{
     display: flex;
     flex-wrap: wrap;
 }
 
-.problem-list{
+.problem-overview-container{
     display: flex;
-    flex-wrap: wrap;
+    flex-direction: column;
+    padding: 1.25rem;
+    border-width: 2px;
+    border-radius: 10px;
+    border-color: black;
+    border-style: solid;
+}
+
+.problem-notification{
+    text-align: center;
+    font-weight: 600;
+    font-size: xx-large;
 }
 
 .problem-container{
@@ -232,107 +158,24 @@ body{
 }
 
 .problem-title{
-    justify-content: space-between;
-}
-
-.problem-notification{
-    text-align: center;
-    font-weight: 600;
-    font-size: xx-large;
-}
-
-.page-info{
-    width: 100px;
-    text-align: center;
-    position: relative;
-    z-index: 2;
-}
-
-.page-info-indecater{
-    justify-content: space-between;
-    position: absolute;
-    /* transform: translateX(26px); */
-    z-index: 0;
-    transition-property: all;
-    transition-duration: 500ms;
-}
-
-.info-first{
-    transform: translateX(26px);
-}
-
-.info-second{
-    transform: translateX(136px);
-}
-
-.page-info-btn{
-    padding: 0px;
-
-}
-
-.middel{
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%,-50%);
-}
-
-.container{
     display: flex;
-    margin: 0px;
-}
-
-.main-page{
-    max-width: 1280px;
-    margin-left: auto;
-    margin-right: auto;
-}
-
-.all_page_cover{
-    height: 100vh;
-    width: 100vw;
-    position: absolute;
-    top:0;
-    left: 0;
-    background-color: black;
-    opacity: 0.8;
-}
-
-
-
-
-.profile-img{
-    height: 250px;
-    width: 250px;
-    object-fit: cover;
-    border-radius: 100%;
-    padding: 1px;
-}
-
-.logo-img{
-    /* height: 50px; */
-    width: 100px;
-}
-
-.img-cover{
-    height: 250px;
-    width: 250px;
-    position: absolute;
-    border-radius: 100%;
-    display: flex;
-    justify-content: center;
+    justify-content: space-between;
     align-items: center;
-    color: rgb(0 0 0 / 0);
-}
-.img-cover:hover{
-    background-color: rgb(0 0 0 / 0.5);
-    color: rgba(255, 255, 255);
 }
 
-.profile-img-container{
-    height: auto; 
-    width: auto;
-    overflow: hidden;
-    border-radius: 100%;
-    box-shadow: rgba(0, 0, 0, 0.35) 0px 0px 5px;
+.problem-list-container{
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 250px);
+    overflow-y: scroll;
 }
+
+.problem-list-container::-webkit-scrollbar {
+    width: 5px;
+}
+
+.problem-list-container::-webkit-scrollbar-thumb {
+    border-radius: 10px;
+    background-color: rgba(99, 99, 99, 0.534);
+}
+

@@ -24,6 +24,8 @@ from app_auth import auth
 from app_add_problem import problem
 from app_problem import problem_page
 from app_profile import profile_page
+from app_admin import admin_page
+
 
 app = Flask(__name__, static_url_path='', template_folder="/etc/nuoj/templates")
 app.register_blueprint(auth)

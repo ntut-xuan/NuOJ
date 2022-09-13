@@ -235,6 +235,22 @@ def get_problem_list():
 			i+=1
 	return Response(json.dumps({"status":"OK","data": result}), mimetype="application/json")
 
+@profile_page.route("/get_user_problem_number",methods=["GET"])
+@require_session
+def get_user_problem_number():
+
+	# 確認登入狀況
+	SID = request.cookies.get("SID")
+	if(not jwt_valid(SID)):
+		return Response(json.dumps(error_dict(ErrorCode.REQUIRE_AUTHORIZATION)), mimetype="application/json")
+
+	handle = jwt_decode(SID)["handle"]
+
+	count = database_util.command_execute("SELECT COUNT(*) FROM `problem` WHERE problem_author=%s", (handle))[0]["COUNT(*)"]
+
+	return Response(json.dumps({"status":"OK","data": count}), mimetype="application/json")
+
+
 @profile_page.route("/storage/<path:path>")
 def returnStaticFile(path):
 	return send_from_directory('../storage', path)

@@ -24,6 +24,8 @@ function error_swal(title) {
     });
 }
 
+// Profile 顯示範圍
+
 var Inputbox = function (_React$Component) {
     _inherits(Inputbox, _React$Component);
 
@@ -250,7 +252,7 @@ var UpdateProfileInterface = function (_React$Component2) {
 
             var main = React.createElement(
                 "div",
-                { className: "container g-15 p-40 flex flex-col profile-area absolute" },
+                { className: "container gap-1 p-10 flex flex-col profile-area" },
                 React.createElement(
                     "div",
                     { className: "m-auto" },
@@ -259,7 +261,7 @@ var UpdateProfileInterface = function (_React$Component2) {
                         { className: "profile-img-container" },
                         React.createElement(
                             "button",
-                            { className: "img-cover text-size-normal", onClick: this.trigger_image_upload },
+                            { className: "img-cover text-lg", onClick: this.trigger_image_upload },
                             "\u4FEE\u6539\u5716\u7247"
                         ),
                         React.createElement("img", { id: "user_avater", className: "profile-img", src: this.state.img })
@@ -271,7 +273,7 @@ var UpdateProfileInterface = function (_React$Component2) {
                     { className: "flex w-full" },
                     React.createElement(
                         "button",
-                        { className: "large-btu-bg w-full", onClick: function onClick() {
+                        { className: "bg-cyan-700/50 w-full", onClick: function onClick() {
                                 _this6.upload_profile();
                             } },
                         "\u78BA\u8A8D\u4FEE\u6539"
@@ -282,7 +284,7 @@ var UpdateProfileInterface = function (_React$Component2) {
                     { className: "flex w-full" },
                     React.createElement(
                         "button",
-                        { className: "large-btu-bg w-full", onClick: function onClick() {
+                        { className: "bg-neutral-400/50 w-full", onClick: function onClick() {
                                 _this6.props.change(false);
                             } },
                         "\u53D6\u6D88"
@@ -306,17 +308,17 @@ var Subtitle = function (_React$Component3) {
     }
 
     _createClass(Subtitle, [{
-        key: "get_titles",
-        value: function get_titles(titles) {
+        key: "render_titles",
+        value: function render_titles(titles) {
             var lines = Object.entries(titles);
             resp = [];
             lines.forEach(function (element) {
                 if (element[1] != "") resp.push(React.createElement(
                     "div",
-                    { key: element[0], className: "over-flow-text" },
+                    { key: element[0], className: "" },
                     React.createElement(
                         "p",
-                        { className: "text-size-small text-little_gray break-words" },
+                        { className: "text-base text-slate-400 break-words" },
                         element[1]
                     )
                 ));
@@ -331,7 +333,7 @@ var Subtitle = function (_React$Component3) {
             var maintitles = this.props.maintitles;
             var main = React.createElement(
                 "div",
-                { className: "container g-15 p-40 flex flex-col profile-area absolute" },
+                { className: "container gap-5 p-10 flex flex-col profile-area" },
                 React.createElement(
                     "div",
                     { className: "m-auto" },
@@ -346,26 +348,26 @@ var Subtitle = function (_React$Component3) {
                     { className: "w-full flex flex-col" },
                     React.createElement(
                         "p",
-                        { className: "text-size-small font-mono" },
+                        { className: "text-base font-mono" },
                         maintitles.accountType
                     ),
                     React.createElement(
                         "p",
-                        { className: "text-size-large font-mono " },
+                        { className: "text-6xl font-mono " },
                         maintitles.handle
                     )
                 ),
                 React.createElement(
                     "div",
                     { className: "flex flex-col" },
-                    this.get_titles(this.props.subtitles)
+                    this.render_titles(this.props.subtitles)
                 ),
                 React.createElement(
                     "div",
                     { className: "flex" },
                     React.createElement(
                         "button",
-                        { className: "large-btu-bg w-full", onClick: function onClick() {
+                        { className: "w-full bg-cyan-700/50", onClick: function onClick() {
                                 return _this8.props.change();
                             } },
                         "\u4FEE\u6539\u500B\u4EBA\u8CC7\u6599"
@@ -474,6 +476,8 @@ var Introduce = function (_React$Component4) {
 
     return Introduce;
 }(React.Component);
+
+// 主要顯示範圍
 
 var PageSlecter = function (_React$Component5) {
     _inherits(PageSlecter, _React$Component5);
@@ -586,121 +590,67 @@ var PageSlecter = function (_React$Component5) {
     return PageSlecter;
 }(React.Component);
 
-var Problem_info = function (_React$Component6) {
-    _inherits(Problem_info, _React$Component6);
-
-    function Problem_info() {
-        _classCallCheck(this, Problem_info);
-
-        return _possibleConstructorReturn(this, (Problem_info.__proto__ || Object.getPrototypeOf(Problem_info)).apply(this, arguments));
-    }
-
-    _createClass(Problem_info, [{
-        key: "render",
-        value: function render() {
-            var status;
-            if (this.props.permission == true) {
-                status = React.createElement(
-                    "p",
-                    null,
-                    "\u516C\u958B"
-                );
-            } else {
-                status = React.createElement(
-                    "p",
-                    null,
-                    "\u672A\u516C\u958B"
-                );
-            }
-            var url = "/edit_problem/" + this.props.problem_pid + "/basic";
-
-            var main = React.createElement(
-                "div",
-                { className: "w-50" },
-                React.createElement(
-                    "div",
-                    { className: "problem-container" },
-                    React.createElement(
-                        "div",
-                        { className: "border-sd p-10 flex flex-col" },
-                        React.createElement(
-                            "div",
-                            { className: "flex g-10 align-items-center problem-title" },
-                            React.createElement(
-                                "a",
-                                { href: url, className: "text-size-small problem-info-col text-bule" },
-                                this.props.title
-                            ),
-                            status
-                        ),
-                        React.createElement("div", { className: "problem-info-col" })
-                    )
-                )
-            );
-
-            var all = React.createElement(
-                "div",
-                { className: "p-10 flex flex-col" },
-                React.createElement(
-                    "div",
-                    { className: "flex g-10 align-items-center problem-title" },
-                    React.createElement(
-                        "a",
-                        { href: url, className: "text-size-small problem-info-col text-bule" },
-                        this.props.title
-                    ),
-                    status
-                ),
-                React.createElement("div", { className: "problem-info-col" }),
-                React.createElement("hr", null)
-            );
-
-            if (this.props.mode == true) {
-                return main;
-            } else {
-                return all;
-            }
-        }
-    }]);
-
-    return Problem_info;
-}(React.Component);
-
-var Problem_List = function (_React$Component7) {
-    _inherits(Problem_List, _React$Component7);
+var Problem_List = function (_React$Component6) {
+    _inherits(Problem_List, _React$Component6);
 
     function Problem_List(prop) {
         _classCallCheck(this, Problem_List);
 
-        var _this15 = _possibleConstructorReturn(this, (Problem_List.__proto__ || Object.getPrototypeOf(Problem_List)).call(this, prop));
+        var _this14 = _possibleConstructorReturn(this, (Problem_List.__proto__ || Object.getPrototypeOf(Problem_List)).call(this, prop));
 
-        _this15.state = {
+        _this14.state = {
             num_per_page: 10,
             showing: 1,
-            problems: []
+            problems: {},
+            total_number: 0
         };
 
-        _this15.topage = _this15.topage.bind(_this15);
-        _this15.render_problem_list = _this15.render_problem_list.bind(_this15);
-        return _this15;
+        _this14.topage = _this14.topage.bind(_this14);
+        _this14.render_problem_list = _this14.render_problem_list.bind(_this14);
+        return _this14;
     }
 
     _createClass(Problem_List, [{
         key: "componentDidMount",
         value: function componentDidMount() {
+            this.getNumbers();
             this.getProblems();
+        }
+    }, {
+        key: "getNumbers",
+        value: function getNumbers() {
+            var _this15 = this;
+
+            fetch("/get_user_problem_number").then(function (res) {
+                return res.json();
+            }).then(function (json) {
+                var status = json.status;
+                if (status == "OK") {
+                    _this15.setState({ total_number: json.data });
+                }
+            });
         }
     }, {
         key: "getProblems",
         value: function getProblems() {
             var _this16 = this;
 
-            fetch("/profile_problem_list?" + new URLSearchParams({ mode: this.state.num_per_page, page: this.state.showing })).then(function (res) {
+            var num_per_page = this.state.num_per_page;
+            var showing = this.state.showing;
+            var problems = this.state.problems;
+
+            if (problems[showing] != undefined) {
+                return;
+            }
+
+            fetch("/profile_problem_list?" + new URLSearchParams({ mode: num_per_page, page: showing })).then(function (res) {
                 return res.json();
             }).then(function (json) {
                 var status = json.status;
                 if (status == "OK") {
-                    _this16.setState({ problems: json.data });
+                    var temp = _this16.state.problems;
+                    temp[showing] = json.data;
+                    _this16.setState({ problems: temp });
                 }
             });
         }
@@ -709,7 +659,7 @@ var Problem_List = function (_React$Component7) {
         value: function topage(i) {
             if (i == this.state.showing) return;
             var real_page;
-            var max = Math.ceil(this.props.num_of_problem / this.state.num_per_page);
+            var max = Math.ceil(this.state.total_number / this.state.num_per_page);
 
             if (i > max) real_page = max;else if (i < 1) real_page = 1;else real_page = i;
             this.setState({ showing: real_page });
@@ -718,27 +668,61 @@ var Problem_List = function (_React$Component7) {
     }, {
         key: "render_problem_list",
         value: function render_problem_list() {
-            if (this.props.num_of_problem == 0) {
-                var None_problems = React.createElement(
+            var None_problems = React.createElement(
+                "div",
+                { className: "h-full w-hull flex items-center" },
+                React.createElement(
                     "p",
-                    { className: "problem-notification p-40" },
+                    { className: "problem-notification p-10" },
                     " You didn't released any problem yet"
-                );
+                )
+            );
+            if (this.state.total_number == 0) {
+
                 return None_problems;
             }
-            re = [];
-            var from = (this.state.showing - 1) * this.state.num_per_page;
-            var to = this.state.num_per_page + from;
-            var max = this.state.problems.length;
-            for (var i = from; i < to; i++) {
-                if (i >= max) {
-                    break;
-                }
-                var element = this.state.problems[i];
-                var info = React.createElement(Problem_info, { key: element.problem_pid, problem_pid: element.problem_pid, title: element.title, permission: element.permission, mode: false });
-                re.push(info);
-            }
 
+            re = [];
+            var showing = this.state.showing;
+            var lists = this.state.problems[showing];
+            if (lists == undefined) return None_problems;
+
+            lists.forEach(function (element) {
+                var status;
+                if (element.permission == true) {
+                    status = React.createElement(
+                        "p",
+                        null,
+                        "\u516C\u958B"
+                    );
+                } else {
+                    status = React.createElement(
+                        "p",
+                        null,
+                        "\u672A\u516C\u958B"
+                    );
+                }
+                var url = "/edit_problem/" + element.problem_pid + "/basic";
+
+                var info = React.createElement(
+                    "div",
+                    { className: "p-5 flex flex-col" },
+                    React.createElement(
+                        "div",
+                        { className: "gap-5 problem-title" },
+                        React.createElement(
+                            "a",
+                            { href: url, className: "text-xl problem-info-col text-blue-700/70" },
+                            element.title
+                        ),
+                        status
+                    ),
+                    React.createElement("div", { className: "problem-info-col w-ful" }),
+                    React.createElement("hr", null)
+                );
+
+                re.push(info);
+            });
             return re;
         }
     }, {
@@ -758,8 +742,8 @@ var Problem_List = function (_React$Component7) {
                 ),
                 React.createElement(
                     "div",
-                    { className: "flex flex-col" },
-                    React.createElement(this.render_problem_list, null)
+                    { className: "problem-list-container" },
+                    this.render_problem_list()
                 )
             );
 
@@ -770,8 +754,11 @@ var Problem_List = function (_React$Component7) {
     return Problem_List;
 }(React.Component);
 
-var OverView_problem = function (_React$Component8) {
-    _inherits(OverView_problem, _React$Component8);
+// 概覽範圍
+
+
+var OverView_problem = function (_React$Component7) {
+    _inherits(OverView_problem, _React$Component7);
 
     function OverView_problem(props) {
         _classCallCheck(this, OverView_problem);
@@ -783,7 +770,7 @@ var OverView_problem = function (_React$Component8) {
             problems: []
         };
 
-        _this17.getProblems = _this17.getProblems.bind(_this17);
+        _this17.render_poroblems = _this17.render_poroblems.bind(_this17);
         return _this17;
     }
 
@@ -804,8 +791,8 @@ var OverView_problem = function (_React$Component8) {
             });
         }
     }, {
-        key: "getProblems",
-        value: function getProblems() {
+        key: "render_poroblems",
+        value: function render_poroblems() {
             re = [];
             var max = this.state.problems.length;
             for (var i = 0; i < 4; i++) {
@@ -813,8 +800,44 @@ var OverView_problem = function (_React$Component8) {
                     break;
                 }
                 var element = this.state.problems[i];
-                var info = React.createElement(Problem_info, { key: element.problem_pid, problem_pid: element.problem_pid, title: element.title, permission: element.permission, mode: true });
-                re.push(info);
+                var url = "/edit_problem/" + element.problem_pid + "/basic";
+                if (element.permission == true) {
+                    problem_status = React.createElement(
+                        "p",
+                        null,
+                        "\u516C\u958B"
+                    );
+                } else {
+                    problem_status = React.createElement(
+                        "p",
+                        null,
+                        "\u672A\u516C\u958B"
+                    );
+                }
+                var info_card = React.createElement(
+                    "div",
+                    { className: "w-1/2 ", key: element.problem_pid },
+                    React.createElement(
+                        "div",
+                        { className: "problem-container" },
+                        React.createElement(
+                            "div",
+                            { className: "problem-overview-container" },
+                            React.createElement(
+                                "div",
+                                { className: "gap-5 problem-title" },
+                                React.createElement(
+                                    "a",
+                                    { href: url, className: "text-xl problem-info-col text-blue-700/80" },
+                                    element.title
+                                ),
+                                problem_status
+                            ),
+                            React.createElement("div", { className: "problem-info-col w-full" })
+                        )
+                    )
+                );
+                re.push(info_card);
             }
 
             var main = React.createElement(
@@ -825,7 +848,7 @@ var OverView_problem = function (_React$Component8) {
             if (re.length == 0) {
                 var None_problems = React.createElement(
                     "p",
-                    { className: "problem-notification p-40" },
+                    { className: "problem-notification p-10" },
                     " You didn't released any problem yet"
                 );
                 return None_problems;
@@ -866,7 +889,7 @@ var OverView_problem = function (_React$Component8) {
                 React.createElement(
                     "div",
                     { className: "" },
-                    React.createElement(this.getProblems, null)
+                    this.render_poroblems()
                 ),
                 React.createElement(
                     "div",
@@ -881,8 +904,10 @@ var OverView_problem = function (_React$Component8) {
     return OverView_problem;
 }(React.Component);
 
-var ToolBar = function (_React$Component9) {
-    _inherits(ToolBar, _React$Component9);
+// 其他
+
+var ToolBar = function (_React$Component8) {
+    _inherits(ToolBar, _React$Component8);
 
     function ToolBar(prop) {
         _classCallCheck(this, ToolBar);
@@ -910,10 +935,10 @@ var ToolBar = function (_React$Component9) {
         value: function render() {
             var main = React.createElement(
                 "div",
-                { className: "items-center flex g-20 tool_bar" },
+                { className: "items-center flex tool_bar" },
                 React.createElement(
                     "div",
-                    { className: "flex g-40 w-80 align-items-center" },
+                    { className: "flex gap-10 w-4/5 items-center" },
                     React.createElement(
                         "div",
                         { className: "h-50" },
@@ -928,7 +953,7 @@ var ToolBar = function (_React$Component9) {
                         { href: "/problem" },
                         React.createElement(
                             "p",
-                            { className: "text-size-normal" },
+                            { className: "text-lg" },
                             "\u984C\u76EE"
                         )
                     ),
@@ -937,7 +962,7 @@ var ToolBar = function (_React$Component9) {
                         { href: "/about" },
                         React.createElement(
                             "p",
-                            { className: "text-size-normal" },
+                            { className: "text-lg" },
                             "\u95DC\u65BC"
                         )
                     ),
@@ -946,20 +971,20 @@ var ToolBar = function (_React$Component9) {
                         { href: "/status" },
                         React.createElement(
                             "p",
-                            { className: "text-size-normal" },
+                            { className: "text-lg" },
                             "\u72C0\u614B"
                         )
                     )
                 ),
                 React.createElement(
                     "div",
-                    { className: "w-20 flex justify-end" },
+                    { className: "w-1/5 flex justify-end" },
                     React.createElement(
                         "div",
                         null,
                         React.createElement(
                             "button",
-                            { className: "text-size-normal", onClick: this.logout },
+                            { className: "text-lg", onClick: this.logout },
                             "\u767B\u51FA"
                         )
                     )
@@ -972,8 +997,8 @@ var ToolBar = function (_React$Component9) {
     return ToolBar;
 }(React.Component);
 
-var Info_selecter = function (_React$Component10) {
-    _inherits(Info_selecter, _React$Component10);
+var Info_selecter = function (_React$Component9) {
+    _inherits(Info_selecter, _React$Component9);
 
     function Info_selecter() {
         _classCallCheck(this, Info_selecter);
@@ -986,10 +1011,9 @@ var Info_selecter = function (_React$Component10) {
         value: function render() {
             var _this22 = this;
 
-            var indecater_class = "page-info flex page-info-indecater " + this.props.pos;
             var main = [React.createElement(
                 "div",
-                { className: "flex g-10 m-b-10 page-info-title" },
+                { className: "flex gap-5 m-b-10 " },
                 React.createElement(
                     "button",
                     { className: "page-info-btn", onClick: function onClick() {
@@ -999,38 +1023,42 @@ var Info_selecter = function (_React$Component10) {
                 ),
                 React.createElement(
                     "div",
-                    { className: "page-info" },
+                    { className: "page-info-container" },
                     React.createElement(
-                        "button",
-                        { onClick: function onClick() {
-                                return _this22.props.onclick("OverView");
-                            }, className: "page-info-btn" },
-                        "OverView"
-                    )
-                ),
-                React.createElement(
-                    "div",
-                    { className: "page-info" },
-                    React.createElement(
-                        "button",
-                        { onClick: function onClick() {
-                                return _this22.props.onclick("Problem");
-                            }, className: "page-info-btn" },
-                        "Problems"
-                    )
-                ),
-                React.createElement(
-                    "div",
-                    { className: indecater_class },
-                    React.createElement(
-                        "p",
-                        null,
-                        "<"
+                        "div",
+                        { className: "page-info" },
+                        React.createElement(
+                            "button",
+                            { onClick: function onClick() {
+                                    return _this22.props.onclick("OverView");
+                                }, className: "page-info-btn" },
+                            "OverView"
+                        )
                     ),
                     React.createElement(
-                        "p",
-                        null,
-                        ">"
+                        "div",
+                        { className: "page-info" },
+                        React.createElement(
+                            "button",
+                            { onClick: function onClick() {
+                                    return _this22.props.onclick("Problem");
+                                }, className: "page-info-btn" },
+                            "Problems"
+                        )
+                    ),
+                    React.createElement(
+                        "div",
+                        { className: "page-info flex page-info-indecater", style: { transform: "translateX(" + this.props.pos + ")" } },
+                        React.createElement(
+                            "p",
+                            null,
+                            "<"
+                        ),
+                        React.createElement(
+                            "p",
+                            null,
+                            ">"
+                        )
                     )
                 )
             ), React.createElement("hr", null)];
@@ -1041,8 +1069,8 @@ var Info_selecter = function (_React$Component10) {
     return Info_selecter;
 }(React.Component);
 
-var Main = function (_React$Component11) {
-    _inherits(Main, _React$Component11);
+var Main = function (_React$Component10) {
+    _inherits(Main, _React$Component10);
 
     function Main(props) {
         _classCallCheck(this, Main);
@@ -1051,8 +1079,7 @@ var Main = function (_React$Component11) {
 
         _this23.state = {
             changing: false,
-            showing: "OverView",
-            problem_number: 0
+            showing: "0px"
         };
         _this23.get_maincontent = _this23.get_maincontent.bind(_this23);
         _this23.change_Info = _this23.change_Info.bind(_this23);
@@ -1060,33 +1087,16 @@ var Main = function (_React$Component11) {
     }
 
     _createClass(Main, [{
-        key: "componentDidMount",
-        value: function componentDidMount() {
-            var _this24 = this;
-
-            fetch("/profile_problem_setting").then(function (res) {
-                return res.json();
-            }).then(function (json) {
-                var status = json.status;
-                if (status == "OK") {
-                    _this24.setState({ problem_number: json.count });
-                } else {
-                    _this24.setState({ problem_number: 0 });
-                }
-            });
-        }
-    }, {
         key: "get_maincontent",
         value: function get_maincontent() {
-            var _this25 = this;
+            var _this24 = this;
 
-            if (this.state.showing == "OverView") {
+            if (this.state.showing == "0px") {
                 var html = [React.createElement(OverView_problem, { position: "", num_of_problem: this.state.problem_number, onclick: function onclick(i) {
-                        return _this25.change_Info(i);
+                        return _this24.change_Info(i);
                     } })];
-
                 return html;
-            } else if (this.state.showing == "Problem") {
+            } else if (this.state.showing == "110px") {
                 var _html = React.createElement(Problem_List, { num_of_problem: this.state.problem_number });
                 return _html;
             }
@@ -1094,33 +1104,33 @@ var Main = function (_React$Component11) {
     }, {
         key: "change_Info",
         value: function change_Info(i) {
+            var translate_pos = {
+                "OverView": "0px",
+                "Problem": "110px"
+            };
             this.setState({
-                showing: i
+                showing: translate_pos[i]
             });
         }
     }, {
         key: "render",
         value: function render() {
-            var _this26 = this;
+            var _this25 = this;
 
-            var translate_pos = {
-                "OverView": "info-first",
-                "Problem": "info-second"
-            };
             var page = [React.createElement(ToolBar, null), React.createElement(
                 "div",
-                { className: "p-40 main-page" },
-                React.createElement(Introduce, { position: "" }),
+                { className: "p-10 main-page" },
+                React.createElement(Introduce, null),
                 React.createElement(
                     "div",
-                    { className: "main-content" },
+                    { className: "ml-96" },
                     React.createElement(Info_selecter, { onclick: function onclick(i) {
-                            _this26.change_Info(i);
-                        }, pos: translate_pos[this.state.showing] }),
+                            _this25.change_Info(i);
+                        }, pos: this.state.showing }),
                     React.createElement(
                         "div",
-                        { className: "p-40 container flex flex-col" },
-                        React.createElement(this.get_maincontent, null)
+                        { className: "p-10 container flex flex-col" },
+                        this.get_maincontent()
                     )
                 )
             )];
