@@ -18,15 +18,15 @@ function error_swal(title){
 
 // ============================個人介紹部分============================
 
-class Subtitle extends React.Component{
-    get_titles(titles){
+class Subtitle extends React.Component{ 
+    render_titles(titles){
         const lines = Object.entries(titles)
         resp =[]
         lines.forEach(element=>{
             if(element[1]!="")
                 resp.push(
-                    <div key={element[0]} className="over-flow-text">
-                        <p className="text-size-small text-little_gray break-words">{element[1]}</p>
+                    <div key={element[0]} className="">
+                        <p className="text-base text-slate-400 break-words">{element[1]}</p>
                     </div>
                 ) 
         })
@@ -35,18 +35,18 @@ class Subtitle extends React.Component{
     render(){
         var maintitles = this.props.maintitles
         var main = (
-            <div className="container g-15 p-40 flex flex-col profile-area absolute">
+            <div className="container gap-5 p-10 flex flex-col profile-area">
                 <div className="m-auto">
                     <div className="profile-img-container" >
                         <img id="user_avater" className="profile-img" src={maintitles.img}/>
                     </div>
                 </div>
                 <div className="w-full flex flex-col">
-                    <p className="text-size-small font-mono">{maintitles.accountType}</p>
-                    <p className="text-size-large font-mono ">{maintitles.handle}</p>
+                    <p className="text-base font-mono">{maintitles.accountType}</p>
+                    <p className="text-6xl font-mono ">{maintitles.handle}</p>
                 </div>
                 <div className="flex flex-col">
-                    {this.get_titles(this.props.subtitles)}
+                    {this.render_titles(this.props.subtitles)}
                 </div>
             </div>
         )
@@ -262,78 +262,109 @@ class Problem_List extends React.Component{
         this.state={
             num_per_page : 10,
             showing : 1,
-            problems : []
+            problems : {},
+            total_number : 0
         }
 
         this.topage = this.topage.bind(this)
-        this.get_problem_list = this.get_problem_list.bind(this)
+        this.render_problem_list = this.render_problem_list.bind(this)
     }
 
-    getProblems(i,j){
-        fetch("/profile_problem_list?"+new URLSearchParams({numbers:i,from:j})).then((res)=>{
+    componentDidMount(){
+        this.getNumbers()
+        this.getProblems()
+    }
+
+
+    getNumbers(){
+        var location = window.location.href.split("/")
+        const handle = location[location.length-1] 
+        fetch("/get_user_problem_number?"+new URLSearchParams({handle:handle})).then((res)=>{
             return res.json()
         }).then((json)=>{
             const status = json.status;
             if(status == "OK"){
-                this.setState({ problems : this.state.problems.concat(json.data) })
+                this.setState({ total_number : json.data })
             }
         })
     }
 
-    getMoerProblems(i){
-        const from = this.state.problems.length
-        this.getProblems(i,from)
-    }
+    getProblems(){
+        const num_per_page = this.state.num_per_page
+        const showing = this.state.showing
+        const problems = this.state.problems
 
-    componentDidMount(){
-        this.getProblems(20,0)
+        if(problems[showing] != undefined){
+            return
+        }
+        var location = window.location.href.split("/")
+        const handle = location[location.length-1] 
+        fetch("/profile_problem_list?"+new URLSearchParams({mode:num_per_page,page:showing,handle:handle})).then((res)=>{
+            return res.json()
+        }).then((json)=>{
+            const status = json.status;
+            if(status == "OK"){
+                var temp = this.state.problems
+                temp[showing]=json.data
+                this.setState({ problems : temp })
+            }
+        })
     }
 
     topage(i){
         if(i==this.state.showing) return
         var real_page;
-        var max = Math.ceil(this.props.num_of_problem / this.state.num_per_page)
+        var max = Math.ceil(this.state.total_number / this.state.num_per_page)
         
-        if(i>max){
-            real_page = max
-        }
-        else if(i<1){
-            real_page = 1
-        }
-        else{
-            real_page = i
-        }
-
-        num_should_be = this.state.showing *this.state.num_per_page
-        if(this.state.problems.length<num_should_be){
-            const needed = num_should_be - this.state.problems.length +20
-            this.getMoerProblems(needed)
-        }
+        if(i>max) real_page = max
+        else if(i<1) real_page = 1
+        else real_page = i
+        this.setState({showing : real_page})
+        this.getProblems()
     }
 
-    get_problem_list(){
-        if(this.props.num_of_problem==0){
-            var None_problems=(
-                <p className="problem-notification p-40"> You didn't released any problem yet</p>
-            )
+    render_problem_list(){
+        const None_problems=(
+            <div className="h-full w-hull flex items-center">
+                <p className="problem-notification p-10"> He/She didn't released any problem yet</p>
+            </div>
+        )
+        if(this.state.total_number == 0){
+            
             return None_problems
         }
-        re=[]
-        const from = (this.state.showing - 1)*this.state.num_per_page
-        const to = this.state.num_per_page + from
-        const max = this.state.problems.length
-        for(var i= from;i<to;i++){
-            if(i>=max){
-                break;
-            }
-            var element = this.state.problems[i]
-            let info =
-                <Problem_info key={element.problem_pid} problem_pid={element.problem_pid} title={element.title} permission={element.permission}  mode={false}></Problem_info>
-            re.push(info)
-        }
 
+        re=[]
+        const showing = this.state.showing
+        const lists = this.state.problems[showing]
+        if(lists == undefined) return None_problems
+
+        lists.forEach(function(element){
+            var status;
+            if(element.permission == true){
+                status=<p>公開</p>
+            }
+            else{
+                status=<p>未公開</p>
+            }
+            const url ="/edit_problem/" + element.problem_pid + "/basic"
+
+            const info =(
+                <div className="p-5 flex flex-col">
+                    <div className="gap-5 problem-title">
+                        <a href={url}  className="text-xl problem-info-col text-blue-700/70">
+                            {element.title}
+                        </a>
+                        {status}
+                    </div>
+                    <div className="problem-info-col w-ful"></div>
+                    <hr/>
+                </div>
+            )
+
+            re.push(info)
+        })
         return re
-        
     }
 
     render(){
@@ -342,8 +373,8 @@ class Problem_List extends React.Component{
                 <div className="m-b-10">
                     <p>Problem list</p>
                 </div>
-                <div className="flex flex-col">
-                    <this.get_problem_list ></this.get_problem_list>
+                <div className="problem-list-container">
+                    {this.render_problem_list()}
                 </div>
             </div>  
         )
@@ -351,7 +382,6 @@ class Problem_List extends React.Component{
         return main
     }
 }
-
 class OverView_problem extends React.Component {
     constructor(props){
         super(props)
@@ -360,11 +390,13 @@ class OverView_problem extends React.Component {
             problems : []
         }
 
-        this.getProblems = this.getProblems.bind(this)
+        this.render_poroblems = this.render_poroblems.bind(this)
     }
 
     componentDidMount(){
-        fetch("/profile_problem_list?"+new URLSearchParams({numbers:4,from:0})).then((res)=>{
+        var location = window.location.href.split("/")
+        const handle = location[location.length-1] 
+        fetch("/profile_problem_list?"+new URLSearchParams({mode:4,page:1,handle:handle})).then((res)=>{
             return res.json()
         }).then((json)=>{
             const status = json.status;
@@ -377,7 +409,7 @@ class OverView_problem extends React.Component {
         })
     }
 
-    getProblems(){
+    render_poroblems(){
         re=[]
         const max = this.state.problems.length
         for(var i= 0;i<4;i++){
@@ -385,9 +417,29 @@ class OverView_problem extends React.Component {
                 break;
             }
             var element = this.state.problems[i]
-            let info =
-                <Problem_info key={element.problem_pid} problem_pid={element.problem_pid} title={element.title} permission={element.permission} mode={true}></Problem_info>
-            re.push(info)
+            let url ="/edit_problem/" + element.problem_pid + "/basic"
+            if(element.permission == true){
+                problem_status=<p>公開</p>
+            }
+            else{
+                problem_status=<p>未公開</p>
+            }
+            const info_card = (
+                <div className="w-1/2 " key={element.problem_pid}>
+                    <div className="problem-container">
+                        <div className="problem-overview-container">
+                            <div className="gap-5 problem-title">
+                                <a href={url}  className="text-xl problem-info-col text-blue-700/80">
+                                    {element.title}
+                                </a>
+                            {problem_status}
+                            </div>
+                            <div className="problem-info-col w-full"></div>
+                        </div>
+                    </div>
+                </div>
+            )
+            re.push(info_card)
         }
 
         var main=(
@@ -397,7 +449,7 @@ class OverView_problem extends React.Component {
         )
         if(re.length==0){
             var None_problems=(
-                <p className="problem-notification p-40"> You didn't released any problem yet</p>
+                <p className="problem-notification p-10"> He/She didn't released any problem yet</p>
             )
             return None_problems
         }
@@ -423,7 +475,7 @@ class OverView_problem extends React.Component {
                     <p>Problem list</p>
                 </div>
                 <div className="">
-                    <this.getProblems></this.getProblems>
+                    {this.render_poroblems()}
                 </div>
                 <div className="flex justify-content-end">
                     {overflow_tag}
@@ -434,23 +486,25 @@ class OverView_problem extends React.Component {
     }
 }
 
+
 class Info_selecter extends React.Component{
     render(){
-        var indecater_class = "page-info flex page-info-indecater "+this.props.pos
         var main = [
-            <div className="flex g-10 m-b-10 page-info-title">
+            <div className="flex gap-5 m-b-10 ">
                 <button className="page-info-btn" onClick={()=>this.props.onclick("OverView")}>
                     <img src="/static/house.svg" alt="" />
                 </button>
-                <div className="page-info">
-                    <button onClick={()=>this.props.onclick("OverView")} className="page-info-btn">OverView</button>
-                </div>
-                <div className="page-info">
-                    <button onClick={()=>this.props.onclick("Problem")} className="page-info-btn">Problems</button>
-                </div>
-                <div className={indecater_class}>
-                    <p>&lt;</p>
-                    <p>&gt;</p>
+                <div className="page-info-container">
+                    <div className="page-info">
+                        <button onClick={()=>this.props.onclick("OverView")} className="page-info-btn">OverView</button>
+                    </div>
+                    <div className="page-info">
+                        <button onClick={()=>this.props.onclick("Problem")} className="page-info-btn">Problems</button>
+                    </div>
+                    <div className="page-info flex page-info-indecater" style={{ transform : `translateX(${this.props.pos})`}}>
+                        <p>&lt;</p>
+                        <p>&gt;</p>
+                    </div>
                 </div>
             </div>,
             <hr/>
@@ -465,6 +519,7 @@ class ToolBar extends React.Component{
     constructor(prop){
         super(prop)
     }
+
     logout(){
         fetch("/logout").then((res)=>{ return res.json()}).then((json)=>{
             if(json.status == "OK"){ 
@@ -477,18 +532,18 @@ class ToolBar extends React.Component{
     }
     render(){
         let main = (
-            <div className="items-center flex g-20 tool_bar">
-                <div className="flex g-40 w-80 align-items-center">
+            <div className="items-center flex tool_bar">
+                <div className="flex gap-10 w-4/5 items-center">
                     <div className="h-50">
                         <a href="/"><img width={100} src="/static/logo-black.svg"/></a>
                     </div>
-                    <a href="/problem" ><p className="text-size-normal">題目</p></a>
-                    <a href="/about" ><p className="text-size-normal">關於</p></a>
-                    <a href="/status" ><p className="text-size-normal">狀態</p></a>
+                    <a href="/problem" ><p className="text-lg">題目</p></a>
+                    <a href="/about" ><p className="text-lg">關於</p></a>
+                    <a href="/status" ><p className="text-lg">狀態</p></a>
                 </div>
-                <div className="w-20 flex justify-end">
+                <div className="w-1/5 flex justify-end">
                     <div>
-                        <button className="text-size-normal" onClick={this.logout}>登出</button>
+                        <button className="text-lg" onClick={this.logout}>登出</button>
                     </div>
                 </div>
             </div>
@@ -502,56 +557,42 @@ class Main extends React.Component{
         super(props)
         this.state={
             changing : false,
-            showing : "OverView",
-            problem_number : 0
+            showing : "0px"
         }
         this.get_maincontent = this.get_maincontent.bind(this)
         this.change_Info = this.change_Info.bind(this)
     }
 
-    componentDidMount(){
-        fetch("/profile_problem_setting").then((res)=>{ return res.json() }).then((json)=>{
-            const status = json.status
-            if(status == "OK"){
-                this.setState({ problem_number : json.count })
-            }
-            else{
-                this.setState({ problem_number : 0})     
-            }
-        })
-    }
-
     get_maincontent(){
-        if(this.state.showing=="OverView"){
-            const html = [ <OverView_problem position={""} num_of_problem={this.state.problem_number} onclick={(i)=>this.change_Info(i)}></OverView_problem> ]
-
+        if(this.state.showing=="0px"){
+            const html = [<OverView_problem position={""} num_of_problem={this.state.problem_number} onclick={(i)=>this.change_Info(i)}></OverView_problem> ]
             return html
         }
-        else if(this.state.showing == "Problem"){
+        else if(this.state.showing == "110px"){
             const html = <Problem_List num_of_problem={this.state.problem_number} ></Problem_List>
             return html
         }
     }
 
     change_Info(i){
+        const translate_pos ={
+            "OverView" :  "0px",
+            "Problem" :   "110px"
+        }
         this.setState({
-            showing : i
+            showing : translate_pos[i]
         })
     }
     
     render(){
-        var translate_pos ={
-            "OverView" :  "info-first",
-            "Problem" :  "info-second"
-        }
         let page = [
             <ToolBar></ToolBar>,
-            <div className="p-40 main-page">
-                <Introduce position={""}/>
-                <div className="main-content">
-                    <Info_selecter onclick={(i)=>{this.change_Info(i)}} pos={translate_pos[this.state.showing]} ></Info_selecter>
-                    <div className="p-40 container flex flex-col">   
-                        <this.get_maincontent></this.get_maincontent>
+            <div className="p-10 main-page">
+                <Introduce/>
+                <div className="ml-96">
+                    <Info_selecter onclick={(i)=>{this.change_Info(i)}} pos={this.state.showing} ></Info_selecter>
+                    <div className="p-10 container flex flex-col">   
+                        {this.get_maincontent()}
                     </div>
                 </div>
             </div>
@@ -559,6 +600,7 @@ class Main extends React.Component{
         return page
     }
 }
+
 
 
 const root = ReactDOM.createRoot(document.getElementById("main"))

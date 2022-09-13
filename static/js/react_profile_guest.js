@@ -36,17 +36,17 @@ var Subtitle = function (_React$Component) {
     }
 
     _createClass(Subtitle, [{
-        key: "get_titles",
-        value: function get_titles(titles) {
+        key: "render_titles",
+        value: function render_titles(titles) {
             var lines = Object.entries(titles);
             resp = [];
             lines.forEach(function (element) {
                 if (element[1] != "") resp.push(React.createElement(
                     "div",
-                    { key: element[0], className: "over-flow-text" },
+                    { key: element[0], className: "" },
                     React.createElement(
                         "p",
-                        { className: "text-size-small text-little_gray break-words" },
+                        { className: "text-base text-slate-400 break-words" },
                         element[1]
                     )
                 ));
@@ -59,7 +59,7 @@ var Subtitle = function (_React$Component) {
             var maintitles = this.props.maintitles;
             var main = React.createElement(
                 "div",
-                { className: "container g-15 p-40 flex flex-col profile-area absolute" },
+                { className: "container gap-5 p-10 flex flex-col profile-area" },
                 React.createElement(
                     "div",
                     { className: "m-auto" },
@@ -74,19 +74,19 @@ var Subtitle = function (_React$Component) {
                     { className: "w-full flex flex-col" },
                     React.createElement(
                         "p",
-                        { className: "text-size-small font-mono" },
+                        { className: "text-base font-mono" },
                         maintitles.accountType
                     ),
                     React.createElement(
                         "p",
-                        { className: "text-size-large font-mono " },
+                        { className: "text-6xl font-mono " },
                         maintitles.handle
                     )
                 ),
                 React.createElement(
                     "div",
                     { className: "flex flex-col" },
-                    this.get_titles(this.props.subtitles)
+                    this.render_titles(this.props.subtitles)
                 )
             );
             return main;
@@ -388,84 +388,131 @@ var Problem_List = function (_React$Component5) {
         _this8.state = {
             num_per_page: 10,
             showing: 1,
-            problems: []
+            problems: {},
+            total_number: 0
         };
 
         _this8.topage = _this8.topage.bind(_this8);
-        _this8.get_problem_list = _this8.get_problem_list.bind(_this8);
+        _this8.render_problem_list = _this8.render_problem_list.bind(_this8);
         return _this8;
     }
 
     _createClass(Problem_List, [{
-        key: "getProblems",
-        value: function getProblems(i, j) {
+        key: "componentDidMount",
+        value: function componentDidMount() {
+            this.getNumbers();
+            this.getProblems();
+        }
+    }, {
+        key: "getNumbers",
+        value: function getNumbers() {
             var _this9 = this;
 
-            fetch("/profile_problem_list?" + new URLSearchParams({ numbers: i, from: j })).then(function (res) {
+            var location = window.location.href.split("/");
+            var handle = location[location.length - 1];
+            fetch("/get_user_problem_number?" + new URLSearchParams({ handle: handle })).then(function (res) {
                 return res.json();
             }).then(function (json) {
                 var status = json.status;
                 if (status == "OK") {
-                    _this9.setState({ problems: _this9.state.problems.concat(json.data) });
+                    _this9.setState({ total_number: json.data });
                 }
             });
         }
     }, {
-        key: "getMoerProblems",
-        value: function getMoerProblems(i) {
-            var from = this.state.problems.length;
-            this.getProblems(i, from);
-        }
-    }, {
-        key: "componentDidMount",
-        value: function componentDidMount() {
-            this.getProblems(20, 0);
+        key: "getProblems",
+        value: function getProblems() {
+            var _this10 = this;
+
+            var num_per_page = this.state.num_per_page;
+            var showing = this.state.showing;
+            var problems = this.state.problems;
+
+            if (problems[showing] != undefined) {
+                return;
+            }
+            var location = window.location.href.split("/");
+            var handle = location[location.length - 1];
+            fetch("/profile_problem_list?" + new URLSearchParams({ mode: num_per_page, page: showing, handle: handle })).then(function (res) {
+                return res.json();
+            }).then(function (json) {
+                var status = json.status;
+                if (status == "OK") {
+                    var temp = _this10.state.problems;
+                    temp[showing] = json.data;
+                    _this10.setState({ problems: temp });
+                }
+            });
         }
     }, {
         key: "topage",
         value: function topage(i) {
             if (i == this.state.showing) return;
             var real_page;
-            var max = Math.ceil(this.props.num_of_problem / this.state.num_per_page);
+            var max = Math.ceil(this.state.total_number / this.state.num_per_page);
 
-            if (i > max) {
-                real_page = max;
-            } else if (i < 1) {
-                real_page = 1;
-            } else {
-                real_page = i;
-            }
-
-            num_should_be = this.state.showing * this.state.num_per_page;
-            if (this.state.problems.length < num_should_be) {
-                var needed = num_should_be - this.state.problems.length + 20;
-                this.getMoerProblems(needed);
-            }
+            if (i > max) real_page = max;else if (i < 1) real_page = 1;else real_page = i;
+            this.setState({ showing: real_page });
+            this.getProblems();
         }
     }, {
-        key: "get_problem_list",
-        value: function get_problem_list() {
-            if (this.props.num_of_problem == 0) {
-                var None_problems = React.createElement(
+        key: "render_problem_list",
+        value: function render_problem_list() {
+            var None_problems = React.createElement(
+                "div",
+                { className: "h-full w-hull flex items-center" },
+                React.createElement(
                     "p",
-                    { className: "problem-notification p-40" },
-                    " You didn't released any problem yet"
-                );
+                    { className: "problem-notification p-10" },
+                    " He/She didn't released any problem yet"
+                )
+            );
+            if (this.state.total_number == 0) {
+
                 return None_problems;
             }
-            re = [];
-            var from = (this.state.showing - 1) * this.state.num_per_page;
-            var to = this.state.num_per_page + from;
-            var max = this.state.problems.length;
-            for (var i = from; i < to; i++) {
-                if (i >= max) {
-                    break;
-                }
-                var element = this.state.problems[i];
-                var info = React.createElement(Problem_info, { key: element.problem_pid, problem_pid: element.problem_pid, title: element.title, permission: element.permission, mode: false });
-                re.push(info);
-            }
 
+            re = [];
+            var showing = this.state.showing;
+            var lists = this.state.problems[showing];
+            if (lists == undefined) return None_problems;
+
+            lists.forEach(function (element) {
+                var status;
+                if (element.permission == true) {
+                    status = React.createElement(
+                        "p",
+                        null,
+                        "\u516C\u958B"
+                    );
+                } else {
+                    status = React.createElement(
+                        "p",
+                        null,
+                        "\u672A\u516C\u958B"
+                    );
+                }
+                var url = "/edit_problem/" + element.problem_pid + "/basic";
+
+                var info = React.createElement(
+                    "div",
+                    { className: "p-5 flex flex-col" },
+                    React.createElement(
+                        "div",
+                        { className: "gap-5 problem-title" },
+                        React.createElement(
+                            "a",
+                            { href: url, className: "text-xl problem-info-col text-blue-700/70" },
+                            element.title
+                        ),
+                        status
+                    ),
+                    React.createElement("div", { className: "problem-info-col w-ful" }),
+                    React.createElement("hr", null)
+                );
+
+                re.push(info);
+            });
             return re;
         }
     }, {
@@ -485,8 +532,8 @@ var Problem_List = function (_React$Component5) {
                 ),
                 React.createElement(
                     "div",
-                    { className: "flex flex-col" },
-                    React.createElement(this.get_problem_list, null)
+                    { className: "problem-list-container" },
+                    this.render_problem_list()
                 )
             );
 
@@ -503,36 +550,38 @@ var OverView_problem = function (_React$Component6) {
     function OverView_problem(props) {
         _classCallCheck(this, OverView_problem);
 
-        var _this10 = _possibleConstructorReturn(this, (OverView_problem.__proto__ || Object.getPrototypeOf(OverView_problem)).call(this, props));
+        var _this11 = _possibleConstructorReturn(this, (OverView_problem.__proto__ || Object.getPrototypeOf(OverView_problem)).call(this, props));
 
-        _this10.state = {
+        _this11.state = {
             problem_number: 0,
             problems: []
         };
 
-        _this10.getProblems = _this10.getProblems.bind(_this10);
-        return _this10;
+        _this11.render_poroblems = _this11.render_poroblems.bind(_this11);
+        return _this11;
     }
 
     _createClass(OverView_problem, [{
         key: "componentDidMount",
         value: function componentDidMount() {
-            var _this11 = this;
+            var _this12 = this;
 
-            fetch("/profile_problem_list?" + new URLSearchParams({ numbers: 4, from: 0 })).then(function (res) {
+            var location = window.location.href.split("/");
+            var handle = location[location.length - 1];
+            fetch("/profile_problem_list?" + new URLSearchParams({ mode: 4, page: 1, handle: handle })).then(function (res) {
                 return res.json();
             }).then(function (json) {
                 var status = json.status;
                 if (status == "OK") {
-                    _this11.setState({ problems: json.data });
+                    _this12.setState({ problems: json.data });
                 } else {
-                    _this11.setState({ problems: [] });
+                    _this12.setState({ problems: [] });
                 }
             });
         }
     }, {
-        key: "getProblems",
-        value: function getProblems() {
+        key: "render_poroblems",
+        value: function render_poroblems() {
             re = [];
             var max = this.state.problems.length;
             for (var i = 0; i < 4; i++) {
@@ -540,8 +589,44 @@ var OverView_problem = function (_React$Component6) {
                     break;
                 }
                 var element = this.state.problems[i];
-                var info = React.createElement(Problem_info, { key: element.problem_pid, problem_pid: element.problem_pid, title: element.title, permission: element.permission, mode: true });
-                re.push(info);
+                var url = "/edit_problem/" + element.problem_pid + "/basic";
+                if (element.permission == true) {
+                    problem_status = React.createElement(
+                        "p",
+                        null,
+                        "\u516C\u958B"
+                    );
+                } else {
+                    problem_status = React.createElement(
+                        "p",
+                        null,
+                        "\u672A\u516C\u958B"
+                    );
+                }
+                var info_card = React.createElement(
+                    "div",
+                    { className: "w-1/2 ", key: element.problem_pid },
+                    React.createElement(
+                        "div",
+                        { className: "problem-container" },
+                        React.createElement(
+                            "div",
+                            { className: "problem-overview-container" },
+                            React.createElement(
+                                "div",
+                                { className: "gap-5 problem-title" },
+                                React.createElement(
+                                    "a",
+                                    { href: url, className: "text-xl problem-info-col text-blue-700/80" },
+                                    element.title
+                                ),
+                                problem_status
+                            ),
+                            React.createElement("div", { className: "problem-info-col w-full" })
+                        )
+                    )
+                );
+                re.push(info_card);
             }
 
             var main = React.createElement(
@@ -552,8 +637,8 @@ var OverView_problem = function (_React$Component6) {
             if (re.length == 0) {
                 var None_problems = React.createElement(
                     "p",
-                    { className: "problem-notification p-40" },
-                    " You didn't released any problem yet"
+                    { className: "problem-notification p-10" },
+                    " He/She didn't released any problem yet"
                 );
                 return None_problems;
             } else {
@@ -563,14 +648,14 @@ var OverView_problem = function (_React$Component6) {
     }, {
         key: "render",
         value: function render() {
-            var _this12 = this;
+            var _this13 = this;
 
             var overflow_tag;
             if (this.props.num_of_problem > 4) {
                 overflow_tag = React.createElement(
                     "button",
                     { onClick: function onClick() {
-                            return _this12.props.onclick("Problem");
+                            return _this13.props.onclick("Problem");
                         } },
                     "...see more"
                 );
@@ -593,7 +678,7 @@ var OverView_problem = function (_React$Component6) {
                 React.createElement(
                     "div",
                     { className: "" },
-                    React.createElement(this.getProblems, null)
+                    this.render_poroblems()
                 ),
                 React.createElement(
                     "div",
@@ -620,53 +705,56 @@ var Info_selecter = function (_React$Component7) {
     _createClass(Info_selecter, [{
         key: "render",
         value: function render() {
-            var _this14 = this;
+            var _this15 = this;
 
-            var indecater_class = "page-info flex page-info-indecater " + this.props.pos;
             var main = [React.createElement(
                 "div",
-                { className: "flex g-10 m-b-10 page-info-title" },
+                { className: "flex gap-5 m-b-10 " },
                 React.createElement(
                     "button",
                     { className: "page-info-btn", onClick: function onClick() {
-                            return _this14.props.onclick("OverView");
+                            return _this15.props.onclick("OverView");
                         } },
                     React.createElement("img", { src: "/static/house.svg", alt: "" })
                 ),
                 React.createElement(
                     "div",
-                    { className: "page-info" },
+                    { className: "page-info-container" },
                     React.createElement(
-                        "button",
-                        { onClick: function onClick() {
-                                return _this14.props.onclick("OverView");
-                            }, className: "page-info-btn" },
-                        "OverView"
-                    )
-                ),
-                React.createElement(
-                    "div",
-                    { className: "page-info" },
-                    React.createElement(
-                        "button",
-                        { onClick: function onClick() {
-                                return _this14.props.onclick("Problem");
-                            }, className: "page-info-btn" },
-                        "Problems"
-                    )
-                ),
-                React.createElement(
-                    "div",
-                    { className: indecater_class },
-                    React.createElement(
-                        "p",
-                        null,
-                        "<"
+                        "div",
+                        { className: "page-info" },
+                        React.createElement(
+                            "button",
+                            { onClick: function onClick() {
+                                    return _this15.props.onclick("OverView");
+                                }, className: "page-info-btn" },
+                            "OverView"
+                        )
                     ),
                     React.createElement(
-                        "p",
-                        null,
-                        ">"
+                        "div",
+                        { className: "page-info" },
+                        React.createElement(
+                            "button",
+                            { onClick: function onClick() {
+                                    return _this15.props.onclick("Problem");
+                                }, className: "page-info-btn" },
+                            "Problems"
+                        )
+                    ),
+                    React.createElement(
+                        "div",
+                        { className: "page-info flex page-info-indecater", style: { transform: "translateX(" + this.props.pos + ")" } },
+                        React.createElement(
+                            "p",
+                            null,
+                            "<"
+                        ),
+                        React.createElement(
+                            "p",
+                            null,
+                            ">"
+                        )
                     )
                 )
             ), React.createElement("hr", null)];
@@ -708,10 +796,10 @@ var ToolBar = function (_React$Component8) {
         value: function render() {
             var main = React.createElement(
                 "div",
-                { className: "items-center flex g-20 tool_bar" },
+                { className: "items-center flex tool_bar" },
                 React.createElement(
                     "div",
-                    { className: "flex g-40 w-80 align-items-center" },
+                    { className: "flex gap-10 w-4/5 items-center" },
                     React.createElement(
                         "div",
                         { className: "h-50" },
@@ -726,7 +814,7 @@ var ToolBar = function (_React$Component8) {
                         { href: "/problem" },
                         React.createElement(
                             "p",
-                            { className: "text-size-normal" },
+                            { className: "text-lg" },
                             "\u984C\u76EE"
                         )
                     ),
@@ -735,7 +823,7 @@ var ToolBar = function (_React$Component8) {
                         { href: "/about" },
                         React.createElement(
                             "p",
-                            { className: "text-size-normal" },
+                            { className: "text-lg" },
                             "\u95DC\u65BC"
                         )
                     ),
@@ -744,20 +832,20 @@ var ToolBar = function (_React$Component8) {
                         { href: "/status" },
                         React.createElement(
                             "p",
-                            { className: "text-size-normal" },
+                            { className: "text-lg" },
                             "\u72C0\u614B"
                         )
                     )
                 ),
                 React.createElement(
                     "div",
-                    { className: "w-20 flex justify-end" },
+                    { className: "w-1/5 flex justify-end" },
                     React.createElement(
                         "div",
                         null,
                         React.createElement(
                             "button",
-                            { className: "text-size-normal", onClick: this.logout },
+                            { className: "text-lg", onClick: this.logout },
                             "\u767B\u51FA"
                         )
                     )
@@ -776,46 +864,28 @@ var Main = function (_React$Component9) {
     function Main(props) {
         _classCallCheck(this, Main);
 
-        var _this16 = _possibleConstructorReturn(this, (Main.__proto__ || Object.getPrototypeOf(Main)).call(this, props));
+        var _this17 = _possibleConstructorReturn(this, (Main.__proto__ || Object.getPrototypeOf(Main)).call(this, props));
 
-        _this16.state = {
+        _this17.state = {
             changing: false,
-            showing: "OverView",
-            problem_number: 0
+            showing: "0px"
         };
-        _this16.get_maincontent = _this16.get_maincontent.bind(_this16);
-        _this16.change_Info = _this16.change_Info.bind(_this16);
-        return _this16;
+        _this17.get_maincontent = _this17.get_maincontent.bind(_this17);
+        _this17.change_Info = _this17.change_Info.bind(_this17);
+        return _this17;
     }
 
     _createClass(Main, [{
-        key: "componentDidMount",
-        value: function componentDidMount() {
-            var _this17 = this;
-
-            fetch("/profile_problem_setting").then(function (res) {
-                return res.json();
-            }).then(function (json) {
-                var status = json.status;
-                if (status == "OK") {
-                    _this17.setState({ problem_number: json.count });
-                } else {
-                    _this17.setState({ problem_number: 0 });
-                }
-            });
-        }
-    }, {
         key: "get_maincontent",
         value: function get_maincontent() {
             var _this18 = this;
 
-            if (this.state.showing == "OverView") {
+            if (this.state.showing == "0px") {
                 var html = [React.createElement(OverView_problem, { position: "", num_of_problem: this.state.problem_number, onclick: function onclick(i) {
                         return _this18.change_Info(i);
                     } })];
-
                 return html;
-            } else if (this.state.showing == "Problem") {
+            } else if (this.state.showing == "110px") {
                 var _html = React.createElement(Problem_List, { num_of_problem: this.state.problem_number });
                 return _html;
             }
@@ -823,8 +893,12 @@ var Main = function (_React$Component9) {
     }, {
         key: "change_Info",
         value: function change_Info(i) {
+            var translate_pos = {
+                "OverView": "0px",
+                "Problem": "110px"
+            };
             this.setState({
-                showing: i
+                showing: translate_pos[i]
             });
         }
     }, {
@@ -832,24 +906,20 @@ var Main = function (_React$Component9) {
         value: function render() {
             var _this19 = this;
 
-            var translate_pos = {
-                "OverView": "info-first",
-                "Problem": "info-second"
-            };
             var page = [React.createElement(ToolBar, null), React.createElement(
                 "div",
-                { className: "p-40 main-page" },
-                React.createElement(Introduce, { position: "" }),
+                { className: "p-10 main-page" },
+                React.createElement(Introduce, null),
                 React.createElement(
                     "div",
-                    { className: "main-content" },
+                    { className: "ml-96" },
                     React.createElement(Info_selecter, { onclick: function onclick(i) {
                             _this19.change_Info(i);
-                        }, pos: translate_pos[this.state.showing] }),
+                        }, pos: this.state.showing }),
                     React.createElement(
                         "div",
-                        { className: "p-40 container flex flex-col" },
-                        React.createElement(this.get_maincontent, null)
+                        { className: "p-10 container flex flex-col" },
+                        this.get_maincontent()
                     )
                 )
             )];

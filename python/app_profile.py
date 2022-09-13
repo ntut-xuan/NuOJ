@@ -203,8 +203,15 @@ def get_problem_list():
 
 	handle = jwt_decode(SID)["handle"]
 	
+
 	# 取出題目列表
 	args = request.args
+	guset_handle = ""
+	try:
+		guset_handle = args["handle"]
+	except:
+		pass
+
 	num_per_page = 0
 	index = 0
 	try:
@@ -213,8 +220,10 @@ def get_problem_list():
 	except:
 		problems = []
 	finally:
-		problems = database_util.command_execute("select * from problem where problem_author=%s limit %s offset %s;",(handle,num_per_page,(index-1)*num_per_page))
-	
+		if(guset_handle == ""):
+			problems = database_util.command_execute("select * from problem where problem_author=%s limit %s offset %s;",(handle,num_per_page,(index-1)*num_per_page))
+		else:
+			problems = database_util.command_execute("select * from problem where problem_author=%s limit %s offset %s;",(guset_handle,num_per_page,(index-1)*num_per_page))	
 	# 取出題目詳細資訊
 	result =[]
 	i=0
@@ -246,8 +255,15 @@ def get_user_problem_number():
 
 	handle = jwt_decode(SID)["handle"]
 
-	count = database_util.command_execute("SELECT COUNT(*) FROM `problem` WHERE problem_author=%s", (handle))[0]["COUNT(*)"]
-
+	args = request.args
+	guset_handle = ""
+	try:
+		guset_handle = args["handle"]
+	except:
+		count = database_util.command_execute("SELECT COUNT(*) FROM `problem` WHERE problem_author=%s", (handle))[0]["COUNT(*)"]
+	finally:
+		count = database_util.command_execute("SELECT COUNT(*) FROM `problem` WHERE problem_author=%s", (guset_handle))[0]["COUNT(*)"]	
+		
 	return Response(json.dumps({"status":"OK","data": count}), mimetype="application/json")
 
 
