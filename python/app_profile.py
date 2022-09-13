@@ -217,13 +217,13 @@ def get_problem_list():
 	try:
 		num_per_page = int(args["mode"])
 		index = int(args["page"])
-	except:
-		problems = []
-	finally:
 		if(guset_handle == ""):
 			problems = database_util.command_execute("select * from problem where problem_author=%s limit %s offset %s;",(handle,num_per_page,(index-1)*num_per_page))
 		else:
 			problems = database_util.command_execute("select * from problem where problem_author=%s limit %s offset %s;",(guset_handle,num_per_page,(index-1)*num_per_page))	
+	except:
+		problems = []
+		
 	# 取出題目詳細資訊
 	result =[]
 	i=0
@@ -259,10 +259,10 @@ def get_user_problem_number():
 	guset_handle = ""
 	try:
 		guset_handle = args["handle"]
+		count = database_util.command_execute("SELECT COUNT(*) FROM `problem` WHERE problem_author=%s", (guset_handle))[0]["COUNT(*)"]
 	except:
 		count = database_util.command_execute("SELECT COUNT(*) FROM `problem` WHERE problem_author=%s", (handle))[0]["COUNT(*)"]
-	finally:
-		count = database_util.command_execute("SELECT COUNT(*) FROM `problem` WHERE problem_author=%s", (guset_handle))[0]["COUNT(*)"]	
+			
 		
 	return Response(json.dumps({"status":"OK","data": count}), mimetype="application/json")
 
