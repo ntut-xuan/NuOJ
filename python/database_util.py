@@ -7,7 +7,7 @@ from tunnel_code import TunnelCode
 from enum import Enum
 
 def connect_database() -> pymysql.Connection:
-    conn = pymysql.connect(host="127.0.0.1", user="NuOJService", password="Nu0JS!@#$", database="NuOJ")
+    conn = pymysql.connect(host="mariadb", user="nuoja", password="@nuoja2023", database="nuoj")
     return conn
 
 def command_execute(command: str, param: tuple) -> dict:
