@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
-import os
 import json
 from typing import Mapping, Any
-from datetime import timedelta
 from flask import Flask, send_from_directory
 from flask.wrappers import Response
 
@@ -32,7 +30,7 @@ def create_app(test_config: Mapping[str, Any] | None = None) -> Flask:
 		return send_from_directory('../static', path)
 
 	@app.route("/heartbeat", methods=["GET"])
-	def fetch_heart_beat():
+	def fetch_heartbeat():
 		return Response(json.dumps({"status": "OK"}), mimetype="application/json")
 
 	crypto_util.GenerateKey()
