@@ -28,11 +28,11 @@ def create_app(test_config: Mapping[str, Any] | None = None) -> Flask:
 	app.register_blueprint(page)
 
 	@app.route("/static/<path:path>")
-	def returnStaticFile(path):
+	def fetch_static_file_from_specific_path(path):
 		return send_from_directory('../static', path)
 
 	@app.route("/heartbeat", methods=["GET"])
-	def getHeartbeat():
+	def fetch_heart_beat():
 		return Response(json.dumps({"status": "OK"}), mimetype="application/json")
 
 	crypto_util.GenerateKey()
