@@ -202,3 +202,30 @@ def getAllProblemList():
 			result.append(subdata)
 			i+=1
 	return {"data":result}
+
+@problem_page.route("/problem", methods=["GET"])
+def returnProblemPage():
+
+	problem = []
+	problem_db = database_util.command_execute("SELECT * from `problem`", ())
+
+	SID = request.cookies.get("SID")
+	login = (SID in session)
+	
+	if login:
+		username = session[SID]["handle"]
+
+	for i in range(len(problem_db)):
+		raw_problem_data = database_util.file_storage_tunnel_read(problem_db[i]["problem_pid"] + ".json", TunnelCode.PROBLEM)
+		problem_id = problem_db[i]["ID"]
+		problem_author = problem_db[i]["problem_author"]
+		if len(raw_problem_data) == 0:
+			continue
+		problem_data = json.loads(raw_problem_data)
+		if "problem_content" in problem_data:
+			problem_content = problem_data["problem_content"]
+			problem_title = problem_content["title"]
+			problem_dict = {"problem_ID": problem_id, "problem_name": problem_title, "problem_author": problem_author, "problem_tag": []}
+			problem.append(problem_dict)
+
+	return render_template("problem.html", **locals())
