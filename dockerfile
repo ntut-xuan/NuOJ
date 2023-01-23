@@ -2,8 +2,7 @@ FROM ubuntu:22.04
 
 RUN rm /bin/sh && ln -s /bin/bash /bin/sh
 RUN sed 's@archive.ubuntu.com@free.nchc.org.tw@' -i /etc/apt/sources.list
-RUN apt-get update
-RUN apt-get install -y ssh python3 python3-pip git build-essential
+RUN apt-get update && apt-get install -y ssh python3 python3-pip git build-essential
 
 RUN mkdir /etc/nuoj
 COPY . /etc/nuoj
