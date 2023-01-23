@@ -15,4 +15,5 @@ RUN cp /etc/nuoj/setting/setting.json /etc/nuoj/setting.json
 
 RUN pip3 install flask pymysql flask_cors loguru flask_login flask_session asana python-dateutil pytz pyjwt pycryptodome
 
-CMD sleep 10 && python3 /etc/nuoj/python/nuoj_service.py
+WORKDIR /etc/nuoj/python
+CMD sleep 10 && flask --debug --app app:create_app run --host 0.0.0.0 --port 8080
