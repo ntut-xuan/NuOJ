@@ -12,27 +12,28 @@ from app_problem import problem_page
 from app_profile import profile_page
 from page.route import page
 
+
 def create_app(test_config: Mapping[str, Any] | None = None) -> Flask:
-	app = Flask(__name__, static_url_path='', template_folder="/etc/nuoj/templates")
- 
-	if test_config is None:
-		app.config.from_pyfile("config.py")
-	else:
-		app.config.from_mapping(test_config)
- 
-	app.register_blueprint(auth)
-	app.register_blueprint(problem)
-	app.register_blueprint(problem_page)
-	app.register_blueprint(profile_page)
-	app.register_blueprint(page)
+    app = Flask(__name__, static_url_path="", template_folder="/etc/nuoj/templates")
 
-	@app.route("/static/<path:path>")
-	def fetch_static_file_from_specific_path(path):
-		return send_from_directory('../static', path)
+    if test_config is None:
+        app.config.from_pyfile("config.py")
+    else:
+        app.config.from_mapping(test_config)
 
-	@app.route("/heartbeat", methods=["GET"])
-	def fetch_heartbeat():
-		return Response(json.dumps({"status": "OK"}), mimetype="application/json")
+    app.register_blueprint(auth)
+    app.register_blueprint(problem)
+    app.register_blueprint(problem_page)
+    app.register_blueprint(profile_page)
+    app.register_blueprint(page)
 
-	crypto_util.GenerateKey()
-	return app
+    @app.route("/static/<path:path>")
+    def fetch_static_file_from_specific_path(path):
+        return send_from_directory("../static", path)
+
+    @app.route("/heartbeat", methods=["GET"])
+    def fetch_heartbeat():
+        return Response(json.dumps({"status": "OK"}), mimetype="application/json")
+
+    crypto_util.GenerateKey()
+    return app
