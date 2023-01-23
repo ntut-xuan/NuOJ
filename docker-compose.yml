@@ -34,4 +34,4 @@ services:
     depends_on:
       - "mariadb"
     ports:
-      - "80:80"
+      - "8080:8080"
