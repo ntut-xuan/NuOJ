@@ -1,15 +1,16 @@
 #!/usr/bin/env python3
 import json
 from typing import Mapping, Any
+
 from flask import Flask, send_from_directory
 from flask.wrappers import Response
 
+import crypto_util
 from app_add_problem import problem
 from app_auth import auth
 from app_problem import problem_page
 from app_profile import profile_page
 from page.route import page
-import crypto_util
 
 def create_app(test_config: Mapping[str, Any] | None = None) -> Flask:
 	app = Flask(__name__, static_url_path='', template_folder="/etc/nuoj/templates")
