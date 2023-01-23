@@ -186,3 +186,23 @@ def processGoogleLogin():
 		return resp
 	else:
 		return Response(json.dumps(data), mimetype="application/json")
+
+@auth.route("/veriCookie")
+def veriCookie(cookie):
+	data = {}
+	if cookie in session:
+		data["status"] = "OK"
+		data["result"] = {"cookie": session[cookie]}
+	else:
+		data["status"] = "Failed"
+	return json.dumps(data)
+
+@auth.route("/pubkey")
+def pubkey():
+	return send_from_directory('../', "public.pem")
+
+@auth.route("/logout", methods=["GET", "POST"])
+def logout():
+	resp = Response(json.dumps({"status": "OK"}))
+	resp.set_cookie("SID", value = "", expires=0)
+	return resp
