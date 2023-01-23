@@ -1,0 +1,37 @@
+version: "3.8"
+
+services:
+  mariadb:
+    image: mariadb:latest
+    container_name: nuoj-mariadb
+    restart: always
+    environment:
+      MYSQL_USER: nuoja
+      MYSQL_PASSWORD: "@nuoja2023"
+      MYSQL_DATABASE: nuoj
+      MYSQL_ROOT_USER: root
+      MYSQL_ROOT_PASSWORD: "#nuojr2023"
+    volumes:
+      - ./database.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "3306:3306"
+  mariadb-test:
+    image: mariadb:latest
+    container_name: nuoj-mariadb-test
+    restart: always
+    environment:
+      MYSQL_USER: nuojta  # t refers to test
+      MYSQL_PASSWORD: "@nuojta2023"
+      MYSQL_DATABASE: nuoj-test
+      MYSQL_ROOT_USER: root
+      MYSQL_ROOT_PASSWORD: "#nuojtr2023"
+    ports:
+      - "3307:3306"
+  nuoj:
+    build: .
+    container_name: nuoj
+    tty: true
+    depends_on:
+      - "mariadb"
+    ports:
+      - "80:80"
