@@ -5,13 +5,13 @@ from flask import Flask, send_from_directory
 from flask.wrappers import Response
 
 import crypto_util
+from api.auth.route import auth
 from app_add_problem import problem
-from app_auth import auth
 from app_problem import problem_page
 from app_profile import profile_page
 from database import create_db_command, db
+from page.auth.route import auth_page
 from page.route import page
-
 
 def create_app(test_config: Mapping[str, Any] | None = None) -> Flask:
     app = Flask(__name__, static_url_path="", template_folder="/etc/nuoj/templates")
@@ -25,6 +25,7 @@ def create_app(test_config: Mapping[str, Any] | None = None) -> Flask:
 
     app.cli.add_command(create_db_command)
     app.register_blueprint(auth)
+    app.register_blueprint(auth_page)
     app.register_blueprint(problem)
     app.register_blueprint(problem_page)
     app.register_blueprint(profile_page)
