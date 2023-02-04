@@ -18,6 +18,7 @@ from email.mime.text import MIMEText
 from email.mime.image import MIMEImage
 from error_code import ErrorCode, error_dict
 
+from typing import Any, Final
 from dataclasses import dataclass
 
 from sqlalchemy.sql import or_, and_
@@ -154,12 +155,45 @@ def handle_setup(data, email) -> dict:
 
     return {"status": "OK", "data": {"email": email, "handle": handle}}
 
-def payload_generator(username, email):
-    payload = {"handle": username, "email": email, "iat": datetime.now(tz=timezone.utc), "exp": datetime.now(tz=timezone.utc) + timedelta(days=1)}
-    return jwt.encode(payload, "secret", algorithm="HS256")
+class HS256JWTCodec:
+    def __init__(self, key: str) -> None:
+        self._key: Final[str] = key
+        self._algorithm: Final[str] = "HS256"
 
-def jwt_valid(SID):
-    return not (SID == None or datetime.now(tz=timezone.utc).timestamp() > jwt.decode(SID, "secret", algorithms=["HS256"])["exp"])
+    @property
+    def key(self) -> str:
+        return self._key
 
-def jwt_decode(SID):
-    return jwt.decode(SID, "secret", algorithms=["HS256"])
+    @property
+    def algorithm(self) -> str:
+        return self._algorithm
+
+    def encode(
+        self,
+        payload: dict[str, Any],
+        expiration_time_delta: timedelta = timedelta(days=1),
+    ) -> str:
+        """Returns the JWT with `data`, Issue At (iat) and Expiration Time (exp) as payload."""
+        current_time: datetime = datetime.now(tz=timezone.utc)
+        expiration_time: datetime = current_time + expiration_time_delta
+        payload = {
+            "data": payload,
+            "iat": current_time,
+            "exp": expiration_time,
+        }
+        token: str = jwt.encode(payload, key=self._key, algorithm=self._algorithm)
+        return token
+
+    def decode(self, token: str) -> dict[str, Any]:
+        data: dict[str, Any] = jwt.decode(
+            token, key=self._key, algorithms=[self._algorithm]
+        )
+        return data
+
+    def is_valid_jwt(self, token: str) -> bool:
+        """Returns False if the expiration time (exp) is in the past or it failed validation."""
+        try:
+            self.decode(token)
+        except (jwt.exceptions.DecodeError, jwt.exceptions.ExpiredSignatureError):
+            return False
+        return True

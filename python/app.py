@@ -1,4 +1,5 @@
 import json
+from secrets import token_hex
 from typing import Mapping, Any
 
 from flask import Flask, send_from_directory
@@ -20,6 +21,8 @@ def create_app(test_config: Mapping[str, Any] | None = None) -> Flask:
         app.config.from_pyfile("config.py")
     else:
         app.config.from_mapping(test_config)
+        
+    app.config["jwt_key"] = token_hex()
 
     db.init_app(app)
 

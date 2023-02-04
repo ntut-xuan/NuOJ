@@ -1,12 +1,14 @@
 import json
-from dataclasses import dataclass
+import jwt
+from datetime import datetime, timedelta, timezone
 from http import HTTPStatus
 from typing import Any
 
-from flask import Blueprint, Response, request, make_response, send_from_directory
+from flask import Blueprint, Response, current_app, request, make_response, send_from_directory
+from sqlalchemy.sql import or_
 
 import setting_util
-from api.auth.util import LoginPayload, RegisterPayload, login, payload_generator, register
+from api.auth.util import HS256JWTCodec, LoginPayload, login, register
 from api.auth.validator import (
     validate_email_or_return_unprocessable_entity,
     validate_email_is_not_repeated_or_return_forbidden,
@@ -16,6 +18,7 @@ from api.auth.validator import (
     validate_password_or_return_unprocessable_entity,
     validate_register_payload_format_or_return_bad_request,
 )
+from models import User
 from util import make_simple_error_response
 
 auth = Blueprint('auth', __name__, url_prefix="/api")
@@ -28,8 +31,11 @@ def login_route():
     
     if not login(login_payload.account, login_payload.password):
         return make_simple_error_response(HTTPStatus.FORBIDDEN, "Incorrect account or password")
-
+    
     response: Response = make_response({"message": "OK"}, HTTPStatus.OK)
+    user: User = _get_user_info_from_account(login_payload.account)
+    _set_jwt_cookie_to_response({"email": user.email, "handle": user.handle}, response)
+    
     return response
 
 
@@ -92,3 +98,34 @@ def oauth_info():
 @auth.route("/pubkey")
 def pubkey():
 	return send_from_directory('../', "public.pem")
+
+
+def _get_user_info_from_account(account: str) -> User:
+    user: User | None = User.query.filter(or_(User.email == account, User.handle == account)).first()
+    
+    assert user is not None
+    
+    return user
+
+def _generate_ok_response_with_jwt(username, email):
+    response: Response = make_response({"message": "OK"}, HTTPStatus.OK)
+    expired_time: datetime = datetime.now(tz=timezone.utc) + timedelta(days=1)
+    jwt_payload: dict[str, Any] = {"handle": username, "email": email, "iat": datetime.now(tz=timezone.utc), "exp": expired_time}
+    jwt_token: str = jwt.encode(jwt_payload, "secret", algorithm="HS256")
+    
+    response.set_cookie(key="jwt", value=jwt_token, expires=expired_time)
+
+    return response
+
+def _set_jwt_cookie_to_response(
+    payload: dict[str, Any],
+    response: Response,
+    expiration_time_delta: timedelta = timedelta(days=1),
+) -> None:
+    codec = HS256JWTCodec(current_app.config["jwt_key"])
+    token: str = codec.encode(payload, expiration_time_delta)
+    response.set_cookie(
+        "jwt",
+        value=token,
+        expires=datetime.now(tz=timezone.utc) + expiration_time_delta,
+    )

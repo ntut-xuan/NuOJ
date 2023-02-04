@@ -16,7 +16,6 @@ def app() -> Generator[Flask, None, None]:
         {
             "TESTING": True,
             "SQLALCHEMY_DATABASE_URI": f"sqlite:///{db_path}",
-            
         }
     )
     with app.app_context():
