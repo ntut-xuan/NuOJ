@@ -9,6 +9,7 @@ from app_add_problem import problem
 from app_auth import auth
 from app_problem import problem_page
 from app_profile import profile_page
+from database import create_db_command, db
 from page.route import page
 
 
@@ -20,6 +21,9 @@ def create_app(test_config: Mapping[str, Any] | None = None) -> Flask:
     else:
         app.config.from_mapping(test_config)
 
+    db.init_app(app)
+
+    app.cli.add_command(create_db_command)
     app.register_blueprint(auth)
     app.register_blueprint(problem)
     app.register_blueprint(problem_page)
