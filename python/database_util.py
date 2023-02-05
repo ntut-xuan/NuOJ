@@ -6,6 +6,8 @@ import os
 from tunnel_code import TunnelCode
 from enum import Enum
 
+from flask import current_app
+
 def connect_database() -> pymysql.Connection:
     conn = pymysql.connect(host="mariadb", user="nuoja", password="@nuoja2023", database="nuoj")
     return conn
@@ -34,41 +36,47 @@ def command_execute(command: str, param: tuple) -> dict:
             return {}
 
 def file_storage_tunnel_exist(filename: str, tunnel: TunnelCode) -> bool:
-    path = "/etc/nuoj/storage/%s/%s" % (tunnel.value, filename)
-    return os.path.exists(path)
+    file_path = _make_file_path(tunnel, filename)
+    return os.path.exists(file_path)
 
 def file_storage_tunnel_read(filename: str, tunnel: TunnelCode) -> str:
-    path = "/etc/nuoj/storage/%s/%s" % (tunnel.value, filename)
+    file_path = _make_file_path(tunnel, filename)
     if file_storage_tunnel_exist(filename, tunnel):
-        with open(path, "r") as file:
+        with open(file_path, "r") as file:
             return file.read()
     else:
         return ""
     
 def byte_storage_tunnel_read(filename: str, tunnel: TunnelCode) -> bytes:
-    path = "/etc/nuoj/storage/%s/%s" % (tunnel.value, filename)
+    file_path = _make_file_path(tunnel, filename)
     if file_storage_tunnel_exist(filename, tunnel):
-        with open(path, "rb") as file:
+        with open(file_path, "rb") as file:
             return file.read()
     else:
         return 0
 
 def file_storage_tunnel_write(filename: str, data : str, tunnel: TunnelCode) -> None:
-    path = "/etc/nuoj/storage/%s/%s" % (tunnel.value, filename)
-    with open(path, "w") as file:
+    file_path = _make_file_path(tunnel, filename)
+    with open(file_path, "w") as file:
         file.write(data)
         file.close()
 
 def byte_storage_tunnel_write(filename: str, data: bytes, tunnel: TunnelCode) -> None:
-    path = "/etc/nuoj/storage/%s/%s" % (tunnel.value, filename)
-    with open(path, "wb") as file:
+    file_path = _make_file_path(tunnel, filename)
+    with open(file_path, "wb") as file:
         file.write(data)
         file.close()
 
 
 def file_storage_tunnel_del(filename: str, tunnel: TunnelCode) -> str:
-    path = "/etc/nuoj/storage/%s/%s" % (tunnel.value, filename)
+    file_path = _make_file_path(tunnel, filename)
     if file_storage_tunnel_exist(filename, tunnel):
-        os.remove(path)
+        os.remove(file_path)
     else:
         return ""
+
+def _make_file_path(tunnel: TunnelCode, filename: str) -> str:
+    storage_path = current_app.config.get("STORAGE_PATH")
+    assert storage_path is not None
+    file_path = "%s/%s/%s" % (storage_path, tunnel.value, filename)
+    return file_path
