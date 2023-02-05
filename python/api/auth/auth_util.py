@@ -22,6 +22,7 @@ from typing import Any, Final
 from dataclasses import dataclass
 
 from sqlalchemy.sql import or_, and_
+from api.auth.email_util import send_verification_email
 from database import db
 from models import User, Profile
 
@@ -79,17 +80,9 @@ def register(email: str, handle: str, password: str) -> None:
     if not database_util.file_storage_tunnel_exist(user_uid + ".json", TunnelCode.USER_PROFILE):
         database_util.file_storage_tunnel_write(user_uid + ".json", json.dumps({"handle": handle, "email": email, "school": "", "bio": ""}), TunnelCode.USER_PROFILE)
 
-    ''' 
-    Temporarity standing off.
-    
-    # Email verification
-    # response["mail_verification_require"] = setting_util.mail_verification_enable()
-    # if setting_util.mail_verification_enable() == True:
-        # Make email with verification link:
-        # verification_code = str(uuid4())
-        # response["verification_code"] = verification_code
-        # send_email(email, handle, verification_code)
-    '''
+    if setting_util.mail_verification_enable():
+        thread = threading.Thread(target=send_verification_email, args=[handle, email])
+        thread.start()
 
 
 def handle_exist(email) -> bool:

@@ -44,6 +44,12 @@ def mail_verification_enable() -> bool:
 def mail_info() -> str:
     return setting["mail"]["info"]
 
+def mail_redirect_url() -> str:
+    '''
+    回傳信箱 redirect_url 設置值
+    '''
+    return setting["mail"]["redirect_url"]
+
 def database_info() -> list:
     '''
     回傳使用者設定的 database 連結序列
