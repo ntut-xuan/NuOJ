@@ -7,7 +7,7 @@ from flask import Flask
 from flask.testing import FlaskClient
 from werkzeug.test import TestResponse
 
-from api.auth.util import HS256JWTCodec
+from api.auth.auth_util import HS256JWTCodec
 from models import User
 from database import db
 from test.util import assert_not_raise

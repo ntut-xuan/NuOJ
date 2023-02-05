@@ -1,7 +1,7 @@
 import pytest
 from flask import Flask
 
-from api.auth.util import login, register
+from api.auth.auth_util import login, register
 from database import db
 from models import User
 

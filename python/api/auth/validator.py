@@ -5,7 +5,7 @@ from typing import Any, Callable, TypeVar
 
 from flask import Response, request
 
-from api.auth.util import LoginPayload, RegisterPayload
+from api.auth.auth_util import LoginPayload, RegisterPayload
 from models import User
 from util import make_simple_error_response
 

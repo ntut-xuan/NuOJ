@@ -8,7 +8,7 @@ from flask import Blueprint, Response, current_app, request, make_response, send
 from sqlalchemy.sql import or_
 
 import setting_util
-from api.auth.util import HS256JWTCodec, LoginPayload, login, register
+from api.auth.auth_util import HS256JWTCodec, LoginPayload, login, register
 from api.auth.validator import (
     validate_email_or_return_unprocessable_entity,
     validate_email_is_not_repeated_or_return_forbidden,

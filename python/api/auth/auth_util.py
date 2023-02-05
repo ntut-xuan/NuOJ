@@ -55,41 +55,6 @@ def login(account: str, password: str) -> bool:
     
     return True
 
-def send_email(email, username, verification_code):
-
-    mail_info = json.loads(open("/etc/nuoj/setting.json", "r").read())["mail"]
-
-    img_file_name = "/etc/nuoj/static/logo_min.png"
-    with open(img_file_name, 'rb') as f:
-        img_data = f.read()
-
-    image = MIMEImage(img_data, name=os.path.basename(img_file_name))
-    image.add_header('Content-ID', '<{}>'.format(os.path.basename(img_file_name)))
-
-    content = MIMEMultipart()  #建立MIMEMultipart物件
-    content["subject"] = "NuOJ 驗證信件"  #郵件標題
-    content["from"] = "NuOJ@noreply.me"  #寄件者
-    content["to"] = email #收件者
-    
-    verification_url = mail_info["redirect_url"] + "?vericode=%s" % (verification_code)
-
-    content.attach(image)
-    content.attach(MIMEText(render_template("mail_template.html", **locals()), 'html'))  #郵件內容
-
-    def send(mail_info, content):
-        with smtplib.SMTP(host=mail_info["server"], port=mail_info["port"]) as smtp:  # 設定SMTP伺服器
-            try:
-                smtp.ehlo()  # 驗證SMTP伺服器
-                smtp.starttls()  # 建立加密傳輸
-                smtp.login(mail_info["mailname"], mail_info["password"])  # 登入寄件者gmail
-                smtp.send_message(content)  # 寄送郵件
-                print("Complete!")
-            except Exception as e:
-                print("Error message: ", e)
-
-    thread = threading.Thread(target=send, args=[mail_info, content])
-    thread.start()
-
 def register(email: str, handle: str, password: str) -> None:
     # password = crypto_util.Decrypt(password)
     # response = {"status": "OK"}
