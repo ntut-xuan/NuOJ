@@ -107,16 +107,6 @@ def _get_user_info_from_account(account: str) -> User:
     
     return user
 
-def _generate_ok_response_with_jwt(username, email):
-    response: Response = make_response({"message": "OK"}, HTTPStatus.OK)
-    expired_time: datetime = datetime.now(tz=timezone.utc) + timedelta(days=1)
-    jwt_payload: dict[str, Any] = {"handle": username, "email": email, "iat": datetime.now(tz=timezone.utc), "exp": expired_time}
-    jwt_token: str = jwt.encode(jwt_payload, "secret", algorithm="HS256")
-    
-    response.set_cookie(key="jwt", value=jwt_token, expires=expired_time)
-
-    return response
-
 def _set_jwt_cookie_to_response(
     payload: dict[str, Any],
     response: Response,
