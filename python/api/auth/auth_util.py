@@ -40,14 +40,15 @@ class RegisterPayload:
     password: str
 
 
-def password_cypto(password) -> str:
+def hash_password(password) -> str:
     m = hashlib.sha256()
     m.update(password.encode("utf8"))
     password = m.hexdigest()
     return password
 
+
 def login(account: str, password: str) -> bool:
-    password = password_cypto(password)
+    password = hash_password(password)
 
     user: User | None = User.query.filter(and_(or_(User.email == account, User.handle == account), User.password == password)).first()
 
@@ -60,10 +61,10 @@ def register(email: str, handle: str, password: str) -> None:
     # password = crypto_util.Decrypt(password)
     # response = {"status": "OK"}
 
-    # Cypto
-    password = password_cypto(password)
+    # Hash
+    password = hash_password(password)
     
-    # create user_uid
+    # Create user_uid
     user_uid = str(uuid4())
     
     # add user
@@ -77,41 +78,45 @@ def register(email: str, handle: str, password: str) -> None:
     db.session.commit()
     
     # Write into storage (init)
-    if not database_util.file_storage_tunnel_exist(user_uid + ".json", TunnelCode.USER_PROFILE):
-        database_util.file_storage_tunnel_write(user_uid + ".json", json.dumps({"handle": handle, "email": email, "school": "", "bio": ""}), TunnelCode.USER_PROFILE)
+    assert not _is_profile_storage_exist(user_uid)
+    _init_profile_storage_file(user_uid, handle, email)
 
+    # Send the email if the email verification is enabled.
     if setting_util.mail_verification_enable():
         thread = threading.Thread(target=send_verification_email, args=[handle, email])
         thread.start()
 
 
-def handle_exist(email) -> bool:
-    result = database_util.command_execute("SELECT handle FROM `user` WHERE email=%s", (email))[0]
-    return result["handle"] != None
-
-def handle_setup(data, email) -> dict:
-
-    # User Data
-    handle = data["handle"]
-
-    # Validate handle
-    handle_valid = bool(re.match("[a-zA-Z\\d](?:[a-zA-Z\\d]|[_-](?=[a-zA-Z\\d])){3,38}$", handle))
-    if not handle_valid:
-        return error_dict(ErrorCode.HANDLE_INVALID)
-    
-    # Check handle repeat or not
-    result = database_util.command_execute("SELECT COUNT(*) FROM `user` WHERE handle=%s", (handle))[0]
-    if result["COUNT(*)"] > 0:
-        return error_dict(ErrorCode.HANDLE_REPEAT)
-
+def setup_handle(account, handle) -> None:
     # Setup Handle
-    database_util.command_execute("UPDATE `user` SET handle=%s WHERE email=%s", (handle, email))
+    user: User | None = User.query.filter(User.email == account).first()
+    assert user is not None
+    
+    user.handle = handle
+    db.session.commit()
 
     # Setup Handle on storage data
-    user_uid = database_util.command_execute("SELECT user_uid from `user` where email=%s", (email))[0]["user_uid"]
-    database_util.file_storage_tunnel_write(user_uid + ".json", json.dumps({"handle": handle, "email": email, "school": "", "bio": ""}), TunnelCode.USER_PROFILE)      
+    _init_profile_storage_file(user.user_uid, user.handle, user.email)    
 
-    return {"status": "OK", "data": {"email": email, "handle": handle}}
+
+def is_user_already_have_handle(email: str) -> bool:
+    user: User | None = User.query.filter(User.email == email).first()
+    assert user is not None
+    
+    return user.handle is not None
+
+
+def _init_profile_storage_file(user_uid: str, handle: str, email: str) -> None:
+    database_util.file_storage_tunnel_write(
+        user_uid + ".json", 
+        json.dumps({"handle": handle, "email": email, "school": "", "bio": ""}), 
+        TunnelCode.USER_PROFILE
+    )
+
+
+def _is_profile_storage_exist(user_uid: str) -> bool:
+    return database_util.file_storage_tunnel_exist(user_uid + ".json", TunnelCode.USER_PROFILE)
+
 
 class HS256JWTCodec:
     def __init__(self, key: str) -> None:
