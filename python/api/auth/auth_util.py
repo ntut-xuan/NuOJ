@@ -3,20 +3,13 @@ from flask import *
 import os
 import json
 import hashlib
-import re
-import smtplib
 import threading
 import jwt
 import database_util
 import crypto_util as crypto_util
 from datetime import *
 from tunnel_code import TunnelCode
-import setting_util as setting_util
 from uuid import uuid4
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
-from email.mime.image import MIMEImage
-from error_code import ErrorCode, error_dict
 
 from typing import Any, Final
 from dataclasses import dataclass
@@ -25,6 +18,7 @@ from sqlalchemy.sql import or_, and_
 from api.auth.email_util import send_verification_email
 from database import db
 from models import User, Profile
+from setting_util import mail_verification_enable
 
 
 @dataclass
@@ -82,9 +76,12 @@ def register(email: str, handle: str, password: str) -> None:
     _init_profile_storage_file(user_uid, handle, email)
 
     # Send the email if the email verification is enabled.
-    if setting_util.mail_verification_enable():
-        thread = threading.Thread(target=send_verification_email, args=[handle, email])
-        thread.start()
+    if mail_verification_enable():
+        if current_app.config.get("TESTING") == False:
+            thread = FlaskThread(target=send_verification_email, args=[handle, email])
+            thread.start()
+        else:
+            send_verification_email(handle, email)
 
 
 def setup_handle(account, handle) -> None:
@@ -160,3 +157,13 @@ class HS256JWTCodec:
         except (jwt.exceptions.DecodeError, jwt.exceptions.ExpiredSignatureError):
             return False
         return True
+
+
+class FlaskThread(threading.Thread):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.app: Flask = current_app._get_current_object()
+        
+    def run(self):
+        with self.app.app_context():
+            super().run()
