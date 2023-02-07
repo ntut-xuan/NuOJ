@@ -73,9 +73,7 @@ class TestRegisterUtil:
             assert user_profile_file_path.exists()
 
     def test_register_account_with_mail_verification_enabled_should_send_the_email(self, app: Flask, monkeypatch: pytest.MonkeyPatch):
-        with app.app_context():
-            monkeypatch.setattr("api.auth.auth_util.send_verification_email", _send_verification_email_to_stroage)
-            
+        with app.app_context():            
             register("nuoj@test.com", "nuoj_test", "nuoj_test")
             
             storage_path = current_app.config.get("STORAGE_PATH")
@@ -90,7 +88,6 @@ def test_hash_password_should_return_password_hash_by_sha256_algorithm(app: Flas
     hashed_password = hash_password(password)
     
     assert excepted_hashed_password == hashed_password
-
 
 class TestHandleUtil:
     def test_setup_handle_should_set_into_database(self, app: Flask):
@@ -184,27 +181,4 @@ class TestHS256JWTCodec:
             assert is_valid_jwt
 
 
-def _send_verification_email_to_stroage(username: str, email: str) -> None:
-    random_uuid: UUID = uuid4()
-    mail_sender: MailSender = _get_mail_sender()
-    logo_image: MIMEImage = _get_logo_mime_image()
-    mime_text_content: MIMEText = _get_mail_content_mime_text(username, str(random_uuid))
-    
-    mime_mail: MIMEMultipart = _build_verification_mail([logo_image], "NuOJ 驗證信件", "NuOJ@noreply.me", email, mime_text_content)
-    
-    _send_email_to_storage(mail_sender, mime_mail)
 
-
-def _send_email_to_storage(sender: MailSender, mail: MIMEMultipart) -> None:
-    storage_path: str = current_app.config.get("STORAGE_PATH")
-    storage_path_object: Path = Path(storage_path)
-    mail_file_path: Path = storage_path_object / ("mail.txt")
-    sender_file_path: Path = storage_path_object / ('sender.txt')
-    
-    with open(mail_file_path, "w") as file:
-        file.write(mail.as_string())
-        
-    with open(sender_file_path, "w") as file:
-        file.write(str(sender))
-    
-    print("Complete! [Mock]")

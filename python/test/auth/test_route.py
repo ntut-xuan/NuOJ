@@ -204,6 +204,31 @@ class TestRegisterRoute:
 
 			assert response.status_code == HTTPStatus.FORBIDDEN
 
+class TestJWTVerify:
+
+	def test_with_valid_jwt_token_should_return_http_status_ok(self, logged_in_client: FlaskClient):
+		response: TestResponse = logged_in_client.post("/api/verify_jwt")
+		
+		assert response.status_code == HTTPStatus.OK
+		
+		
+	def test_with_not_exists_jwt_token_should_return_http_status_forbidden(self, client: FlaskClient):
+		response: TestResponse = client.post("/api/verify_jwt")
+		
+		assert response.status_code == HTTPStatus.FORBIDDEN    
+		assert response.json is not None 
+		assert response.json["message"] == "JWT is not exists."
+	
+		
+	def test_with_not_invalid_jwt_token_should_return_http_status_forbidden(self, client: FlaskClient):
+		client.set_cookie("", "jwt", "some.invalid.jwt")
+		response: TestResponse = client.post("/api/verify_jwt")
+		
+		assert response.status_code == HTTPStatus.FORBIDDEN   
+		assert response.json is not None 
+		assert response.json["message"] == "JWT is invalid."
+
+
 def _get_cookies(cookie_jar: CookieJar | None) -> tuple[Cookie, ...]:
 	if cookie_jar is None:
 		return tuple()

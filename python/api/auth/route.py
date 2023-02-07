@@ -12,6 +12,8 @@ from api.auth.auth_util import HS256JWTCodec, LoginPayload, login, register
 from api.auth.validator import (
     validate_email_or_return_unprocessable_entity,
     validate_email_is_not_repeated_or_return_forbidden,
+    validate_jwt_is_exists_or_return_forbidden,
+    validate_jwt_is_valid_or_return_forbidden,
     validate_login_payload_format_or_return_bad_request,
     validate_handle_or_return_unprocessable_entity,
     validate_handle_is_not_repeated_or_return_forbidden,
@@ -95,9 +97,16 @@ def oauth_info():
 
     return Response(json.dumps(response), mimetype="application/json")
 
-@auth.route("/pubkey")
-def pubkey():
-	return send_from_directory('../', "public.pem")
+# @auth.route("/pubkey")
+# def pubkey():
+# 	return send_from_directory('../', "public.pem")
+
+@auth.route("/verify_jwt", methods=["POST"])
+@validate_jwt_is_exists_or_return_forbidden
+@validate_jwt_is_valid_or_return_forbidden
+def verify_session() -> Response:
+    response: Response = make_response({"message": "OK"}, HTTPStatus.OK)
+    return response
 
 
 def _get_user_info_from_account(account: str) -> User:

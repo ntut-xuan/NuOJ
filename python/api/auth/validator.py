@@ -1,11 +1,12 @@
 import re
 from functools import wraps
 from http import HTTPStatus
+from http.cookiejar import Cookie
 from typing import Any, Callable, TypeVar
 
-from flask import Response, request
+from flask import Response, current_app, request
 
-from api.auth.auth_util import LoginPayload, RegisterPayload
+from api.auth.auth_util import HS256JWTCodec, LoginPayload, RegisterPayload
 from models import User
 from util import make_simple_error_response
 
@@ -158,5 +159,31 @@ def validate_handle_is_repeated_or_return_forbidden(func: Callable[..., Response
         if user is not None:
             return make_simple_error_response(HTTPStatus.FORBIDDEN, "Handle is repeated.")
         
+        return func(*args, **kwargs)
+    return wrapper
+
+
+def validate_jwt_is_exists_or_return_forbidden(func: Callable[..., Response | T]) -> Callable[..., Response | T]:
+    @wraps(func)
+    def wrapper(*args, **kwargs) -> Response | T:
+        cookie: Cookie | None = request.cookies.get("jwt")
+        
+        if cookie is None:
+            return make_simple_error_response(HTTPStatus.FORBIDDEN, "JWT is not exists.")
+
+        return func(*args, **kwargs)
+    return wrapper
+
+
+def validate_jwt_is_valid_or_return_forbidden(func: Callable[..., Response | T]) -> Callable[..., Response | T]:
+    @wraps(func)
+    def wrapper(*args, **kwargs) -> Response | T:
+        jwt: Cookie | None = request.cookies.get("jwt")
+        key: str = current_app.config.get("jwt_key")
+        codec: HS256JWTCodec = HS256JWTCodec(key)
+
+        if not codec.is_valid_jwt(jwt):
+            return make_simple_error_response(HTTPStatus.FORBIDDEN, "JWT is invalid.")
+
         return func(*args, **kwargs)
     return wrapper

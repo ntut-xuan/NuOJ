@@ -1,15 +1,19 @@
 import tempfile
 import os
 import shutil
+from http import HTTPStatus
 from pathlib import Path
 from typing import Generator
 
 import pytest
+from flask import current_app
 
 from app import create_app
-from database import create_db
+from models import User
+from database import create_db, db
 from flask import Flask
 from flask.testing import FlaskClient
+from werkzeug.test import TestResponse
 
 @pytest.fixture
 def app() -> Generator[Flask, None, None]:
@@ -25,6 +29,7 @@ def app() -> Generator[Flask, None, None]:
     _create_storage_folder_structure(storage_path)
     with app.app_context():
         create_db()
+        _add_test_account()
     
     yield app
     
@@ -36,9 +41,29 @@ def app() -> Generator[Flask, None, None]:
 def client(app: Flask) -> FlaskClient:
     return app.test_client()
 
+@pytest.fixture
+def logged_in_client(app: Flask) -> FlaskClient:
+    client: FlaskClient = app.test_client()
+    response: TestResponse = client.post("/api/login", json={"account": "test_account", "password": "nuoj_test"})
+    assert response.status_code == HTTPStatus.OK
+    return client
+
 
 def _create_storage_folder_structure(storage_path):
     (Path(storage_path) / "problem/").mkdir()
     (Path(storage_path) / "user_avater/").mkdir()
     (Path(storage_path) / "user_profile/").mkdir()
     (Path(storage_path) / "user_submission/").mkdir()
+
+
+def _add_test_account():
+    user: User = User(
+        user_uid="cb7ce8d5-8a5a-48e0-b9f0-7247dd5825dd",
+        handle="test_account",
+        password="cc28a9d01d08f4fa60b63434ce9971fda60e58a2f421898c78582bbb709bf7bb", # nuoj_test
+        email="test_account@nuoj.com",
+        role=0,
+        email_verified=0
+    )
+    db.session.add(user)
+    db.session.commit()
