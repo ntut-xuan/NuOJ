@@ -1,14 +1,17 @@
 import json
-import jwt
+import os
+from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 from http import HTTPStatus
 from typing import Any
 
-from flask import Blueprint, Response, current_app, request, make_response, send_from_directory
+from flask import Blueprint, Response, current_app, request, make_response, redirect
 from sqlalchemy.sql import or_
 
 import setting_util
 from api.auth.auth_util import HS256JWTCodec, LoginPayload, login, register
+from api.auth.github_oauth_util import github_login
+from api.auth.oauth_util import OAuthLoginResult
 from api.auth.validator import (
     validate_email_or_return_unprocessable_entity,
     validate_email_is_not_repeated_or_return_forbidden,
@@ -24,6 +27,7 @@ from models import User
 from util import make_simple_error_response
 
 auth = Blueprint('auth', __name__, url_prefix="/api")
+
 
 @auth.route("/login", methods=["POST"])
 @validate_login_payload_format_or_return_bad_request
@@ -90,7 +94,7 @@ def oauth_info():
     response = {"status": "OK"}
 
     if github_status:
-        response["github_oauth_url"] = "https://github.com/login/oauth/authorize?client_id=%s&scope=repo" % (github_client_id)
+        response["github_oauth_url"] = f"https://github.com/login/oauth/authorize?client_id={github_client_id}&scope=repo"
 
     if google_status:
         response["google_oauth_url"] = "https://accounts.google.com/o/oauth2/v2/auth?client_id=%s&redirect_uri=%s&response_type=code&scope=%s" % (google_client_id, google_redirect_url, google_oauth_scope)
@@ -106,6 +110,25 @@ def oauth_info():
 @validate_jwt_is_valid_or_return_forbidden
 def verify_session() -> Response:
     response: Response = make_response({"message": "OK"}, HTTPStatus.OK)
+    return response
+
+
+@auth.route("/github_login", methods=["GET"])
+def github_login_route():
+    code: str = request.args.get("code")
+    oauth_login_result: OAuthLoginResult = github_login(code)
+
+    response: Response
+
+    if oauth_login_result.passed:
+        user: User = _get_user_info_from_account(oauth_login_result.email)
+        if user.handle is None:
+            response = redirect("/handle_setup")
+        else:
+            response = redirect("/")
+            _set_jwt_cookie_to_response({"email": user.email, "handle": user.handle}, response)
+    else:
+        response = make_simple_error_response(HTTPStatus.FORBIDDEN, "Github OAuth login failed.")
     return response
 
 

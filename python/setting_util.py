@@ -17,6 +17,12 @@ def github_oauth_client_id() -> str:
     '''
     return setting["oauth"]["github"]["client_id"]
 
+def github_oauth_secret() -> str:
+    '''
+    回傳使用者 Github OAuth 的 secret
+    '''
+    return setting["oauth"]["github"]["secret"]
+
 def google_oauth_enable() -> bool:
     '''
     回傳使用者是否開啟 Google OAuth 功能

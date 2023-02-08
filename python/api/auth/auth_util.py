@@ -61,15 +61,7 @@ def register(email: str, handle: str, password: str) -> None:
     # Create user_uid
     user_uid = str(uuid4())
     
-    # add user
-    user: User = User(user_uid=user_uid, email=email, handle=handle, password=password, role=0, email_verified=0)
-    db.session.add(user)
-    db.session.commit()
-    
-    # init profile
-    profile: Profile = Profile(user_uid=user_uid)
-    db.session.add(profile)
-    db.session.commit()
+    _init_user_data_to_database(user_uid, password, handle, email)
     
     # Write into storage (init)
     assert not _is_profile_storage_exist(user_uid)
@@ -114,6 +106,31 @@ def _init_profile_storage_file(user_uid: str, handle: str, email: str) -> None:
 def _is_profile_storage_exist(user_uid: str) -> bool:
     return database_util.file_storage_tunnel_exist(user_uid + ".json", TunnelCode.USER_PROFILE)
 
+
+def _init_user_data_to_database(user_uid: str, password: str, handle: str, email: str, role: int = 0, email_verified: int = 0):
+    user_uid: str = str(uuid4())
+    password: str = str(uuid4())
+    
+    user: User = User(
+        user_uid=user_uid,
+        handle=handle,
+        password=password,
+        email=email,
+        role=role,
+        email_verified=email_verified
+    )
+    db.session.add(user)
+    db.session.commit()
+    
+    profile: Profile = Profile(
+        user_uid=user_uid,
+        img_type=None,
+        email=None,
+        school=None,
+        bio=None
+    )
+    db.session.add(profile)
+    db.session.commit()
 
 class HS256JWTCodec:
     def __init__(self, key: str) -> None:
