@@ -204,7 +204,7 @@ class TestRegisterRoute:
 
 			assert response.status_code == HTTPStatus.FORBIDDEN
 
-class TestJWTVerify:
+class TestJWTVerifyRoute:
 
 	def test_with_valid_jwt_token_should_return_http_status_ok(self, logged_in_client: FlaskClient):
 		response: TestResponse = logged_in_client.post("/api/verify_jwt")
