@@ -163,6 +163,29 @@ def logout_route():
 	resp.set_cookie("jwt", value = "", expires=0)
 	return resp
 
+@auth.route("/access_token", methods=["POST"])
+def access_token_test_route():
+    code: str | None = request.args.get("code", None)
+    
+    assert code is not None
+    
+    if code == "valid_code":
+        return make_response({"message": "OK", "access_token": "valid_access_token"})
+    else:
+        return make_response({"error": "Invalid Code"}, HTTPStatus.FORBIDDEN)
+
+
+@auth.route("/oauth_user_profile", methods=["GET"])
+def oauth_user_profile_test_route():
+    authorization_header: str | None = request.headers.get("Authorization", None)
+    
+    assert authorization_header is not None
+    
+    if authorization_header == "token valid_access_token":
+        return make_response({"login": "oauth_test", "email": "oauth_test@nuoj.com"})
+    else:
+        return make_response({"error": "Unauthorized"}, HTTPStatus.FORBIDDEN)
+
 
 def _get_user_info_from_account(account: str) -> User:
     user: User | None = User.query.filter(or_(User.email == account, User.handle == account)).first()
