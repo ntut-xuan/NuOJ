@@ -11,6 +11,7 @@ from sqlalchemy.sql import or_
 import setting_util
 from api.auth.auth_util import HS256JWTCodec, LoginPayload, login, register
 from api.auth.github_oauth_util import github_login
+from api.auth.google_oauth_util import google_login
 from api.auth.oauth_util import OAuthLoginResult
 from api.auth.validator import (
     validate_email_or_return_unprocessable_entity,
@@ -97,7 +98,7 @@ def oauth_info():
         response["github_oauth_url"] = f"https://github.com/login/oauth/authorize?client_id={github_client_id}&scope=repo"
 
     if google_status:
-        response["google_oauth_url"] = "https://accounts.google.com/o/oauth2/v2/auth?client_id=%s&redirect_uri=%s&response_type=code&scope=%s" % (google_client_id, google_redirect_url, google_oauth_scope)
+        response["google_oauth_url"] = f"https://accounts.google.com/o/oauth2/v2/auth?client_id={google_client_id}&redirect_uri={google_redirect_url}&response_type=code&scope={google_oauth_scope}"
 
     return Response(json.dumps(response), mimetype="application/json")
 
@@ -129,6 +130,30 @@ def github_login_route():
             _set_jwt_cookie_to_response({"email": user.email, "handle": user.handle}, response)
     else:
         response = make_simple_error_response(HTTPStatus.FORBIDDEN, "Github OAuth login failed.")
+    return response
+
+
+@auth.route("/google_login", methods=["GET"])
+def google_login_route():
+    code: str = request.args.get("code")
+    error: str | None = request.args.get("error")
+    
+    if error is not None:
+        make_simple_error_response(HTTPStatus.FORBIDDEN, "Google OAuth login failed since args have error argument.")
+    
+    oauth_login_result: OAuthLoginResult = google_login(code)
+
+    response: Response
+
+    if oauth_login_result.passed:
+        user: User = _get_user_info_from_account(oauth_login_result.email)
+        if user.handle is None:
+            response = redirect("/handle_setup")
+        else:
+            response = redirect("/")
+            _set_jwt_cookie_to_response({"email": user.email, "handle": user.handle}, response)
+    else:
+        response = make_simple_error_response(HTTPStatus.FORBIDDEN, "Google OAuth login failed.")
     return response
 
 

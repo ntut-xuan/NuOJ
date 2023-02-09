@@ -3,11 +3,8 @@ import json
 from requests import Response, get, post
 from dataclasses import dataclass
 from typing import Any
-from uuid import uuid4
 
-from api.auth.auth_util import _init_user_data_to_database, _init_profile_storage_file
-from api.auth.oauth_util import OAuthLoginResult
-from models import User
+from api.auth.oauth_util import OAuthLoginResult, _init_oauth_user_data_and_profile_if_user_not_exists
 from setting_util import github_oauth_client_id, github_oauth_secret
 
 
@@ -25,17 +22,13 @@ def github_login(code) -> OAuthLoginResult:
     access_token: str | None = _validate_github_oauth_code_and_get_access_token(client_id, client_secret, code)
 
     if access_token is None:
-        return OAuthLoginResult(None, False, None)
+        return OAuthLoginResult(None, False)
 
-    user_profile: UserProfile = _get_user_data_with_access_token(access_token)
+    user_profile: UserProfile = _get_user_email_with_access_token(access_token)
 
-    if not _is_user_exists(user_profile.email):
-        user_uid: str = str(uuid4())
-        password: str = str(uuid4())
-        _init_user_data_to_database(user_uid, password, None, user_profile.email, email_verified=1)
-        _init_profile_storage_file(user_uid, user_profile.username, user_profile.email)
+    _init_oauth_user_data_and_profile_if_user_not_exists(user_profile.email)
 
-    return OAuthLoginResult(user_profile.email, True, code)
+    return OAuthLoginResult(user_profile.email, True)
 
 
 def _validate_github_oauth_code_and_get_access_token(client_id: str, client_secret: str, code: str) -> str | None:
@@ -51,7 +44,7 @@ def _validate_github_oauth_code_and_get_access_token(client_id: str, client_secr
     return response_json["access_token"]
 
 
-def _get_user_data_with_access_token(access_token: str) -> UserProfile:
+def _get_user_email_with_access_token(access_token: str) -> str:
     headers: dict[str, str] = {
         "Accept": "application/json",
         "Authorization": f"token {access_token}"
@@ -65,10 +58,4 @@ def _get_user_data_with_access_token(access_token: str) -> UserProfile:
     username: str = response_json["login"]
     email: str = response_json.get("email", username + "@github.com")
     
-    return UserProfile(username=username, email=email)
-
-
-def _is_user_exists(email: str):
-    user: User | None = User.query.filter(User.email == email).first()
-    
-    return user is not None
+    return email

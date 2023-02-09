@@ -35,9 +35,15 @@ def google_oauth_client_id() -> str:
     '''
     return setting["oauth"]["google"]["client_id"]
 
+def google_oauth_secret() -> str:
+    '''
+    回傳使用者 Google OAuth 的 secret
+    '''
+    return setting["oauth"]["google"]["secret"]
+
 def google_oauth_redirect_url() -> str:
     '''
-    回傳使用者 Google OAuth 的 client ID
+    回傳使用者 Google OAuth 的 redirect URL
     '''
     return setting["oauth"]["google"]["redirect_url"]
 
