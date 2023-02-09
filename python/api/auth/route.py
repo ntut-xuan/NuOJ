@@ -157,6 +157,13 @@ def google_login_route():
     return response
 
 
+@auth.route("/logout", methods=["POST"])
+def logout_route():
+	resp: Response = Response(json.dumps({"status": "OK"}))
+	resp.set_cookie("jwt", value = "", expires=0)
+	return resp
+
+
 def _get_user_info_from_account(account: str) -> User:
     user: User | None = User.query.filter(or_(User.email == account, User.handle == account)).first()
     

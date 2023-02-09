@@ -229,6 +229,15 @@ class TestJWTVerifyRoute:
 		assert response.json["message"] == "JWT is invalid."
 
 
+def test_logout_with_logged_in_client_should_remove_jwt_token(logged_in_client: FlaskClient):
+    response: TestResponse = logged_in_client.post("/api/logout")
+    
+    assert response.status_code == HTTPStatus.OK
+    cookies: tuple[Cookie, ...] = _get_cookies(logged_in_client.cookie_jar)
+    with pytest.raises(ValueError):
+	    (jwt_cookie,) = tuple(filter(lambda x: x.name == "jwt", cookies))
+    
+
 def _get_cookies(cookie_jar: CookieJar | None) -> tuple[Cookie, ...]:
 	if cookie_jar is None:
 		return tuple()
