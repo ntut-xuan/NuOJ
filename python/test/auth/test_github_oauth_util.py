@@ -1,6 +1,5 @@
 import pytest
 from flask import Flask
-from flask.testing import FlaskClient
 
 import api.auth.github_oauth_util
 from api.auth.oauth_util import OAuthLoginResult
@@ -12,20 +11,20 @@ def test_mock_access_token_url_should_change_the_access_token_url(app: Flask, mo
     monkeypatch.setattr(api.auth.github_oauth_util, "ACCESS_TOKEN_URL", "some_random_url")
     
     assert api.auth.github_oauth_util.ACCESS_TOKEN_URL == "some_random_url"
+
+def test_mock_user_profile_url_should_change_the_user_profile_url(app: Flask, monkeypatch: pytest.MonkeyPatch):
+    monkeypatch.setattr(api.auth.github_oauth_util, "USER_PROFILE_API_URL", "some_random_url")
     
-def test_mock_post_function_should_replace_the_post_function_to_test_client_post(client: FlaskClient, monkeypatch: pytest.MonkeyPatch):
-    monkeypatch.setattr(api.auth.github_oauth_util, "post", client.post)
-    
-    assert api.auth.github_oauth_util.post.__annotations__["return"] == "TestResponse"
+    assert api.auth.github_oauth_util.USER_PROFILE_API_URL == "some_random_url"
 
 def test_validate_code_with_valid_oauth_code_should_return_valid_access_token(monkeypatch: pytest.MonkeyPatch):
-        monkeypatch.setattr(api.auth.github_oauth_util, "ACCESS_TOKEN_URL", "http://0.0.0.0:8080/api/access_token")
+        monkeypatch.setattr(api.auth.github_oauth_util, "ACCESS_TOKEN_URL", "http://0.0.0.0:8080/test/github/access_token")
         
         access_token: str | None = _validate_github_oauth_code_and_get_access_token("some_client_id", "some_secret", "valid_code")
         assert access_token == "valid_access_token"
         
 def test_get_user_email_with_valid_access_token_should_return_email(monkeypatch: pytest.MonkeyPatch):
-    monkeypatch.setattr(api.auth.github_oauth_util, "USER_PROFILE_API_URL", "http://0.0.0.0:8080/api/oauth_user_profile")
+    monkeypatch.setattr(api.auth.github_oauth_util, "USER_PROFILE_API_URL", "http://0.0.0.0:8080/test/github/user_profile")
     
     access_token: str | None = _get_user_email_with_access_token("valid_access_token")
     assert access_token == "oauth_test@nuoj.com"
@@ -33,8 +32,8 @@ def test_get_user_email_with_valid_access_token_should_return_email(monkeypatch:
 
 class TestGithubOAuthWithMOCK:
     def test_github_login_with_valid_code_should_passed_the_verify(self, app: Flask, monkeypatch: pytest.MonkeyPatch):
-        monkeypatch.setattr(api.auth.github_oauth_util, "ACCESS_TOKEN_URL", "http://0.0.0.0:8080/api/access_token")
-        monkeypatch.setattr(api.auth.github_oauth_util, "USER_PROFILE_API_URL", "http://0.0.0.0:8080/api/oauth_user_profile")
+        monkeypatch.setattr(api.auth.github_oauth_util, "ACCESS_TOKEN_URL", "http://0.0.0.0:8080/test/github/access_token")
+        monkeypatch.setattr(api.auth.github_oauth_util, "USER_PROFILE_API_URL", "http://0.0.0.0:8080/test/github/user_profile")
         with app.app_context():
             
             result: OAuthLoginResult = github_login("valid_code")
@@ -42,8 +41,8 @@ class TestGithubOAuthWithMOCK:
             assert result.passed
             
     def test_github_login_with_valid_code_should_have_correct_user_email(self, app: Flask, monkeypatch: pytest.MonkeyPatch):
-        monkeypatch.setattr(api.auth.github_oauth_util, "ACCESS_TOKEN_URL", "http://0.0.0.0:8080/api/access_token")
-        monkeypatch.setattr(api.auth.github_oauth_util, "USER_PROFILE_API_URL", "http://0.0.0.0:8080/api/oauth_user_profile")
+        monkeypatch.setattr(api.auth.github_oauth_util, "ACCESS_TOKEN_URL", "http://0.0.0.0:8080/test/github/access_token")
+        monkeypatch.setattr(api.auth.github_oauth_util, "USER_PROFILE_API_URL", "http://0.0.0.0:8080/test/github/user_profile")
         with app.app_context():
             
             result: OAuthLoginResult = github_login("valid_code")
@@ -51,8 +50,8 @@ class TestGithubOAuthWithMOCK:
             assert result.email == "oauth_test@nuoj.com"
             
     def test_github_login_with_valid_code_and_new_email_should_init_the_user_data(self, app: Flask, monkeypatch: pytest.MonkeyPatch):
-        monkeypatch.setattr(api.auth.github_oauth_util, "ACCESS_TOKEN_URL", "http://0.0.0.0:8080/api/access_token")
-        monkeypatch.setattr(api.auth.github_oauth_util, "USER_PROFILE_API_URL", "http://0.0.0.0:8080/api/oauth_user_profile")
+        monkeypatch.setattr(api.auth.github_oauth_util, "ACCESS_TOKEN_URL", "http://0.0.0.0:8080/test/github/access_token")
+        monkeypatch.setattr(api.auth.github_oauth_util, "USER_PROFILE_API_URL", "http://0.0.0.0:8080/test/github/user_profile")
         with app.app_context():
             
             result: OAuthLoginResult = github_login("valid_code")
@@ -63,8 +62,8 @@ class TestGithubOAuthWithMOCK:
             assert profile is not None
             
     def test_github_login_with_valid_code_and_new_email_should_init_the_user_profile_in_storage(self, app: Flask, monkeypatch: pytest.MonkeyPatch):
-        monkeypatch.setattr(api.auth.github_oauth_util, "ACCESS_TOKEN_URL", "http://0.0.0.0:8080/api/access_token")
-        monkeypatch.setattr(api.auth.github_oauth_util, "USER_PROFILE_API_URL", "http://0.0.0.0:8080/api/oauth_user_profile")
+        monkeypatch.setattr(api.auth.github_oauth_util, "ACCESS_TOKEN_URL", "http://0.0.0.0:8080/test/github/access_token")
+        monkeypatch.setattr(api.auth.github_oauth_util, "USER_PROFILE_API_URL", "http://0.0.0.0:8080/test/github/user_profile")
         with app.app_context():
             
             result: OAuthLoginResult = github_login("valid_code")
@@ -73,8 +72,8 @@ class TestGithubOAuthWithMOCK:
             assert file_storage_tunnel_exist(f"{user.user_uid}.json", TunnelCode.USER_PROFILE)
             
     def test_github_login_with_invalid_code_should_fail_the_verify(self, app: Flask, monkeypatch: pytest.MonkeyPatch):
-        monkeypatch.setattr(api.auth.github_oauth_util, "ACCESS_TOKEN_URL", "http://0.0.0.0:8080/api/access_token")
-        monkeypatch.setattr(api.auth.github_oauth_util, "USER_PROFILE_API_URL", "http://0.0.0.0:8080/api/oauth_user_profile")
+        monkeypatch.setattr(api.auth.github_oauth_util, "ACCESS_TOKEN_URL", "http://0.0.0.0:8080/test/github/access_token")
+        monkeypatch.setattr(api.auth.github_oauth_util, "USER_PROFILE_API_URL", "http://0.0.0.0:8080/test/github/user_profile")
         with app.app_context():
             
             result: OAuthLoginResult = github_login("invalid_code")

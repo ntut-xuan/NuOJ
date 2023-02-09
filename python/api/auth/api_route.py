@@ -27,10 +27,10 @@ from api.auth.validator import (
 from models import User
 from util import make_simple_error_response
 
-auth = Blueprint('auth', __name__, url_prefix="/api")
+auth_bp = Blueprint('auth', __name__, url_prefix="/api")
 
 
-@auth.route("/login", methods=["POST"])
+@auth_bp.route("/login", methods=["POST"])
 @validate_login_payload_format_or_return_bad_request
 def login_route():
     payload: dict[str, Any] | None = request.get_json(silent=True)
@@ -46,7 +46,7 @@ def login_route():
     return response
 
 
-@auth.route("/register", methods=["POST"])
+@auth_bp.route("/register", methods=["POST"])
 @validate_register_payload_format_or_return_bad_request
 @validate_email_or_return_unprocessable_entity
 @validate_handle_or_return_unprocessable_entity
@@ -83,7 +83,7 @@ def register_route():
     return response
 
 
-@auth.route("/oauth_info", methods=["GET"])
+@auth_bp.route("/oauth_info", methods=["GET"])
 def oauth_info():
     github_status = setting_util.github_oauth_enable()
     google_status = setting_util.github_oauth_enable()
@@ -106,7 +106,7 @@ def oauth_info():
 # def pubkey():
 # 	return send_from_directory('../', "public.pem")
 
-@auth.route("/verify_jwt", methods=["POST"])
+@auth_bp.route("/verify_jwt", methods=["POST"])
 @validate_jwt_is_exists_or_return_forbidden
 @validate_jwt_is_valid_or_return_forbidden
 def verify_session() -> Response:
@@ -114,7 +114,7 @@ def verify_session() -> Response:
     return response
 
 
-@auth.route("/github_login", methods=["GET"])
+@auth_bp.route("/github_login", methods=["GET"])
 def github_login_route():
     code: str = request.args.get("code")
     oauth_login_result: OAuthLoginResult = github_login(code)
@@ -133,7 +133,7 @@ def github_login_route():
     return response
 
 
-@auth.route("/google_login", methods=["GET"])
+@auth_bp.route("/google_login", methods=["GET"])
 def google_login_route():
     code: str = request.args.get("code")
     error: str | None = request.args.get("error")
@@ -157,34 +157,11 @@ def google_login_route():
     return response
 
 
-@auth.route("/logout", methods=["POST"])
+@auth_bp.route("/logout", methods=["POST"])
 def logout_route():
 	resp: Response = Response(json.dumps({"status": "OK"}))
 	resp.set_cookie("jwt", value = "", expires=0)
 	return resp
-
-@auth.route("/access_token", methods=["POST"])
-def access_token_test_route():
-    code: str | None = request.args.get("code", None)
-    
-    assert code is not None
-    
-    if code == "valid_code":
-        return make_response({"message": "OK", "access_token": "valid_access_token"})
-    else:
-        return make_response({"error": "Invalid Code"}, HTTPStatus.FORBIDDEN)
-
-
-@auth.route("/oauth_user_profile", methods=["GET"])
-def oauth_user_profile_test_route():
-    authorization_header: str | None = request.headers.get("Authorization", None)
-    
-    assert authorization_header is not None
-    
-    if authorization_header == "token valid_access_token":
-        return make_response({"login": "oauth_test", "email": "oauth_test@nuoj.com"})
-    else:
-        return make_response({"error": "Unauthorized"}, HTTPStatus.FORBIDDEN)
 
 
 def _get_user_info_from_account(account: str) -> User:
