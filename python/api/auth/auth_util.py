@@ -108,9 +108,6 @@ def _is_profile_storage_exist(user_uid: str) -> bool:
 
 
 def _init_user_data_to_database(user_uid: str, password: str, handle: str, email: str, role: int = 0, email_verified: int = 0):
-    user_uid: str = str(uuid4())
-    password: str = str(uuid4())
-    
     user: User = User(
         user_uid=user_uid,
         handle=handle,
