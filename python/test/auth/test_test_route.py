@@ -35,6 +35,11 @@ class TestGithubTestRoute:
         assert response.json is not None
         assert response.json["login"] == "oauth_test"
         assert response.json["email"] == "oauth_test@nuoj.com"
+    
+    def test_github_user_profile_test_route_with_invalid_access_token_should_respond_http_status_forbidden(self, client: Flask):
+        response: TestResponse = client.get("/test/github/user_profile", headers={"Authorization": "token invalid_access_token"})
+        
+        assert response.status_code == HTTPStatus.FORBIDDEN
         
 class TestGoogleTestRoute:
     def _get_payload(self, valid: bool):
@@ -75,3 +80,8 @@ class TestGoogleTestRoute:
         assert response.status_code == HTTPStatus.OK
         assert response.json is not None
         assert response.json["email"] == "oauth_test@nuoj.com"
+    
+    def test_google_user_profile_test_route_with_invalid_access_token_should_respond_http_status_forbidden(self, client: Flask):
+        response: TestResponse = client.get("/test/google/user_profile?access_token=invalid_access_token")
+        
+        assert response.status_code == HTTPStatus.FORBIDDEN

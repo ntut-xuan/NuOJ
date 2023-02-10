@@ -25,7 +25,8 @@ def github_oauth_user_profile_test_route():
     
     if authorization_header == "token valid_access_token":
         return make_response({"login": "oauth_test", "email": "oauth_test@nuoj.com"})
-
+    else:
+        return make_response({"error": "Invalid access token"}, HTTPStatus.FORBIDDEN)
     
 @auth_test_bp.route("/google/access_token", methods=["POST"])
 def google_access_token_test_route():
@@ -50,3 +51,5 @@ def google_oauth_user_profile_test_route():
 
     if access_token == "valid_access_token":
         return make_response({"email": "oauth_test@nuoj.com"})
+    else:
+        return make_response({"error": "Invalid access token"}, HTTPStatus.FORBIDDEN)
