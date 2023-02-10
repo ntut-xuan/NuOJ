@@ -1,9 +1,13 @@
-from flask import *
 import json
 import requests
+from typing import Final
 
 from api.auth.oauth_util import OAuthLoginResult, _init_oauth_user_data_and_profile_if_user_not_exists
 from setting_util import google_oauth_client_id, google_oauth_secret, google_oauth_redirect_url
+
+
+ACCESS_TOKEN_URL: Final[str] = "https://oauth2.googleapis.com/token"
+USER_PROFILE_API_URL: Final[str] = "https://www.googleapis.com/oauth2/v2/userinfo"
 
 
 def google_login(code) -> bool:
@@ -32,11 +36,13 @@ def _get_access_token_from_code(code: str) -> str:
         "redirect_uri": redirect_uri,
         "grant_type": "authorization_code"
     }
-
-    response: requests.Response = requests.post("https://oauth2.googleapis.com/token", data=payload)
-    response_json = json.loads(response.text)
     
-    print(response_json)
+    headers = {
+        "content-type": "application/json"
+    }
+
+    response: requests.Response = requests.post(ACCESS_TOKEN_URL, data=json.dumps(payload), headers=headers)
+    response_json = json.loads(response.text)
     
     if "access_token" not in response_json:
         return None
@@ -47,7 +53,7 @@ def _get_access_token_from_code(code: str) -> str:
 
 
 def _get_user_email_from_access_token(access_token: str) -> str:
-    response = requests.get(f"https://www.googleapis.com/oauth2/v2/userinfo?access_token={access_token}")
+    response = requests.get(USER_PROFILE_API_URL, params={"access_token": access_token})
     response_json = json.loads(response.text)
     
     assert "email" in response_json

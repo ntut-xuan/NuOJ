@@ -58,23 +58,6 @@ def validate_email_or_return_unprocessable_entity(func: Callable[..., Response |
         return func(*args, **kwargs)
     return wrapper
 
-def validate_handle_or_return_unprocessable_entity(func: Callable[..., Response | T]) -> Callable[..., Response | T]:
-    @wraps(func)
-    def wrapper(*args, **kwargs) -> Response | T:
-        payload: dict[str, Any] | None = request.get_json(silent=True)
-        
-        assert payload is not None
-        assert "handle" in payload
-        
-        handle = payload["handle"]
-        is_handle_valid = bool(re.match("[a-zA-Z\d](?:[a-zA-Z\d]|[_-](?=[a-zA-Z\d])){3,38}$", handle))
-        
-        if not is_handle_valid:
-            return make_simple_error_response(HTTPStatus.UNPROCESSABLE_ENTITY, "Handle is invalid.")
-        
-        return func(*args, **kwargs)
-    return wrapper
-
 def validate_password_or_return_unprocessable_entity(func: Callable[..., Response | T]) -> Callable[..., Response | T]:
     @wraps(func)
     def wrapper(*args, **kwargs) -> Response | T:
@@ -141,24 +124,6 @@ def validate_handle_or_return_unprocessable_entity(func: Callable[..., Response 
         if not is_handle_valid:
             return make_simple_error_response(HTTPStatus.UNPROCESSABLE_ENTITY, "Handle is invalid.")
 
-        return func(*args, **kwargs)
-    return wrapper
-
-
-def validate_handle_is_repeated_or_return_forbidden(func: Callable[..., Response | T]) -> Callable[..., Response | T]:
-    @wraps(func)
-    def wrapper(*args, **kwargs) -> Response | T:
-        payload: dict[str, Any] | None = request.get_json(silent=True)
-        
-        assert payload is not None
-        assert "handle" in payload
-        
-        handle = payload["handle"]
-        user: User | None = User.query.filter(User.handle == handle)
-        
-        if user is not None:
-            return make_simple_error_response(HTTPStatus.FORBIDDEN, "Handle is repeated.")
-        
         return func(*args, **kwargs)
     return wrapper
 
