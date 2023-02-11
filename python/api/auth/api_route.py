@@ -84,7 +84,7 @@ def register_route():
 
 
 @auth_bp.route("/oauth_info", methods=["GET"])
-def oauth_info():
+def oauth_info_route():
     github_status = setting_util.github_oauth_enable()
     google_status = setting_util.github_oauth_enable()
     github_client_id = setting_util.github_oauth_client_id()
@@ -109,7 +109,7 @@ def oauth_info():
 @auth_bp.route("/verify_jwt", methods=["POST"])
 @validate_jwt_is_exists_or_return_forbidden
 @validate_jwt_is_valid_or_return_forbidden
-def verify_session() -> Response:
+def verify_jwt_route() -> Response:
     response: Response = make_response({"message": "OK"}, HTTPStatus.OK)
     return response
 
