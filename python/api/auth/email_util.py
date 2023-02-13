@@ -33,14 +33,10 @@ def send_verification_email(username: str, email: str) -> None:
 
 def _send_email(sender: MailSender, mail: MIMEMultipart):
     with smtplib.SMTP(host=sender.server, port=sender.port) as smtp:  # 設定SMTP伺服器
-        try:
-            smtp.ehlo()  # 驗證SMTP伺服器
-            smtp.starttls()  # 建立加密傳輸
-            smtp.login(sender.mailname, sender.password)  # 登入寄件者gmail
-            smtp.send_message(mail)  # 寄送郵件
-            print("Complete!")
-        except Exception as e:
-            print("Error message: ", e)
+        smtp.ehlo()  # 驗證SMTP伺服器
+        smtp.starttls()  # 建立加密傳輸
+        smtp.login(sender.mailname, sender.password)  # 登入寄件者gmail
+        smtp.send_message(mail)  # 寄送郵件
 
 
 def _build_verification_mail(
@@ -96,28 +92,3 @@ def _get_mail_content_mime_text(username: str, random_uuid: str) -> str:
     mail_content_with_code = _put_parameter_to_mail_content(mail_content, mail_redirect_url() + f"?vericode={random_uuid}", username)
     mime_text_content = MIMEText(mail_content_with_code, 'html')
     return mime_text_content
-
-def _send_verification_email_to_stroage(username: str, email: str) -> None:
-    random_uuid: UUID = uuid4()
-    mail_sender: MailSender = _get_mail_sender()
-    logo_image: MIMEImage = _get_logo_mime_image()
-    mime_text_content: MIMEText = _get_mail_content_mime_text(username, str(random_uuid))
-    
-    mime_mail: MIMEMultipart = _build_verification_mail([logo_image], "NuOJ 驗證信件", "NuOJ@noreply.me", email, mime_text_content)
-    
-    _send_email_to_storage(mail_sender, mime_mail)
-
-
-def _send_email_to_storage(sender: MailSender, mail: MIMEMultipart) -> None:
-    storage_path: str = current_app.config.get("STORAGE_PATH")
-    storage_path_object: Path = Path(storage_path)
-    mail_file_path: Path = storage_path_object / ("mail.txt")
-    sender_file_path: Path = storage_path_object / ('sender.txt')
-    
-    with open(mail_file_path, "w") as file:
-        file.write(mail.as_string())
-        
-    with open(sender_file_path, "w") as file:
-        file.write(str(sender))
-    
-    print("Complete! [Mock]")

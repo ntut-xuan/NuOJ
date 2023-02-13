@@ -6,14 +6,15 @@ from pathlib import Path
 from typing import Generator
 
 import pytest
-from flask import current_app
-
-from app import create_app
-from models import User
-from database import create_db, db
 from flask import Flask
 from flask.testing import FlaskClient
+from requests import Response, delete
 from werkzeug.test import TestResponse
+
+from app import create_app
+from api.auth.email_util import MailSender, _get_mail_sender
+from models import User
+from database import create_db, db
 
 @pytest.fixture
 def app() -> Generator[Flask, None, None]:
@@ -30,6 +31,7 @@ def app() -> Generator[Flask, None, None]:
     with app.app_context():
         create_db()
         _add_test_account()
+        _remove_all_email_from_fake_smtp_server()
     
     yield app
     
@@ -67,3 +69,12 @@ def _add_test_account():
     )
     db.session.add(user)
     db.session.commit()
+    
+
+def _remove_all_email_from_fake_smtp_server():
+    sender: MailSender = _get_mail_sender()
+    server_url: str = "http://" + sender.server + ":1080/api/emails"
+    
+    response: Response = delete(server_url)
+    
+    assert response.status_code == HTTPStatus.OK

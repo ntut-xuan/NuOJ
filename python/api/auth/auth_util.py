@@ -15,7 +15,7 @@ from dataclasses import dataclass
 
 from sqlalchemy.sql import or_, and_
 
-from api.auth.email_util import send_verification_email, _send_verification_email_to_stroage
+from api.auth.email_util import send_verification_email
 from database import db
 from models import User, Profile
 from setting_util import mail_verification_enable
@@ -69,11 +69,8 @@ def register(email: str, handle: str, password: str) -> None:
 
     # Send the email if the email verification is enabled.
     if mail_verification_enable():
-        if current_app.config.get("TESTING") == False:
-            thread = FlaskThread(target=send_verification_email, args=[handle, email])
-            thread.start()
-        else:
-            _send_verification_email_to_stroage(handle, email)
+        thread = FlaskThread(target=send_verification_email, args=[handle, email])
+        thread.start()
 
 
 def setup_handle(account, handle) -> None:

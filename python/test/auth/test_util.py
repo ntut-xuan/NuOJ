@@ -1,18 +1,25 @@
 import freezegun
+import json
 import jwt
 import pytest
+import time
 from datetime import timedelta
 from email.mime.image import MIMEImage
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-from flask import Flask, current_app
+from http import HTTPStatus
 from pathlib import Path
+from typing import Any
 from uuid import UUID, uuid4
 
+from flask import Flask, current_app
+from requests import Response, get
+
 from api.auth.auth_util import HS256JWTCodec, hash_password, is_user_already_have_handle, login, setup_handle, register
-from api.auth.email_util import MailSender, _build_verification_mail, _get_mail_sender, _get_mail_content_mime_text, _get_logo_mime_image
+from api.auth.email_util import MailSender, send_verification_email, _get_mail_sender
 from database import db
 from models import User
+from test.util import assert_not_raise
 
 @pytest.fixture
 def setup_test_user(app: Flask) -> None:
@@ -72,13 +79,19 @@ class TestRegisterUtil:
             user_profile_file_path: Path = user_profile_dir_path / ((user_uid) + ".json")
             assert user_profile_file_path.exists()
 
-    def test_register_account_with_mail_verification_enabled_should_send_the_email(self, app: Flask, monkeypatch: pytest.MonkeyPatch):
+    def test_register_account_with_mail_verification_enabled_should_send_the_email(self, app: Flask):
         with app.app_context():            
             register("nuoj@test.com", "nuoj_test", "nuoj_test")
             
-            storage_path = current_app.config.get("STORAGE_PATH")
-            assert (Path(storage_path) / "mail.txt").exists()
-            assert (Path(storage_path) / "sender.txt").exists()
+            time.sleep(2)
+            sender: MailSender = _get_mail_sender()
+            response: Response = get("http://" + sender.server + ":1080/api/emails")
+            assert response.status_code == HTTPStatus.OK
+            json_response: list[dict[str, Any]] = json.loads(response.text)
+            assert len(json_response) == 1
+            assert json_response[0]["subject"] == "NuOJ 驗證信件"
+            assert json_response[0]["to"]["text"] == "nuoj@test.com"
+            assert json_response[0]["from"]["text"] == "NuOJ@noreply.me"
             
 
 def test_hash_password_should_return_password_hash_by_sha256_algorithm(app: Flask):
@@ -181,4 +194,17 @@ class TestHS256JWTCodec:
             assert is_valid_jwt
 
 
-
+class TestSendEmail:
+    def test_send_email_to_fake_smtp_server_should_record_to_fake_smtp_server(app: Flask, setup_test_user: None):
+        with assert_not_raise(OSError):
+            
+            send_verification_email("nuoj", "nuoj@test.com")
+            
+            sender: MailSender = _get_mail_sender()
+            response: Response = get("http://" + sender.server + ":1080/api/emails")
+            assert response.status_code == HTTPStatus.OK
+            json_response: list[dict[str, Any]] = json.loads(response.text)
+            assert len(json_response) == 1
+            assert json_response[0]["subject"] == "NuOJ 驗證信件"
+            assert json_response[0]["to"]["text"] == "nuoj@test.com"
+            assert json_response[0]["from"]["text"] == "NuOJ@noreply.me"
