@@ -4,10 +4,7 @@ from dataclasses import dataclass
 from email.mime.image import MIMEImage
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-from pathlib import Path
 from uuid import UUID, uuid4
-
-from flask import current_app
 
 from setting_util import mail_redirect_url
 

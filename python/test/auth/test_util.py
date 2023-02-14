@@ -4,13 +4,9 @@ import jwt
 import pytest
 import time
 from datetime import timedelta
-from email.mime.image import MIMEImage
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
 from http import HTTPStatus
 from pathlib import Path
 from typing import Any
-from uuid import UUID, uuid4
 
 from flask import Flask, current_app
 from requests import Response, get

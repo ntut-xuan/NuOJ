@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 import json
 from requests import Response, get, post
-from dataclasses import dataclass
 from typing import Any, Final
 
 from api.auth.oauth_util import OAuthLoginResult, _init_oauth_user_data_and_profile_if_user_not_exists
