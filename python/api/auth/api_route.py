@@ -61,24 +61,6 @@ def register_route():
 
     register(email, handle, password)
 
-    # if result["status"] == "Failed":
-    #     return Response(json.dumps(result), mimetype="application/json")
-
-    # if setting_util.mail_verification_enable():
-    #     verification_code = result["verification_code"]
-    #     result["mail_verification_redirect"] = True
-    #     del result["verification_code"]
-    # else:
-    #     result["mail_verification_redirect"] = False
-
-    # resp = Response(json.dumps(result), mimetype="application/json")
-
-    # if setting_util.mail_verification_enable() == False:
-    #     sessionID = payload_generator(result["data"]["handle"], result["data"]["email"])
-    #     resp.set_cookie("SID", value = sessionID, expires=time.time()+24*60*60)
-    # else:
-    #     verification_code_dict[verification_code] = result["data"]["handle"]
-
     response: Response = make_response({"message": "OK"}, HTTPStatus.OK)
     return response
 
