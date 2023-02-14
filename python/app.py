@@ -44,5 +44,5 @@ def create_app(test_config: Mapping[str, Any] | None = None) -> Flask:
     def fetch_heartbeat():
         return Response(json.dumps({"status": "OK"}), mimetype="application/json")
 
-    crypto_util.GenerateKey()
+    #crypto_util.GenerateKey()
     return app

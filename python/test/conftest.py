@@ -28,10 +28,10 @@ def app() -> Generator[Flask, None, None]:
         }
     )
     _create_storage_folder_structure(storage_path)
+    _remove_all_email_from_fake_smtp_server()
     with app.app_context():
         create_db()
         _add_test_account()
-        _remove_all_email_from_fake_smtp_server()
     
     yield app
     

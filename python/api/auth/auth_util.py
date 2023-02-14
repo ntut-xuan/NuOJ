@@ -69,8 +69,9 @@ def register(email: str, handle: str, password: str) -> None:
 
     # Send the email if the email verification is enabled.
     if mail_verification_enable():
-        thread = FlaskThread(target=send_verification_email, args=[handle, email])
+        thread = threading.Thread(target=send_verification_email, args=[handle, email])
         thread.start()
+        
 
 
 def setup_handle(account, handle) -> None:
@@ -168,13 +169,3 @@ class HS256JWTCodec:
         except (jwt.exceptions.DecodeError, jwt.exceptions.ExpiredSignatureError):
             return False
         return True
-
-
-class FlaskThread(threading.Thread):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.app: Flask = current_app._get_current_object()
-        
-    def run(self):
-        with self.app.app_context():
-            super().run()

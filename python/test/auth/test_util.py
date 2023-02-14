@@ -61,6 +61,7 @@ class TestRegisterUtil:
 
             register("nuoj@test.com", "nuoj_test", "nuoj_test")
             
+            time.sleep(2)
             user: User | None = User.query.filter_by(email="nuoj@test.com", handle="nuoj_test").first()
             assert user is not None
             assert user.password == "cc28a9d01d08f4fa60b63434ce9971fda60e58a2f421898c78582bbb709bf7bb"
@@ -70,6 +71,7 @@ class TestRegisterUtil:
             
             register("nuoj@test.com", "nuoj_test", "nuoj_test")
             
+            time.sleep(2)
             user: User | None = User.query.filter_by(email="nuoj@test.com", handle="nuoj_test").first()
             assert user is not None
             user_uid = user.user_uid
