@@ -6,8 +6,9 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from uuid import UUID, uuid4
 
-from setting_util import mail_redirect_url
+from flask import current_app
 
+from setting.util import Setting
 
 @dataclass
 class MailSender:
@@ -84,8 +85,9 @@ def _get_logo_mime_image() -> MIMEImage:
 
 def _get_mail_content_mime_text(username: str, random_uuid: str) -> str:
     mail_content: str
+    setting: Setting = current_app.config.get("setting")
     with open("/etc/nuoj/templates/mail_template.html", "r") as file:
         mail_content = file.read()
-    mail_content_with_code = _put_parameter_to_mail_content(mail_content, mail_redirect_url() + f"?vericode={random_uuid}", username)
+    mail_content_with_code = _put_parameter_to_mail_content(mail_content, setting.mail_redirect_url() + f"?vericode={random_uuid}", username)
     mime_text_content = MIMEText(mail_content_with_code, 'html')
     return mime_text_content

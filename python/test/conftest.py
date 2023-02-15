@@ -3,7 +3,7 @@ import os
 import shutil
 from http import HTTPStatus
 from pathlib import Path
-from typing import Generator
+from typing import Any, Generator
 
 import pytest
 from flask import Flask
@@ -13,8 +13,9 @@ from werkzeug.test import TestResponse
 
 from app import create_app
 from api.auth.email_util import MailSender, _get_mail_sender
-from models import User
 from database import create_db, db
+from models import User
+from setting.util import Setting
 
 @pytest.fixture
 def app() -> Generator[Flask, None, None]:
@@ -24,9 +25,10 @@ def app() -> Generator[Flask, None, None]:
         {
             "TESTING": True,
             "SQLALCHEMY_DATABASE_URI": f"sqlite:///{db_path}",
-            "STORAGE_PATH": storage_path
+            "STORAGE_PATH": storage_path,
         }
     )
+    _setup_setting_to_app_config(app)
     _create_storage_folder_structure(storage_path)
     _remove_all_email_from_fake_smtp_server()
     with app.app_context():
@@ -78,3 +80,29 @@ def _remove_all_email_from_fake_smtp_server():
     response: Response = delete(server_url)
     
     assert response.status_code == HTTPStatus.OK
+
+def _setup_setting_to_app_config(app: Flask):
+    setting: dict[str, Any] = {
+        "oauth": {
+            "github": {
+                "enable": True,
+                "client_id": "some_client_id",
+                "secret": "some_secret"
+            },
+            "google": {
+                "enable": True,
+                "client_id": "some_client_id",
+                "secret": "some_secret",
+                "redirect_url": "some_redirect_url"
+            }
+        },
+        "mail": {
+            "enable": True,
+            "server": "fake-smtp-server",
+            "port": "1025",
+            "mailname": "test@nuoj.com",
+            "password": "nuoj_test",
+            "redirect_url": "http://test.net/mail_verification"
+        },
+    }
+    app.config["setting"] = Setting().from_dict(setting)

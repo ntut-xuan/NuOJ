@@ -6,7 +6,6 @@ from typing import Any
 from flask import Blueprint, Response, current_app, request, make_response, redirect
 from sqlalchemy.sql import or_
 
-import setting_util
 from api.auth.auth_util import HS256JWTCodec, LoginPayload, login, register
 from api.auth.github_oauth_util import github_login
 from api.auth.google_oauth_util import google_login
@@ -22,6 +21,7 @@ from api.auth.validator import (
     validate_password_or_return_unprocessable_entity,
     validate_register_payload_format_or_return_bad_request,
 )
+from setting.util import Setting
 from models import User
 from util import make_simple_error_response
 
@@ -65,11 +65,13 @@ def register_route():
 
 @auth_bp.route("/oauth_info", methods=["GET"])
 def oauth_info_route():
-    github_status = setting_util.github_oauth_enable()
-    google_status = setting_util.github_oauth_enable()
-    github_client_id = setting_util.github_oauth_client_id()
-    google_client_id = setting_util.google_oauth_client_id()
-    google_redirect_url = setting_util.google_oauth_redirect_url()
+    current_setting: Setting = current_app.config.get("setting")
+    
+    github_status = current_setting.github_oauth_enable()
+    google_status = current_setting.github_oauth_enable()
+    github_client_id = current_setting.github_oauth_client_id()
+    google_client_id = current_setting.google_oauth_client_id()
+    google_redirect_url = current_setting.google_oauth_redirect_url()
     google_oauth_scope = "https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email"
 
     response = {"status": "OK"}

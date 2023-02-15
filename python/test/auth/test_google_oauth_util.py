@@ -9,7 +9,7 @@ from models import Profile, User
 
 def test_mock_access_token_url_should_change_the_access_token_url(app: Flask, monkeypatch: pytest.MonkeyPatch):
     monkeypatch.setattr(api.auth.google_oauth_util, "ACCESS_TOKEN_URL", "some_random_url")
-    
+
     assert api.auth.google_oauth_util.ACCESS_TOKEN_URL == "some_random_url"
 
 def test_mock_user_profile_url_should_change_the_user_profile_url(app: Flask, monkeypatch: pytest.MonkeyPatch):
@@ -17,11 +17,12 @@ def test_mock_user_profile_url_should_change_the_user_profile_url(app: Flask, mo
     
     assert api.auth.google_oauth_util.USER_PROFILE_API_URL == "some_random_url"
 
-def test_validate_code_with_valid_oauth_code_should_return_valid_access_token(monkeypatch: pytest.MonkeyPatch):
+def test_validate_code_with_valid_oauth_code_should_return_valid_access_token(app: Flask, monkeypatch: pytest.MonkeyPatch):
         monkeypatch.setattr(api.auth.google_oauth_util, "ACCESS_TOKEN_URL", "http://0.0.0.0:8080/test/google/access_token")
         
-        access_token: str | None = _get_access_token_from_code("valid_code")
-        assert access_token == "valid_access_token"
+        with app.app_context():
+            access_token: str | None = _get_access_token_from_code("valid_code")
+            assert access_token == "valid_access_token"
         
 def test_get_user_email_with_valid_access_token_should_return_email(monkeypatch: pytest.MonkeyPatch):
     monkeypatch.setattr(api.auth.google_oauth_util, "USER_PROFILE_API_URL", "http://0.0.0.0:8080/test/google/user_profile")

@@ -18,7 +18,7 @@ from sqlalchemy.sql import or_, and_
 from api.auth.email_util import send_verification_email
 from database import db
 from models import User, Profile
-from setting_util import mail_verification_enable
+from setting.util import Setting
 
 
 @dataclass
@@ -68,8 +68,9 @@ def register(email: str, handle: str, password: str) -> None:
     _init_profile_storage_file(user_uid, handle, email)
 
     # Send the email if the email verification is enabled.
-    if mail_verification_enable():
-        thread = threading.Thread(target=send_verification_email, args=[handle, email])
+    setting: Setting = current_app.config.get("setting")
+    if setting.mail_verification_enable():
+        thread = FlaskThread(target=send_verification_email, args=[handle, email])
         thread.start()
         
 
@@ -169,3 +170,13 @@ class HS256JWTCodec:
         except (jwt.exceptions.DecodeError, jwt.exceptions.ExpiredSignatureError):
             return False
         return True
+
+
+class FlaskThread(threading.Thread):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.app: Flask = current_app._get_current_object()
+
+    def run(self):
+        with self.app.app_context():
+            super().run()

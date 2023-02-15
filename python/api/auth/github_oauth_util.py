@@ -3,18 +3,19 @@ import json
 from requests import Response, get, post
 from typing import Any, Final
 
-from api.auth.oauth_util import OAuthLoginResult, _init_oauth_user_data_and_profile_if_user_not_exists
-from setting_util import github_oauth_client_id, github_oauth_secret
+from flask import current_app
 
+from api.auth.oauth_util import OAuthLoginResult, _init_oauth_user_data_and_profile_if_user_not_exists
+from setting.util import Setting
 
 ACCESS_TOKEN_URL: Final[str] = "https://github.com/login/oauth/access_token"
 USER_PROFILE_API_URL: Final[str] = "https://api.github.com/user"
 
 
 def github_login(code) -> OAuthLoginResult:
-
-    client_id = github_oauth_client_id()
-    client_secret = github_oauth_secret()
+    setting: Setting = current_app.config.get("setting")
+    client_id = setting.github_oauth_client_id()
+    client_secret = setting.github_oauth_secret()
     
     access_token: str | None = _validate_github_oauth_code_and_get_access_token(client_id, client_secret, code)
 

@@ -2,8 +2,10 @@ import json
 import requests
 from typing import Final
 
+from flask import current_app
+
 from api.auth.oauth_util import OAuthLoginResult, _init_oauth_user_data_and_profile_if_user_not_exists
-from setting_util import google_oauth_client_id, google_oauth_secret, google_oauth_redirect_url
+from setting.util import Setting
 
 
 ACCESS_TOKEN_URL: Final[str] = "https://oauth2.googleapis.com/token"
@@ -25,9 +27,10 @@ def google_login(code) -> bool:
 
 
 def _get_access_token_from_code(code: str) -> str:
-    client_id = google_oauth_client_id()
-    client_secret = google_oauth_secret()
-    redirect_uri = google_oauth_redirect_url()
+    setting: Setting = current_app.config.get("setting")
+    client_id = setting.google_oauth_client_id()
+    client_secret = setting.google_oauth_secret()
+    redirect_uri = setting.google_oauth_redirect_url()
 
     payload = {
         "code": code, 

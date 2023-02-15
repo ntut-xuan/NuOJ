@@ -15,6 +15,7 @@ from api.auth.auth_util import HS256JWTCodec, hash_password, is_user_already_hav
 from api.auth.email_util import MailSender, send_verification_email, _get_mail_sender
 from database import db
 from models import User
+from setting.util import Setting
 from test.util import assert_not_raise
 
 @pytest.fixture
@@ -79,6 +80,7 @@ class TestRegisterUtil:
 
     def test_register_account_with_mail_verification_enabled_should_send_the_email(self, app: Flask):
         with app.app_context():            
+            
             register("nuoj@test.com", "nuoj_test", "nuoj_test")
             
             time.sleep(2)
@@ -90,6 +92,29 @@ class TestRegisterUtil:
             assert json_response[0]["subject"] == "NuOJ 驗證信件"
             assert json_response[0]["to"]["text"] == "nuoj@test.com"
             assert json_response[0]["from"]["text"] == "NuOJ@noreply.me"
+    
+    def test_register_account_with_mail_verification_disabled_should_not_send_the_email(self, app: Flask):
+        with app.app_context():
+            disabled_mail_setting = {
+                "mail": {
+                    "enable": False,
+                    "server": "fake-smtp-server",
+                    "port": "1025",
+                    "mailname": "test@nuoj.com",
+                    "password": "nuoj_test",
+                    "redirect_url": "http://test.net/mail_verification"
+                },
+            }
+            app.config["setting"] = Setting().from_dict(disabled_mail_setting)
+            
+            register("nuoj@test.com", "nuoj_test", "nuoj_test")
+            
+            time.sleep(2)
+            sender: MailSender = _get_mail_sender()
+            response: Response = get("http://" + sender.server + ":1080/api/emails")
+            assert response.status_code == HTTPStatus.OK
+            json_response: list[dict[str, Any]] = json.loads(response.text)
+            assert len(json_response) == 0
             
 
 def test_hash_password_should_return_password_hash_by_sha256_algorithm(app: Flask):
@@ -193,16 +218,17 @@ class TestHS256JWTCodec:
 
 
 class TestSendEmail:
-    def test_send_email_to_fake_smtp_server_should_record_to_fake_smtp_server(app: Flask, setup_test_user: None):
-        with assert_not_raise(OSError):
-            
-            send_verification_email("nuoj", "nuoj@test.com")
-            
-            sender: MailSender = _get_mail_sender()
-            response: Response = get("http://" + sender.server + ":1080/api/emails")
-            assert response.status_code == HTTPStatus.OK
-            json_response: list[dict[str, Any]] = json.loads(response.text)
-            assert len(json_response) == 1
-            assert json_response[0]["subject"] == "NuOJ 驗證信件"
-            assert json_response[0]["to"]["text"] == "nuoj@test.com"
-            assert json_response[0]["from"]["text"] == "NuOJ@noreply.me"
+    def test_send_email_to_fake_smtp_server_should_record_to_fake_smtp_server(self, app: Flask, setup_test_user: None):
+        with app.app_context():
+            with assert_not_raise(OSError):        
+                
+                send_verification_email("nuoj", "nuoj@test.com")
+                
+                sender: MailSender = _get_mail_sender()
+                response: Response = get("http://" + sender.server + ":1080/api/emails")
+                assert response.status_code == HTTPStatus.OK
+                json_response: list[dict[str, Any]] = json.loads(response.text)
+                assert len(json_response) == 1
+                assert json_response[0]["subject"] == "NuOJ 驗證信件"
+                assert json_response[0]["to"]["text"] == "nuoj@test.com"
+                assert json_response[0]["from"]["text"] == "NuOJ@noreply.me"
