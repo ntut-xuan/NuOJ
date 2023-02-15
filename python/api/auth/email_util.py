@@ -26,6 +26,8 @@ def send_verification_email(username: str, email: str) -> None:
     
     mime_mail: MIMEMultipart = _build_verification_mail([logo_image], "NuOJ 驗證信件", "NuOJ@noreply.me", email, mime_text_content)
     
+    current_app.config["mail_verification_code"] |= {random_uuid: username}
+    
     _send_email(mail_sender, mime_mail)
 
 

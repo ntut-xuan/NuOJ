@@ -27,6 +27,7 @@ def create_app(test_config: Mapping[str, Any] | None = None) -> Flask:
         app.config.from_mapping(test_config)
         
     app.config["jwt_key"] = token_hex()
+    app.config["mail_verification_code"] = {}
     app.config["setting"] = Setting().from_json_file(Path("/etc/nuoj/setting.json"))
 
     db.init_app(app)

@@ -426,6 +426,56 @@ class TestOAuthInfoRoute:
         assert "github_oauth_url" not in response_json
 
 
+class TestVertifyMailRoute:
+    def test_with_valid_code_should_respond_http_status_ok(self, app: Flask, logged_in_client: FlaskClient):
+        mail_verification_codes: dict[str, str] = app.config.get("mail_verification_code")
+        mail_verification_codes |= {"a-random-uuid-here": "test_account"}
+        
+        response: TestResponse = logged_in_client.post("/api/verify_mail?code=a-random-uuid-here")
+        
+        assert response.status_code == HTTPStatus.OK
+        
+    def test_with_absent_jwt_cookie_should_respond_http_status_forbidden(self, client: FlaskClient):
+        
+        response: TestResponse = client.post("/api/verify_mail?code=a-random-uuid-here")
+        
+        assert response.status_code == HTTPStatus.FORBIDDEN
+        json_response: dict[str, str] | None = response.get_json(silent=True)
+        assert json_response["message"] == "JWT is not exists."
+    
+    def test_with_invalid_jwt_cookie_should_respond_http_status_forbidden(self, client: FlaskClient):
+        client.set_cookie("", "jwt", "some.invalid.jwt")
+        
+        response: TestResponse = client.post("/api/verify_mail?code=a-random-uuid-here")
+        
+        assert response.status_code == HTTPStatus.FORBIDDEN
+    
+    def test_with_absent_code_should_respond_http_status_forbidden(self, logged_in_client: FlaskClient):
+    
+        response: TestResponse = logged_in_client.post("/api/verify_mail")
+        
+        assert response.status_code == HTTPStatus.FORBIDDEN
+        json_response: dict[str, str] | None = response.get_json(silent=True)
+        assert json_response["message"] == "Absent code."
+        
+    def test_with_invalid_code_should_respond_http_status_forbidden(self, logged_in_client: FlaskClient):
+    
+        response: TestResponse = logged_in_client.post("/api/verify_mail?code=invalid-code")
+        
+        assert response.status_code == HTTPStatus.FORBIDDEN
+        json_response: dict[str, str] | None = response.get_json(silent=True)
+        assert json_response["message"] == "Invalid code."
+
+    def test_with_not_match_handle_and_code_should_respond_http_status_forbidden(self, app: Flask, logged_in_client: FlaskClient):
+        mail_verification_codes: dict[str, str] = app.config.get("mail_verification_code")
+        mail_verification_codes |= {"a-random-uuid-here": "some_body"}
+        
+        response: TestResponse = logged_in_client.post("/api/verify_mail?code=a-random-uuid-here")
+        
+        assert response.status_code == HTTPStatus.FORBIDDEN
+        json_response: dict[str, str] | None = response.get_json(silent=True)
+        assert json_response["message"] == "Code and handle is not match."
+
 def _get_cookies(cookie_jar: CookieJar | None) -> tuple[Cookie, ...]:
     if cookie_jar is None:
         return tuple()

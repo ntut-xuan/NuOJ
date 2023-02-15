@@ -146,6 +146,32 @@ def logout_route():
 	return resp
 
 
+@auth_bp.route("/verify_mail", methods=["POST"])
+@validate_jwt_is_exists_or_return_forbidden
+@validate_jwt_is_valid_or_return_forbidden
+def verify_mail_route():
+    mail_verification_codes: dict[str, str] = current_app.config.get("mail_verification_code")
+
+    code: str | None = request.args.get("code", None)
+    
+    if code is None:
+        return make_simple_error_response(HTTPStatus.FORBIDDEN, "Absent code.")
+    
+    if code not in mail_verification_codes:
+        return make_simple_error_response(HTTPStatus.FORBIDDEN, "Invalid code.")
+    
+    jwt_token: str = request.cookies.get("jwt")
+    codec: HS256JWTCodec = HS256JWTCodec(current_app.config.get("jwt_key"))
+    jwt_payload: dict[str, str] = codec.decode(jwt_token)
+    handle: str = jwt_payload["data"]["handle"]
+    
+    if handle != mail_verification_codes[code]:
+        return make_simple_error_response(HTTPStatus.FORBIDDEN, "Code and handle is not match.")
+    
+    del mail_verification_codes[code]
+    return make_response({"message": "OK"}, HTTPStatus.OK)
+
+
 def _get_user_info_from_account(account: str) -> User:
     user: User | None = User.query.filter(or_(User.email == account, User.handle == account)).first()
     

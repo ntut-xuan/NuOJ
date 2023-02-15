@@ -53,22 +53,34 @@ class TestLoginUtil:
             assert not is_login
 
 class TestRegisterUtil:
-    def test_register_account_should_write_data_into_database(self, app: Flask):
+    @pytest.fixture()
+    def disabled_mail_setting(self, app: Flask) -> None:
+        disabled_mail_setting = {
+            "mail": {
+                "enable": False,
+                "server": "fake-smtp-server",
+                "port": "1025",
+                "mailname": "test@nuoj.com",
+                "password": "nuoj_test",
+                "redirect_url": "http://test.net/mail_verification"
+            },
+        }
+        app.config["setting"] = Setting().from_dict(disabled_mail_setting)
+            
+    def test_register_account_should_write_data_into_database(self, app: Flask, disabled_mail_setting: None):
         with app.app_context():
 
             register("nuoj@test.com", "nuoj_test", "nuoj_test")
             
-            time.sleep(2)
             user: User | None = User.query.filter_by(email="nuoj@test.com", handle="nuoj_test").first()
             assert user is not None
             assert user.password == "cc28a9d01d08f4fa60b63434ce9971fda60e58a2f421898c78582bbb709bf7bb"
 
-    def test_register_account_should_create_profile_file_to_storage(self, app: Flask):
+    def test_register_account_should_create_profile_file_to_storage(self, app: Flask, disabled_mail_setting: None):
         with app.app_context():
             
             register("nuoj@test.com", "nuoj_test", "nuoj_test")
             
-            time.sleep(2)
             user: User | None = User.query.filter_by(email="nuoj@test.com", handle="nuoj_test").first()
             assert user is not None
             user_uid = user.user_uid
@@ -92,24 +104,21 @@ class TestRegisterUtil:
             assert json_response[0]["subject"] == "NuOJ 驗證信件"
             assert json_response[0]["to"]["text"] == "nuoj@test.com"
             assert json_response[0]["from"]["text"] == "NuOJ@noreply.me"
-    
-    def test_register_account_with_mail_verification_disabled_should_not_send_the_email(self, app: Flask):
-        with app.app_context():
-            disabled_mail_setting = {
-                "mail": {
-                    "enable": False,
-                    "server": "fake-smtp-server",
-                    "port": "1025",
-                    "mailname": "test@nuoj.com",
-                    "password": "nuoj_test",
-                    "redirect_url": "http://test.net/mail_verification"
-                },
-            }
-            app.config["setting"] = Setting().from_dict(disabled_mail_setting)
+            
+    def test_register_account_with_mail_verification_enabled_should_create_verification_code_to_app_config(self, app: Flask):
+        with app.app_context():            
             
             register("nuoj@test.com", "nuoj_test", "nuoj_test")
             
             time.sleep(2)
+            mail_verification_codes: dict[str, str] = app.config.get("mail_verification_code")
+            assert "nuoj_test" in list(mail_verification_codes.values())
+    
+    def test_register_account_with_mail_verification_disabled_should_not_send_the_email(self, app: Flask, disabled_mail_setting: None):
+        with app.app_context():
+            
+            register("nuoj@test.com", "nuoj_test", "nuoj_test")
+            
             sender: MailSender = _get_mail_sender()
             response: Response = get("http://" + sender.server + ":1080/api/emails")
             assert response.status_code == HTTPStatus.OK
