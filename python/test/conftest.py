@@ -52,6 +52,19 @@ def logged_in_client(app: Flask) -> FlaskClient:
     assert response.status_code == HTTPStatus.OK
     return client
 
+@pytest.fixture
+def enabled_mail_setting(app: Flask) -> None:
+    disabled_mail_setting = {
+        "mail": {
+            "enable": True,
+            "server": "fake-smtp-server",
+            "port": "1025",
+            "mailname": "test@nuoj.com",
+            "password": "nuoj_test",
+            "redirect_url": "http://test.net/mail_verification"
+        },
+    }
+    app.config["setting"] = Setting().from_dict(disabled_mail_setting)
 
 def _create_storage_folder_structure(storage_path):
     (Path(storage_path) / "problem/").mkdir()
@@ -97,7 +110,7 @@ def _setup_setting_to_app_config(app: Flask):
             }
         },
         "mail": {
-            "enable": True,
+            "enable": False,
             "server": "fake-smtp-server",
             "port": "1025",
             "mailname": "test@nuoj.com",

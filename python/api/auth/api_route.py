@@ -59,7 +59,9 @@ def register_route():
 
     register(email, handle, password)
 
-    response: Response = make_response({"message": "OK"}, HTTPStatus.OK)
+    setting: Setting = current_app.config.get("setting")
+    mail_verification_enabled = setting.mail_verification_enable()
+    response: Response = make_response({"message": "OK", "mail_verification_enabled": mail_verification_enabled}, HTTPStatus.OK)
     return response
 
 

@@ -126,6 +126,26 @@ class TestRegisterRoute:
 
             assert response.status_code == HTTPStatus.OK
     
+    def test_with_enabled_mail_verification_should_respond_correct_payload_with_mail_verify_status(self, app: Flask, client: FlaskClient, enabled_mail_setting: None):
+        with app.app_context():
+            
+            response: TestResponse = client.post("/api/register", json={"email": "nuoj@test.com", "handle": "nuoj", "password": "nuoj_test_123"})
+
+            assert response.status_code == HTTPStatus.OK
+            json_response: dict[str, Any] | None = response.get_json(silent=True)
+            assert json_response is not None
+            assert json_response["mail_verification_enabled"] == True
+            
+    def test_with_disabled_mail_verification_should_respond_correct_payload_with_mail_verify_status(self, app: Flask, client: FlaskClient):
+        with app.app_context():
+            
+            response: TestResponse = client.post("/api/register", json={"email": "nuoj@test.com", "handle": "nuoj", "password": "nuoj_test_123"})
+
+            assert response.status_code == HTTPStatus.OK
+            json_response: dict[str, Any] | None = response.get_json(silent=True)
+            assert json_response is not None
+            assert json_response["mail_verification_enabled"] == False
+    
     def test_with_bad_format_payload_should_respond_http_status_code_bad_request(self, app: Flask, client: FlaskClient):
         with app.app_context():
             
@@ -206,6 +226,7 @@ class TestRegisterRoute:
             response: TestResponse = client.post("/api/register", json={"email": "another_nuoj@test.com", "handle": "nuoj", "password": "another_password_123"})
 
             assert response.status_code == HTTPStatus.FORBIDDEN
+            
 
 class TestJWTVerifyRoute:
     def test_with_valid_jwt_token_should_return_http_status_ok(self, logged_in_client: FlaskClient):

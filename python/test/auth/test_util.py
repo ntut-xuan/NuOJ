@@ -53,21 +53,7 @@ class TestLoginUtil:
             assert not is_login
 
 class TestRegisterUtil:
-    @pytest.fixture()
-    def disabled_mail_setting(self, app: Flask) -> None:
-        disabled_mail_setting = {
-            "mail": {
-                "enable": False,
-                "server": "fake-smtp-server",
-                "port": "1025",
-                "mailname": "test@nuoj.com",
-                "password": "nuoj_test",
-                "redirect_url": "http://test.net/mail_verification"
-            },
-        }
-        app.config["setting"] = Setting().from_dict(disabled_mail_setting)
-            
-    def test_register_account_should_write_data_into_database(self, app: Flask, disabled_mail_setting: None):
+    def test_register_account_should_write_data_into_database(self, app: Flask):
         with app.app_context():
 
             register("nuoj@test.com", "nuoj_test", "nuoj_test")
@@ -76,7 +62,7 @@ class TestRegisterUtil:
             assert user is not None
             assert user.password == "cc28a9d01d08f4fa60b63434ce9971fda60e58a2f421898c78582bbb709bf7bb"
 
-    def test_register_account_should_create_profile_file_to_storage(self, app: Flask, disabled_mail_setting: None):
+    def test_register_account_should_create_profile_file_to_storage(self, app: Flask):
         with app.app_context():
             
             register("nuoj@test.com", "nuoj_test", "nuoj_test")
@@ -90,7 +76,7 @@ class TestRegisterUtil:
             user_profile_file_path: Path = user_profile_dir_path / ((user_uid) + ".json")
             assert user_profile_file_path.exists()
 
-    def test_register_account_with_mail_verification_enabled_should_send_the_email(self, app: Flask):
+    def test_register_account_with_mail_verification_enabled_should_send_the_email(self, app: Flask, enabled_mail_setting: None):
         with app.app_context():            
             
             register("nuoj@test.com", "nuoj_test", "nuoj_test")
@@ -105,7 +91,7 @@ class TestRegisterUtil:
             assert json_response[0]["to"]["text"] == "nuoj@test.com"
             assert json_response[0]["from"]["text"] == "NuOJ@noreply.me"
             
-    def test_register_account_with_mail_verification_enabled_should_create_verification_code_to_app_config(self, app: Flask):
+    def test_register_account_with_mail_verification_enabled_should_create_verification_code_to_app_config(self, app: Flask, enabled_mail_setting: None):
         with app.app_context():            
             
             register("nuoj@test.com", "nuoj_test", "nuoj_test")
@@ -114,7 +100,7 @@ class TestRegisterUtil:
             mail_verification_codes: dict[str, str] = app.config.get("mail_verification_code")
             assert "nuoj_test" in list(mail_verification_codes.values())
     
-    def test_register_account_with_mail_verification_disabled_should_not_send_the_email(self, app: Flask, disabled_mail_setting: None):
+    def test_register_account_with_mail_verification_disabled_should_not_send_the_email(self, app: Flask):
         with app.app_context():
             
             register("nuoj@test.com", "nuoj_test", "nuoj_test")
@@ -227,7 +213,7 @@ class TestHS256JWTCodec:
 
 
 class TestSendEmail:
-    def test_send_email_to_fake_smtp_server_should_record_to_fake_smtp_server(self, app: Flask, setup_test_user: None):
+    def test_send_email_to_fake_smtp_server_should_record_to_fake_smtp_server(self, app: Flask, setup_test_user: None, enabled_mail_setting: None):
         with app.app_context():
             with assert_not_raise(OSError):        
                 
