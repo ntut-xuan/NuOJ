@@ -37,10 +37,14 @@ def login_route():
     if not login(login_payload.account, login_payload.password):
         return make_simple_error_response(HTTPStatus.FORBIDDEN, "Incorrect account or password")
     
-    response: Response = make_response({"message": "OK"}, HTTPStatus.OK)
     user: User = _get_user_info_from_account(login_payload.account)
-    _set_jwt_cookie_to_response({"email": user.email, "handle": user.handle}, response)
+    setting: Setting = current_app.config.get("setting")
     
+    if setting.mail_verification_enable() and user.email_verified == 0:
+        return make_simple_error_response(HTTPStatus.FORBIDDEN, "Mail verification enabled but mail is not verify.")
+    
+    response: Response = make_response({"message": "OK"}, HTTPStatus.OK)
+    _set_jwt_cookie_to_response({"email": user.email, "handle": user.handle}, response)
     return response
 
 

@@ -24,7 +24,7 @@ def setup_test_user(app: Flask) -> None:
             password="cc28a9d01d08f4fa60b63434ce9971fda60e58a2f421898c78582bbb709bf7bb",
             email="nuoj@test.com",
             role=1,
-            email_verified=1
+            email_verified=0
         )
         db.session.add(add_user)
         db.session.commit()
@@ -95,7 +95,17 @@ class TestLoginRoute:
             data = jwt_payload["data"]
             assert data["email"] == "nuoj@test.com"
             assert data["handle"] == "nuoj"
- 
+    
+    def test_with_handle_account_but_not_pass_the_mail_verify_should_respond_http_status_code_forbidden(self, app: Flask, client: FlaskClient, setup_test_user: None, enabled_mail_setting: None):
+        with app.app_context():
+            
+            response: TestResponse = client.post("/api/login", json={"account": "nuoj", "password": "nuoj_test"})
+            
+            assert response.status_code == HTTPStatus.FORBIDDEN
+            json_response: dict[str, Any] | None = response.get_json(silent=True)
+            assert json_response is not None
+            assert json_response["message"] == "Mail verification enabled but mail is not verify."
+    
     def test_with_bad_format_payload_should_respond_http_status_code_bad_request(self, app: Flask, client: FlaskClient, setup_test_user: None):
         with app.app_context():
             
