@@ -466,6 +466,17 @@ class TestVertifyMailRoute:
         
         assert response.status_code == HTTPStatus.OK
         
+    def test_with_valid_code_should_set_user_mail_verify_status_to_true(self, app: Flask, logged_in_client: FlaskClient):
+        mail_verification_codes: dict[str, str] = app.config.get("mail_verification_code")
+        mail_verification_codes |= {"a-random-uuid-here": "test_account"}
+        
+        logged_in_client.post("/api/auth/verify_mail?code=a-random-uuid-here")
+        
+        with app.app_context():
+            user: User | None = User.query.filter(User.handle == "test_account").first()
+            assert user is not None
+            assert user.email_verified == 1
+        
     def test_with_absent_jwt_cookie_should_respond_http_status_forbidden(self, client: FlaskClient):
         
         response: TestResponse = client.post("/api/auth/verify_mail?code=a-random-uuid-here")

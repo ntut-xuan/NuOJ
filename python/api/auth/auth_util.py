@@ -94,6 +94,13 @@ def is_user_already_have_handle(email: str) -> bool:
     return user.handle is not None
 
 
+def verified_the_email_of_handle(handle: str) -> None:
+    user: User | None = User.query.filter(User.handle == handle).first()
+    assert user is not None
+    
+    user.email_verified = 1
+    db.session.commit()
+
 def _init_profile_storage_file(user_uid: str, handle: str, email: str) -> None:
     database_util.file_storage_tunnel_write(
         user_uid + ".json", 

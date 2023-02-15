@@ -6,7 +6,7 @@ from typing import Any
 from flask import Blueprint, Response, current_app, request, make_response, redirect
 from sqlalchemy.sql import or_
 
-from api.auth.auth_util import HS256JWTCodec, LoginPayload, login, register
+from api.auth.auth_util import HS256JWTCodec, LoginPayload, login, register, verified_the_email_of_handle
 from api.auth.github_oauth_util import github_login
 from api.auth.google_oauth_util import google_login
 from api.auth.oauth_util import OAuthLoginResult
@@ -175,6 +175,7 @@ def verify_mail_route():
         return make_simple_error_response(HTTPStatus.FORBIDDEN, "Code and handle is not match.")
     
     del mail_verification_codes[code]
+    verified_the_email_of_handle(handle)
     return make_response({"message": "OK"}, HTTPStatus.OK)
 
 
