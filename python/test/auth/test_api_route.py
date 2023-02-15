@@ -101,7 +101,7 @@ class TestLoginRoute:
             
             response: TestResponse = client.post("/api/auth/login", json={"account": "nuoj", "password": "nuoj_test"})
             
-            assert response.status_code == HTTPStatus.FORBIDDEN
+            assert response.status_code == HTTPStatus.UNAUTHORIZED
             json_response: dict[str, Any] | None = response.get_json(silent=True)
             assert json_response is not None
             assert json_response["message"] == "Mail verification enabled but mail is not verify."
@@ -248,7 +248,7 @@ class TestJWTVerifyRoute:
     def test_with_not_exists_jwt_token_should_return_http_status_forbidden(self, client: FlaskClient):
         response: TestResponse = client.post("/api/auth/verify_jwt")
         
-        assert response.status_code == HTTPStatus.FORBIDDEN    
+        assert response.status_code == HTTPStatus.UNAUTHORIZED    
         assert response.json is not None 
         assert response.json["message"] == "JWT is not exists."
     
@@ -257,7 +257,7 @@ class TestJWTVerifyRoute:
         client.set_cookie("", "jwt", "some.invalid.jwt")
         response: TestResponse = client.post("/api/auth/verify_jwt")
         
-        assert response.status_code == HTTPStatus.FORBIDDEN   
+        assert response.status_code == HTTPStatus.UNAUTHORIZED   
         assert response.json is not None 
         assert response.json["message"] == "JWT is invalid."
 
@@ -481,7 +481,7 @@ class TestVertifyMailRoute:
         
         response: TestResponse = client.post("/api/auth/verify_mail?code=a-random-uuid-here")
         
-        assert response.status_code == HTTPStatus.FORBIDDEN
+        assert response.status_code == HTTPStatus.UNAUTHORIZED
         json_response: dict[str, str] | None = response.get_json(silent=True)
         assert json_response["message"] == "JWT is not exists."
     
@@ -490,13 +490,13 @@ class TestVertifyMailRoute:
         
         response: TestResponse = client.post("/api/auth/verify_mail?code=a-random-uuid-here")
         
-        assert response.status_code == HTTPStatus.FORBIDDEN
+        assert response.status_code == HTTPStatus.UNAUTHORIZED
     
     def test_with_absent_code_should_respond_http_status_forbidden(self, logged_in_client: FlaskClient):
     
         response: TestResponse = logged_in_client.post("/api/auth/verify_mail")
         
-        assert response.status_code == HTTPStatus.FORBIDDEN
+        assert response.status_code == HTTPStatus.BAD_REQUEST
         json_response: dict[str, str] | None = response.get_json(silent=True)
         assert json_response["message"] == "Absent code."
         
@@ -504,7 +504,7 @@ class TestVertifyMailRoute:
     
         response: TestResponse = logged_in_client.post("/api/auth/verify_mail?code=invalid-code")
         
-        assert response.status_code == HTTPStatus.FORBIDDEN
+        assert response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
         json_response: dict[str, str] | None = response.get_json(silent=True)
         assert json_response["message"] == "Invalid code."
 

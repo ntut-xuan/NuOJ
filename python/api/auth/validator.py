@@ -128,19 +128,19 @@ def validate_handle_or_return_unprocessable_entity(func: Callable[..., Response 
     return wrapper
 
 
-def validate_jwt_is_exists_or_return_forbidden(func: Callable[..., Response | T]) -> Callable[..., Response | T]:
+def validate_jwt_is_exists_or_return_unauthorized(func: Callable[..., Response | T]) -> Callable[..., Response | T]:
     @wraps(func)
     def wrapper(*args, **kwargs) -> Response | T:
         cookie: Cookie | None = request.cookies.get("jwt")
         
         if cookie is None:
-            return make_simple_error_response(HTTPStatus.FORBIDDEN, "JWT is not exists.")
+            return make_simple_error_response(HTTPStatus.UNAUTHORIZED, "JWT is not exists.")
 
         return func(*args, **kwargs)
     return wrapper
 
 
-def validate_jwt_is_valid_or_return_forbidden(func: Callable[..., Response | T]) -> Callable[..., Response | T]:
+def validate_jwt_is_valid_or_return_unauthorized(func: Callable[..., Response | T]) -> Callable[..., Response | T]:
     @wraps(func)
     def wrapper(*args, **kwargs) -> Response | T:
         jwt: Cookie | None = request.cookies.get("jwt")
@@ -148,7 +148,7 @@ def validate_jwt_is_valid_or_return_forbidden(func: Callable[..., Response | T])
         codec: HS256JWTCodec = HS256JWTCodec(key)
 
         if not codec.is_valid_jwt(jwt):
-            return make_simple_error_response(HTTPStatus.FORBIDDEN, "JWT is invalid.")
+            return make_simple_error_response(HTTPStatus.UNAUTHORIZED, "JWT is invalid.")
 
         return func(*args, **kwargs)
     return wrapper

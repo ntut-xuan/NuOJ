@@ -13,8 +13,8 @@ from api.auth.oauth_util import OAuthLoginResult
 from api.auth.validator import (
     validate_email_or_return_unprocessable_entity,
     validate_email_is_not_repeated_or_return_forbidden,
-    validate_jwt_is_exists_or_return_forbidden,
-    validate_jwt_is_valid_or_return_forbidden,
+    validate_jwt_is_exists_or_return_unauthorized,
+    validate_jwt_is_valid_or_return_unauthorized,
     validate_login_payload_format_or_return_bad_request,
     validate_handle_or_return_unprocessable_entity,
     validate_handle_is_not_repeated_or_return_forbidden,
@@ -41,7 +41,7 @@ def login_route():
     setting: Setting = current_app.config.get("setting")
     
     if setting.mail_verification_enable() and user.email_verified == 0:
-        return make_simple_error_response(HTTPStatus.FORBIDDEN, "Mail verification enabled but mail is not verify.")
+        return make_simple_error_response(HTTPStatus.UNAUTHORIZED, "Mail verification enabled but mail is not verify.")
     
     response: Response = make_response({"message": "OK"}, HTTPStatus.OK)
     _set_jwt_cookie_to_response({"email": user.email, "handle": user.handle}, response)
@@ -95,8 +95,8 @@ def oauth_info_route():
 # 	return send_from_directory('../', "public.pem")
 
 @auth_bp.route("/verify_jwt", methods=["POST"])
-@validate_jwt_is_exists_or_return_forbidden
-@validate_jwt_is_valid_or_return_forbidden
+@validate_jwt_is_exists_or_return_unauthorized
+@validate_jwt_is_valid_or_return_unauthorized
 def verify_jwt_route() -> Response:
     response: Response = make_response({"message": "OK"}, HTTPStatus.OK)
     return response
@@ -153,18 +153,18 @@ def logout_route():
 
 
 @auth_bp.route("/verify_mail", methods=["POST"])
-@validate_jwt_is_exists_or_return_forbidden
-@validate_jwt_is_valid_or_return_forbidden
+@validate_jwt_is_exists_or_return_unauthorized
+@validate_jwt_is_valid_or_return_unauthorized
 def verify_mail_route():
     mail_verification_codes: dict[str, str] = current_app.config.get("mail_verification_code")
 
     code: str | None = request.args.get("code", None)
     
     if code is None:
-        return make_simple_error_response(HTTPStatus.FORBIDDEN, "Absent code.")
+        return make_simple_error_response(HTTPStatus.BAD_REQUEST, "Absent code.")
     
     if code not in mail_verification_codes:
-        return make_simple_error_response(HTTPStatus.FORBIDDEN, "Invalid code.")
+        return make_simple_error_response(HTTPStatus.UNPROCESSABLE_ENTITY, "Invalid code.")
     
     jwt_token: str = request.cookies.get("jwt")
     codec: HS256JWTCodec = HS256JWTCodec(current_app.config.get("jwt_key"))
