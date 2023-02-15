@@ -68,7 +68,7 @@ def oauth_info_route():
     current_setting: Setting = current_app.config.get("setting")
     
     github_status = current_setting.github_oauth_enable()
-    google_status = current_setting.github_oauth_enable()
+    google_status = current_setting.google_oauth_enable()
     github_client_id = current_setting.github_oauth_client_id()
     google_client_id = current_setting.google_oauth_client_id()
     google_redirect_url = current_setting.google_oauth_redirect_url()

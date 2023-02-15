@@ -12,6 +12,7 @@ import api.auth.google_oauth_util
 from api.auth.auth_util import HS256JWTCodec
 from models import User
 from database import db
+from setting.util import Setting
 from test.util import assert_not_raise
 
 @pytest.fixture
@@ -353,6 +354,77 @@ def test_logout_with_logged_in_client_should_remove_jwt_token(logged_in_client: 
     with pytest.raises(ValueError):
         (jwt_cookie,) = tuple(filter(lambda x: x.name == "jwt", cookies))
     
+class TestOAuthInfoRoute:
+    def test_with_enabled_github_oauth_and_google_oauth_should_return_correct_github_oauth_url_and_google_oauth_url_in_json(self, app: Flask, client: FlaskClient):
+        setting: Setting = app.config.get("setting")
+        github_client_id = setting.github_oauth_client_id()
+        google_client_id = setting.google_oauth_client_id()
+        google_redirect_url = setting.google_oauth_redirect_url()
+        google_oauth_scope = "https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email"
+        
+        response: TestResponse = client.get("/api/oauth_info")
+        
+        assert response.json is not None
+        response_json: dict[str, str] | None = response.get_json(silent=True)
+        assert response_json["github_oauth_url"] == f"https://github.com/login/oauth/authorize?client_id={github_client_id}&scope=repo"
+        assert response_json["google_oauth_url"] == f"https://accounts.google.com/o/oauth2/v2/auth?client_id={google_client_id}&redirect_uri={google_redirect_url}&response_type=code&scope={google_oauth_scope}"
+
+    def test_with_only_enabled_github_oauth_should_return_correct_github_oauth_url_in_json(self, app: Flask, client: FlaskClient):
+        only_github_oauth_enabled_setting = {
+            "oauth": {
+                "github": {
+                    "enable": True,
+                    "client_id": "some_client_id",
+                    "secret": "some_secret"
+                },
+                "google": {
+                    "enable": False,
+                    "client_id": "some_client_id",
+                    "secret": "some_secret",
+                    "redirect_url": "some_redirect_url"
+                }
+            }
+        }
+        app.config["setting"] = Setting().from_dict(only_github_oauth_enabled_setting)
+        setting: Setting = app.config.get("setting")
+        github_client_id = setting.github_oauth_client_id()
+        
+        response: TestResponse = client.get("/api/oauth_info")
+        
+        assert response.json is not None
+        response_json: dict[str, str] | None = response.get_json(silent=True)
+        assert response_json["github_oauth_url"] == f"https://github.com/login/oauth/authorize?client_id={github_client_id}&scope=repo"
+        assert "google_oauth_url" not in response_json
+    
+    def test_with_only_enabled_google_oauth_should_return_correct_google_oauth_url_in_json(self, app: Flask, client: FlaskClient):
+        only_google_oauth_enabled_setting = {
+            "oauth": {
+                "github": {
+                    "enable": False,
+                    "client_id": "some_client_id",
+                    "secret": "some_secret"
+                },
+                "google": {
+                    "enable": True,
+                    "client_id": "some_client_id",
+                    "secret": "some_secret",
+                    "redirect_url": "some_redirect_url"
+                }
+            }
+        }
+        app.config["setting"] = Setting().from_dict(only_google_oauth_enabled_setting)
+        setting: Setting = app.config.get("setting")
+        google_client_id = setting.google_oauth_client_id()
+        google_redirect_url = setting.google_oauth_redirect_url()
+        google_oauth_scope = "https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email"
+        
+        response: TestResponse = client.get("/api/oauth_info")
+        
+        assert response.json is not None
+        response_json: dict[str, str] | None = response.get_json(silent=True)
+        assert response_json["google_oauth_url"] == f"https://accounts.google.com/o/oauth2/v2/auth?client_id={google_client_id}&redirect_uri={google_redirect_url}&response_type=code&scope={google_oauth_scope}"
+        assert "github_oauth_url" not in response_json
+
 
 def _get_cookies(cookie_jar: CookieJar | None) -> tuple[Cookie, ...]:
     if cookie_jar is None:
