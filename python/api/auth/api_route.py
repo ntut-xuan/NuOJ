@@ -25,7 +25,7 @@ from setting.util import Setting
 from models import User
 from util import make_simple_error_response
 
-auth_bp = Blueprint('auth', __name__, url_prefix="/api")
+auth_bp = Blueprint('auth', __name__, url_prefix="/api/auth")
 
 
 @auth_bp.route("/login", methods=["POST"])

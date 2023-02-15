@@ -48,7 +48,7 @@ def client(app: Flask) -> FlaskClient:
 @pytest.fixture
 def logged_in_client(app: Flask) -> FlaskClient:
     client: FlaskClient = app.test_client()
-    response: TestResponse = client.post("/api/login", json={"account": "test_account", "password": "nuoj_test"})
+    response: TestResponse = client.post("/api/auth/login", json={"account": "test_account", "password": "nuoj_test"})
     assert response.status_code == HTTPStatus.OK
     return client
 

@@ -33,7 +33,7 @@ class TestLoginRoute:
     def test_with_handle_account_should_respond_http_status_code_ok(self, app: Flask, client: FlaskClient, setup_test_user: None):
         with app.app_context():
             
-            response: TestResponse = client.post("/api/login", json={"account": "nuoj", "password": "nuoj_test"})
+            response: TestResponse = client.post("/api/auth/login", json={"account": "nuoj", "password": "nuoj_test"})
             
             assert response.status_code == HTTPStatus.OK
     
@@ -41,7 +41,7 @@ class TestLoginRoute:
         with app.app_context():
             codec = HS256JWTCodec(app.config["jwt_key"])
             
-            response: TestResponse = client.post("/api/login", json={"account": "nuoj", "password": "nuoj_test"})
+            response: TestResponse = client.post("/api/auth/login", json={"account": "nuoj", "password": "nuoj_test"})
             
             assert response.status_code == HTTPStatus.OK
             cookies: tuple[Cookie, ...] = _get_cookies(client.cookie_jar)
@@ -52,7 +52,7 @@ class TestLoginRoute:
         with app.app_context():
             codec = HS256JWTCodec(app.config["jwt_key"])
             
-            response: TestResponse = client.post("/api/login", json={"account": "nuoj", "password": "nuoj_test"})
+            response: TestResponse = client.post("/api/auth/login", json={"account": "nuoj", "password": "nuoj_test"})
             
             assert response.status_code == HTTPStatus.OK
             cookies: tuple[Cookie, ...] = _get_cookies(client.cookie_jar)
@@ -66,7 +66,7 @@ class TestLoginRoute:
     def test_with_email_account_should_respond_http_status_code_ok(self, app: Flask, client: FlaskClient, setup_test_user: None):
         with app.app_context():
             
-            response: TestResponse = client.post("/api/login", json={"account": "nuoj@test.com", "password": "nuoj_test"})
+            response: TestResponse = client.post("/api/auth/login", json={"account": "nuoj@test.com", "password": "nuoj_test"})
             
             assert response.status_code == HTTPStatus.OK
 
@@ -74,7 +74,7 @@ class TestLoginRoute:
         with app.app_context():
             codec = HS256JWTCodec(app.config["jwt_key"])
             
-            response: TestResponse = client.post("/api/login", json={"account": "nuoj@test.com", "password": "nuoj_test"})
+            response: TestResponse = client.post("/api/auth/login", json={"account": "nuoj@test.com", "password": "nuoj_test"})
             
             assert response.status_code == HTTPStatus.OK
             cookies: tuple[Cookie, ...] = _get_cookies(client.cookie_jar)
@@ -85,7 +85,7 @@ class TestLoginRoute:
         with app.app_context():
             codec = HS256JWTCodec(app.config["jwt_key"])
             
-            response: TestResponse = client.post("/api/login", json={"account": "nuoj@test.com", "password": "nuoj_test"})
+            response: TestResponse = client.post("/api/auth/login", json={"account": "nuoj@test.com", "password": "nuoj_test"})
             
             assert response.status_code == HTTPStatus.OK
             cookies: tuple[Cookie, ...] = _get_cookies(client.cookie_jar)
@@ -99,7 +99,7 @@ class TestLoginRoute:
     def test_with_handle_account_but_not_pass_the_mail_verify_should_respond_http_status_code_forbidden(self, app: Flask, client: FlaskClient, setup_test_user: None, enabled_mail_setting: None):
         with app.app_context():
             
-            response: TestResponse = client.post("/api/login", json={"account": "nuoj", "password": "nuoj_test"})
+            response: TestResponse = client.post("/api/auth/login", json={"account": "nuoj", "password": "nuoj_test"})
             
             assert response.status_code == HTTPStatus.FORBIDDEN
             json_response: dict[str, Any] | None = response.get_json(silent=True)
@@ -109,21 +109,21 @@ class TestLoginRoute:
     def test_with_bad_format_payload_should_respond_http_status_code_bad_request(self, app: Flask, client: FlaskClient, setup_test_user: None):
         with app.app_context():
             
-            response: TestResponse = client.post("/api/login", json={"hey": "what"})
+            response: TestResponse = client.post("/api/auth/login", json={"hey": "what"})
             
             assert response.status_code == HTTPStatus.BAD_REQUEST
 
     def test_with_handle_and_incorrect_password_should_respond_http_status_code_bad_request(self, app: Flask, client: FlaskClient, setup_test_user: None):
         with app.app_context():
             
-            response: TestResponse = client.post("/api/login", json={"account": "nuoj", "password": "wrong_password"})
+            response: TestResponse = client.post("/api/auth/login", json={"account": "nuoj", "password": "wrong_password"})
             
             assert response.status_code == HTTPStatus.FORBIDDEN
             
     def test_with_email_and_incorrect_password_should_respond_http_status_code_bad_request(self, app: Flask, client: FlaskClient, setup_test_user: None):
         with app.app_context():
             
-            response: TestResponse = client.post("/api/login", json={"account": "nuoj@test.com", "password": "wrong_password"})
+            response: TestResponse = client.post("/api/auth/login", json={"account": "nuoj@test.com", "password": "wrong_password"})
             
             assert response.status_code == HTTPStatus.FORBIDDEN
 
@@ -132,14 +132,14 @@ class TestRegisterRoute:
     def test_with_valid_payload_should_respond_http_status_code_ok(self, app: Flask, client: FlaskClient):
         with app.app_context():
             
-            response: TestResponse = client.post("/api/register", json={"email": "nuoj@test.com", "handle": "nuoj", "password": "nuoj_test_123"})
+            response: TestResponse = client.post("/api/auth/register", json={"email": "nuoj@test.com", "handle": "nuoj", "password": "nuoj_test_123"})
 
             assert response.status_code == HTTPStatus.OK
     
     def test_with_enabled_mail_verification_should_respond_correct_payload_with_mail_verify_status(self, app: Flask, client: FlaskClient, enabled_mail_setting: None):
         with app.app_context():
             
-            response: TestResponse = client.post("/api/register", json={"email": "nuoj@test.com", "handle": "nuoj", "password": "nuoj_test_123"})
+            response: TestResponse = client.post("/api/auth/register", json={"email": "nuoj@test.com", "handle": "nuoj", "password": "nuoj_test_123"})
 
             assert response.status_code == HTTPStatus.OK
             json_response: dict[str, Any] | None = response.get_json(silent=True)
@@ -149,7 +149,7 @@ class TestRegisterRoute:
     def test_with_disabled_mail_verification_should_respond_correct_payload_with_mail_verify_status(self, app: Flask, client: FlaskClient):
         with app.app_context():
             
-            response: TestResponse = client.post("/api/register", json={"email": "nuoj@test.com", "handle": "nuoj", "password": "nuoj_test_123"})
+            response: TestResponse = client.post("/api/auth/register", json={"email": "nuoj@test.com", "handle": "nuoj", "password": "nuoj_test_123"})
 
             assert response.status_code == HTTPStatus.OK
             json_response: dict[str, Any] | None = response.get_json(silent=True)
@@ -159,7 +159,7 @@ class TestRegisterRoute:
     def test_with_bad_format_payload_should_respond_http_status_code_bad_request(self, app: Flask, client: FlaskClient):
         with app.app_context():
             
-            response: TestResponse = client.post("/api/register", json={"hey": "what"})
+            response: TestResponse = client.post("/api/auth/register", json={"hey": "what"})
 
             assert response.status_code == HTTPStatus.BAD_REQUEST
 
@@ -181,7 +181,7 @@ class TestRegisterRoute:
     def test_with_invalid_email_should_respond_http_status_code_unprocessable_entity(self, app: Flask, client: FlaskClient, malformed_email: str):
         with app.app_context():
             
-            response: TestResponse = client.post("/api/register", json={"email": malformed_email, "handle": "nuoj", "password": "nuoj_test_123"})
+            response: TestResponse = client.post("/api/auth/register", json={"email": malformed_email, "handle": "nuoj", "password": "nuoj_test_123"})
 
             assert response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
 
@@ -204,7 +204,7 @@ class TestRegisterRoute:
     def test_with_invalid_handle_should_respond_http_status_code_unprocessable_entity(self, app: Flask, client: FlaskClient, malformed_handle: str):
         with app.app_context():
             
-            response: TestResponse = client.post("/api/register", json={"email": "nuoj@test.com", "handle": malformed_handle, "password": "nuoj_test_123"})
+            response: TestResponse = client.post("/api/auth/register", json={"email": "nuoj@test.com", "handle": malformed_handle, "password": "nuoj_test_123"})
 
             assert response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
 
@@ -219,34 +219,34 @@ class TestRegisterRoute:
     def test_with_invalid_password_should_respond_http_status_code_unprocessable_entity(self, app: Flask, client: FlaskClient, malformed_password: str):
         with app.app_context():
             
-            response: TestResponse = client.post("/api/register", json={"email": "nuoj@test.com", "handle": "nuoj", "password": malformed_password})
+            response: TestResponse = client.post("/api/auth/register", json={"email": "nuoj@test.com", "handle": "nuoj", "password": malformed_password})
 
             assert response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
 
     def test_with_repeated_email_payload_should_respond_http_status_code_forbidden(self, app: Flask, client: FlaskClient, setup_test_user: None):
         with app.app_context():
             
-            response: TestResponse = client.post("/api/register", json={"email": "nuoj@test.com", "handle": "abcd", "password": "another_password_123"})
+            response: TestResponse = client.post("/api/auth/register", json={"email": "nuoj@test.com", "handle": "abcd", "password": "another_password_123"})
 
             assert response.status_code == HTTPStatus.FORBIDDEN
 
     def test_with_repeated_handle_payload_should_respond_http_status_code_forbidden(self, app: Flask, client: FlaskClient, setup_test_user: None):
         with app.app_context():
             
-            response: TestResponse = client.post("/api/register", json={"email": "another_nuoj@test.com", "handle": "nuoj", "password": "another_password_123"})
+            response: TestResponse = client.post("/api/auth/register", json={"email": "another_nuoj@test.com", "handle": "nuoj", "password": "another_password_123"})
 
             assert response.status_code == HTTPStatus.FORBIDDEN
             
 
 class TestJWTVerifyRoute:
     def test_with_valid_jwt_token_should_return_http_status_ok(self, logged_in_client: FlaskClient):
-        response: TestResponse = logged_in_client.post("/api/verify_jwt")
+        response: TestResponse = logged_in_client.post("/api/auth/verify_jwt")
         
         assert response.status_code == HTTPStatus.OK
         
         
     def test_with_not_exists_jwt_token_should_return_http_status_forbidden(self, client: FlaskClient):
-        response: TestResponse = client.post("/api/verify_jwt")
+        response: TestResponse = client.post("/api/auth/verify_jwt")
         
         assert response.status_code == HTTPStatus.FORBIDDEN    
         assert response.json is not None 
@@ -255,7 +255,7 @@ class TestJWTVerifyRoute:
         
     def test_with_not_invalid_jwt_token_should_return_http_status_forbidden(self, client: FlaskClient):
         client.set_cookie("", "jwt", "some.invalid.jwt")
-        response: TestResponse = client.post("/api/verify_jwt")
+        response: TestResponse = client.post("/api/auth/verify_jwt")
         
         assert response.status_code == HTTPStatus.FORBIDDEN   
         assert response.json is not None 
@@ -267,7 +267,7 @@ class TestGithubRoute:
         monkeypatch.setattr(api.auth.github_oauth_util, "ACCESS_TOKEN_URL", "http://0.0.0.0:8080/test/github/access_token")
         monkeypatch.setattr(api.auth.github_oauth_util, "USER_PROFILE_API_URL", "http://0.0.0.0:8080/test/github/user_profile")
 
-        response: TestResponse = client.get("/api/github_login", query_string={"code": "valid_code"})
+        response: TestResponse = client.get("/api/auth/github_login", query_string={"code": "valid_code"})
         
         assert response.status_code == HTTPStatus.FOUND
         assert response.location == "/handle_setup"
@@ -280,7 +280,7 @@ class TestGithubRoute:
             db.session.add(user)
             db.session.commit()
 
-        response: TestResponse = client.get("/api/github_login", query_string={"code": "valid_code"})
+        response: TestResponse = client.get("/api/auth/github_login", query_string={"code": "valid_code"})
         
         assert response.status_code == HTTPStatus.FOUND
         assert response.location == "/"
@@ -296,7 +296,7 @@ class TestGithubRoute:
             db.session.add(user)
             db.session.commit()
 
-        response: TestResponse = client.get("/api/github_login", query_string={"code": "valid_code"})
+        response: TestResponse = client.get("/api/auth/github_login", query_string={"code": "valid_code"})
         
         assert response.status_code == HTTPStatus.FOUND
         cookies: tuple[Cookie, ...] = _get_cookies(client.cookie_jar)
@@ -311,7 +311,7 @@ class TestGithubRoute:
         monkeypatch.setattr(api.auth.github_oauth_util, "ACCESS_TOKEN_URL", "http://0.0.0.0:8080/test/github/access_token")
         monkeypatch.setattr(api.auth.github_oauth_util, "USER_PROFILE_API_URL", "http://0.0.0.0:8080/test/github/user_profile")
 
-        response: TestResponse = client.get("/api/github_login", query_string={"code": "invalid_code"})
+        response: TestResponse = client.get("/api/auth/github_login", query_string={"code": "invalid_code"})
         
         assert response.status_code == HTTPStatus.FORBIDDEN
 
@@ -320,7 +320,7 @@ class TestGoogleRoute:
         monkeypatch.setattr(api.auth.google_oauth_util, "ACCESS_TOKEN_URL", "http://0.0.0.0:8080/test/google/access_token")
         monkeypatch.setattr(api.auth.google_oauth_util, "USER_PROFILE_API_URL", "http://0.0.0.0:8080/test/google/user_profile")
         
-        response: TestResponse = client.get("/api/google_login", query_string={"code": "valid_code"})
+        response: TestResponse = client.get("/api/auth/google_login", query_string={"code": "valid_code"})
         
         assert response.status_code == HTTPStatus.FOUND
         assert response.location == "/handle_setup"
@@ -333,7 +333,7 @@ class TestGoogleRoute:
             db.session.add(user)
             db.session.commit()
 
-        response: TestResponse = client.get("/api/google_login", query_string={"code": "valid_code"})
+        response: TestResponse = client.get("/api/auth/google_login", query_string={"code": "valid_code"})
         
         assert response.status_code == HTTPStatus.FOUND
         assert response.location == "/"
@@ -349,7 +349,7 @@ class TestGoogleRoute:
             db.session.add(user)
             db.session.commit()
 
-        response: TestResponse = client.get("/api/google_login", query_string={"code": "valid_code"})
+        response: TestResponse = client.get("/api/auth/google_login", query_string={"code": "valid_code"})
         
         assert response.status_code == HTTPStatus.FOUND
         cookies: tuple[Cookie, ...] = _get_cookies(client.cookie_jar)
@@ -364,7 +364,7 @@ class TestGoogleRoute:
         monkeypatch.setattr(api.auth.google_oauth_util, "ACCESS_TOKEN_URL", "http://0.0.0.0:8080/test/google/access_token")
         monkeypatch.setattr(api.auth.google_oauth_util, "USER_PROFILE_API_URL", "http://0.0.0.0:8080/test/google/user_profile")
 
-        response: TestResponse = client.get("/api/google_login", query_string={"code": "invalid_code"})
+        response: TestResponse = client.get("/api/auth/google_login", query_string={"code": "invalid_code"})
         
         assert response.status_code == HTTPStatus.FORBIDDEN
     
@@ -372,13 +372,13 @@ class TestGoogleRoute:
         monkeypatch.setattr(api.auth.google_oauth_util, "ACCESS_TOKEN_URL", "http://0.0.0.0:8080/test/google/access_token")
         monkeypatch.setattr(api.auth.google_oauth_util, "USER_PROFILE_API_URL", "http://0.0.0.0:8080/test/google/user_profile")
 
-        response: TestResponse = client.get("/api/google_login", query_string={"error": "some_error_message"})
+        response: TestResponse = client.get("/api/auth/google_login", query_string={"error": "some_error_message"})
         
         assert response.status_code == HTTPStatus.FORBIDDEN
 
 
 def test_logout_with_logged_in_client_should_remove_jwt_token(logged_in_client: FlaskClient):
-    response: TestResponse = logged_in_client.post("/api/logout")
+    response: TestResponse = logged_in_client.post("/api/auth/logout")
     
     assert response.status_code == HTTPStatus.OK
     cookies: tuple[Cookie, ...] = _get_cookies(logged_in_client.cookie_jar)
@@ -393,7 +393,7 @@ class TestOAuthInfoRoute:
         google_redirect_url = setting.google_oauth_redirect_url()
         google_oauth_scope = "https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email"
         
-        response: TestResponse = client.get("/api/oauth_info")
+        response: TestResponse = client.get("/api/auth/oauth_info")
         
         assert response.json is not None
         response_json: dict[str, str] | None = response.get_json(silent=True)
@@ -420,7 +420,7 @@ class TestOAuthInfoRoute:
         setting: Setting = app.config.get("setting")
         github_client_id = setting.github_oauth_client_id()
         
-        response: TestResponse = client.get("/api/oauth_info")
+        response: TestResponse = client.get("/api/auth/oauth_info")
         
         assert response.json is not None
         response_json: dict[str, str] | None = response.get_json(silent=True)
@@ -449,7 +449,7 @@ class TestOAuthInfoRoute:
         google_redirect_url = setting.google_oauth_redirect_url()
         google_oauth_scope = "https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email"
         
-        response: TestResponse = client.get("/api/oauth_info")
+        response: TestResponse = client.get("/api/auth/oauth_info")
         
         assert response.json is not None
         response_json: dict[str, str] | None = response.get_json(silent=True)
@@ -462,13 +462,13 @@ class TestVertifyMailRoute:
         mail_verification_codes: dict[str, str] = app.config.get("mail_verification_code")
         mail_verification_codes |= {"a-random-uuid-here": "test_account"}
         
-        response: TestResponse = logged_in_client.post("/api/verify_mail?code=a-random-uuid-here")
+        response: TestResponse = logged_in_client.post("/api/auth/verify_mail?code=a-random-uuid-here")
         
         assert response.status_code == HTTPStatus.OK
         
     def test_with_absent_jwt_cookie_should_respond_http_status_forbidden(self, client: FlaskClient):
         
-        response: TestResponse = client.post("/api/verify_mail?code=a-random-uuid-here")
+        response: TestResponse = client.post("/api/auth/verify_mail?code=a-random-uuid-here")
         
         assert response.status_code == HTTPStatus.FORBIDDEN
         json_response: dict[str, str] | None = response.get_json(silent=True)
@@ -477,13 +477,13 @@ class TestVertifyMailRoute:
     def test_with_invalid_jwt_cookie_should_respond_http_status_forbidden(self, client: FlaskClient):
         client.set_cookie("", "jwt", "some.invalid.jwt")
         
-        response: TestResponse = client.post("/api/verify_mail?code=a-random-uuid-here")
+        response: TestResponse = client.post("/api/auth/verify_mail?code=a-random-uuid-here")
         
         assert response.status_code == HTTPStatus.FORBIDDEN
     
     def test_with_absent_code_should_respond_http_status_forbidden(self, logged_in_client: FlaskClient):
     
-        response: TestResponse = logged_in_client.post("/api/verify_mail")
+        response: TestResponse = logged_in_client.post("/api/auth/verify_mail")
         
         assert response.status_code == HTTPStatus.FORBIDDEN
         json_response: dict[str, str] | None = response.get_json(silent=True)
@@ -491,7 +491,7 @@ class TestVertifyMailRoute:
         
     def test_with_invalid_code_should_respond_http_status_forbidden(self, logged_in_client: FlaskClient):
     
-        response: TestResponse = logged_in_client.post("/api/verify_mail?code=invalid-code")
+        response: TestResponse = logged_in_client.post("/api/auth/verify_mail?code=invalid-code")
         
         assert response.status_code == HTTPStatus.FORBIDDEN
         json_response: dict[str, str] | None = response.get_json(silent=True)
@@ -501,7 +501,7 @@ class TestVertifyMailRoute:
         mail_verification_codes: dict[str, str] = app.config.get("mail_verification_code")
         mail_verification_codes |= {"a-random-uuid-here": "some_body"}
         
-        response: TestResponse = logged_in_client.post("/api/verify_mail?code=a-random-uuid-here")
+        response: TestResponse = logged_in_client.post("/api/auth/verify_mail?code=a-random-uuid-here")
         
         assert response.status_code == HTTPStatus.FORBIDDEN
         json_response: dict[str, str] | None = response.get_json(silent=True)
