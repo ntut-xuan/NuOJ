@@ -66,6 +66,18 @@ class Setting():
         回傳使用者是否開啟信箱驗證功能
         '''
         return self.setting["mail"]["enable"]
+    
+    def mail_server(self) -> str:
+        return self.setting["mail"]["server"]
+
+    def mail_port(self) -> str:
+        return self.setting["mail"]["port"]
+    
+    def mail_mailname(self) -> str:
+        return self.setting["mail"]["mailname"]
+    
+    def mail_password(self) -> str:
+        return self.setting["mail"]["password"]
 
     def mail_info(self) -> str:
         return self.setting["mail"]["info"]

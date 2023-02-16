@@ -68,13 +68,12 @@ def _put_parameter_to_mail_content(content: str, verification_url: str, username
     return content
 
 def _get_mail_sender() -> MailSender:
-    with open("/etc/nuoj/setting.json", "r") as file:
-        file_content = file.read()
-        setting_dict = json.loads(file_content)
-        mail_info = setting_dict["mail"]
-        mail_sender = MailSender(mail_info["server"], mail_info["port"], mail_info["mailname"], mail_info["password"])
-        
-        return mail_sender
+    setting: Setting = current_app.config.get("setting", None)
+    assert setting is not None
+    
+    mail_sender = MailSender(setting.mail_server(), setting.mail_port(), setting.mail_mailname(), setting.mail_password())
+    
+    return mail_sender
 
 def _get_logo_mime_image() -> MIMEImage:
     image_content: bytes
