@@ -1,0 +1,23 @@
+name: ubuntu-latest docker action
+on: push
+jobs:
+  docker:
+    timeout-minutes: 10
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - name: Start containers
+      run: docker compose up --build -d
+      
+    - name: Wait compose start completely
+      run: sleep 10s
+      shell: bash
+
+    - name: Exec test
+      run: docker exec nuoj python3 -m pytest ./python/test
+
+    - name: Stop containers
+      if: always()
+      run: docker compose down
