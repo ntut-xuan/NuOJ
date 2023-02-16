@@ -1,0 +1,12 @@
+[run]
+branch = True
+omit = test/**/*.py
+
+[report]
+show_missing = True
+exclude_lines =
+  # Re-enable the standard pragma
+  pragma: no cover
+
+  # Type checking only
+  if TYPE_CHECKING:
