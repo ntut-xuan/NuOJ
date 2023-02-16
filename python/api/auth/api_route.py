@@ -44,7 +44,7 @@ def login_route():
         return make_simple_error_response(HTTPStatus.UNAUTHORIZED, "Mail verification enabled but mail is not verify.")
     
     response: Response = make_response({"message": "OK"}, HTTPStatus.OK)
-    _set_jwt_cookie_to_response({"email": user.email, "handle": user.handle}, response)
+    _set_cookie_to_response("jwt", {"email": user.email, "handle": user.handle}, response)
     return response
 
 
@@ -115,7 +115,7 @@ def github_login_route():
             response = redirect("/handle_setup")
         else:
             response = redirect("/")
-            _set_jwt_cookie_to_response({"email": user.email, "handle": user.handle}, response)
+            _set_cookie_to_response("jwt", {"email": user.email, "handle": user.handle}, response)
     else:
         response = make_simple_error_response(HTTPStatus.FORBIDDEN, "Github OAuth login failed.")
     return response
@@ -137,9 +137,10 @@ def google_login_route():
         user: User = _get_user_info_from_account(oauth_login_result.email)
         if user.handle is None:
             response = redirect("/handle_setup")
+            _set_cookie_to_response("hs", {"email": user.email}, response)
         else:
             response = redirect("/")
-            _set_jwt_cookie_to_response({"email": user.email, "handle": user.handle}, response)
+            _set_cookie_to_response("jwt", {"email": user.email, "handle": user.handle}, response)
     else:
         response = make_simple_error_response(HTTPStatus.FORBIDDEN, "Google OAuth login failed.")
     return response
@@ -186,7 +187,8 @@ def _get_user_info_from_account(account: str) -> User:
     
     return user
 
-def _set_jwt_cookie_to_response(
+def _set_cookie_to_response(
+    name: str,
     payload: dict[str, Any],
     response: Response,
     expiration_time_delta: timedelta = timedelta(days=1),
@@ -194,7 +196,7 @@ def _set_jwt_cookie_to_response(
     codec = HS256JWTCodec(current_app.config["jwt_key"])
     token: str = codec.encode(payload, expiration_time_delta)
     response.set_cookie(
-        "jwt",
+        name,
         value=token,
         expires=datetime.now(tz=timezone.utc) + expiration_time_delta,
     )

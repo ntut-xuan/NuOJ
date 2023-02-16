@@ -316,18 +316,27 @@ class TestGithubRoute:
         assert response.status_code == HTTPStatus.FORBIDDEN
 
 class TestGoogleRoute:
-    def test_with_new_account_and_valid_code_should_redirect_to_handle_setup_page(self, client: FlaskClient, monkeypatch: pytest.MonkeyPatch):
+    @pytest.fixture()
+    def monkeypatch_url(self, monkeypatch: pytest.MonkeyPatch):
         monkeypatch.setattr(api.auth.google_oauth_util, "ACCESS_TOKEN_URL", "http://0.0.0.0:8080/test/google/access_token")
         monkeypatch.setattr(api.auth.google_oauth_util, "USER_PROFILE_API_URL", "http://0.0.0.0:8080/test/google/user_profile")
         
+    def test_with_new_account_and_valid_code_should_redirect_to_handle_setup_page(self, client: FlaskClient, monkeypatch_url: None):
         response: TestResponse = client.get("/api/auth/google_login", query_string={"code": "valid_code"})
         
         assert response.status_code == HTTPStatus.FOUND
         assert response.location == "/handle_setup"
     
-    def test_with_old_account_and_valid_code_should_redirect_to_root(self, app: Flask, client: FlaskClient, monkeypatch: pytest.MonkeyPatch):
-        monkeypatch.setattr(api.auth.google_oauth_util, "ACCESS_TOKEN_URL", "http://0.0.0.0:8080/test/google/access_token")
-        monkeypatch.setattr(api.auth.google_oauth_util, "USER_PROFILE_API_URL", "http://0.0.0.0:8080/test/google/user_profile")
+    def test_with_new_account_and_valid_code_should_setup_hs_cookie(self, app: Flask, client: FlaskClient, monkeypatch_url: None):
+        codec: HS256JWTCodec = HS256JWTCodec(app.config["jwt_key"])
+        excepted_data_payload_in_cookie: dict[str, str] = {"email": "oauth_test@nuoj.com"}
+        
+        response: TestResponse = client.get("/api/auth/google_login", query_string={"code": "valid_code"})
+        
+        assert response.status_code == HTTPStatus.FOUND
+        assert _verify_data_field_in_cookie_payload(codec, client.cookie_jar, "hs", excepted_data_payload_in_cookie)
+    
+    def test_with_old_account_and_valid_code_should_redirect_to_root(self, app: Flask, client: FlaskClient, monkeypatch_url: None):
         with app.app_context():
             user: User = User(user_uid="random_user_uid", handle="some_handle", email="oauth_test@nuoj.com", password="password", role=0, email_verified=1)
             db.session.add(user)
@@ -338,12 +347,11 @@ class TestGoogleRoute:
         assert response.status_code == HTTPStatus.FOUND
         assert response.location == "/"
 
-    def test_with_old_account_and_valid_code_should_have_jwt_cookie(self, app: Flask, client: FlaskClient, monkeypatch: pytest.MonkeyPatch):
-        monkeypatch.setattr(api.auth.google_oauth_util, "ACCESS_TOKEN_URL", "http://0.0.0.0:8080/test/google/access_token")
-        monkeypatch.setattr(api.auth.google_oauth_util, "USER_PROFILE_API_URL", "http://0.0.0.0:8080/test/google/user_profile")
+    def test_with_old_account_and_valid_code_should_have_jwt_cookie(self, app: Flask, client: FlaskClient, monkeypatch_url: None):
         codec: HS256JWTCodec = HS256JWTCodec(app.config["jwt_key"])
-        user_email: str = "oauth_test@nuoj.com"
         user_handle: str = "some_handle"
+        user_email: str = "oauth_test@nuoj.com"
+        excepted_data_payload_in_cookie: dict[str, str] = {"email": user_email, "handle": user_handle}
         with app.app_context():
             user: User = User(user_uid="random_user_uid", handle=user_handle, email=user_email, password="password", role=0, email_verified=1)
             db.session.add(user)
@@ -352,26 +360,14 @@ class TestGoogleRoute:
         response: TestResponse = client.get("/api/auth/google_login", query_string={"code": "valid_code"})
         
         assert response.status_code == HTTPStatus.FOUND
-        cookies: tuple[Cookie, ...] = _get_cookies(client.cookie_jar)
-        (jwt_cookie,) = tuple(filter(lambda x: x.name == "jwt", cookies))
-        assert jwt_cookie.value is not None
-        jwt_payload: dict[str, Any] = codec.decode(jwt_cookie.value)
-        data = jwt_payload["data"]
-        assert data["email"] == user_email
-        assert data["handle"] == user_handle
+        assert _verify_data_field_in_cookie_payload(codec, client.cookie_jar, "jwt", excepted_data_payload_in_cookie)
 
-    def test_with_invalid_code_should_return_http_status_code_forbidden(self, client: FlaskClient, monkeypatch: pytest.MonkeyPatch):
-        monkeypatch.setattr(api.auth.google_oauth_util, "ACCESS_TOKEN_URL", "http://0.0.0.0:8080/test/google/access_token")
-        monkeypatch.setattr(api.auth.google_oauth_util, "USER_PROFILE_API_URL", "http://0.0.0.0:8080/test/google/user_profile")
-
+    def test_with_invalid_code_should_return_http_status_code_forbidden(self, client: FlaskClient, monkeypatch_url: None):
         response: TestResponse = client.get("/api/auth/google_login", query_string={"code": "invalid_code"})
         
         assert response.status_code == HTTPStatus.FORBIDDEN
     
-    def test_with_error_args_should_return_http_status_code_forbidden(self, client: FlaskClient, monkeypatch: pytest.MonkeyPatch):
-        monkeypatch.setattr(api.auth.google_oauth_util, "ACCESS_TOKEN_URL", "http://0.0.0.0:8080/test/google/access_token")
-        monkeypatch.setattr(api.auth.google_oauth_util, "USER_PROFILE_API_URL", "http://0.0.0.0:8080/test/google/user_profile")
-
+    def test_with_error_args_should_return_http_status_code_forbidden(self, client: FlaskClient, monkeypatch_url: None):
         response: TestResponse = client.get("/api/auth/google_login", query_string={"error": "some_error_message"})
         
         assert response.status_code == HTTPStatus.FORBIDDEN
@@ -518,7 +514,16 @@ class TestVertifyMailRoute:
         json_response: dict[str, str] | None = response.get_json(silent=True)
         assert json_response["message"] == "Code and handle is not match."
 
+
 def _get_cookies(cookie_jar: CookieJar | None) -> tuple[Cookie, ...]:
     if cookie_jar is None:
         return tuple()
     return tuple(cookie for cookie in cookie_jar)
+
+
+def _verify_data_field_in_cookie_payload(codec: HS256JWTCodec, cookie_jar, cookie_name: str, payload: dict[str, str]) -> bool:
+    cookies: tuple[Cookie, ...] = _get_cookies(cookie_jar)
+    (jwt_cookie,) = tuple(filter(lambda x: x.name == cookie_name, cookies))
+    assert jwt_cookie.value is not None
+    jwt_payload: dict[str, Any] = codec.decode(jwt_cookie.value)
+    return payload == jwt_payload["data"]
