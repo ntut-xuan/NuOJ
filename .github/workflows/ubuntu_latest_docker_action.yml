@@ -16,7 +16,7 @@ jobs:
       shell: bash
 
     - name: Exec test
-      run: docker exec nuoj python3 -m pytest ./python/test
+      run: docker exec nuoj python3 -m pytest ./test
 
     - name: Stop containers
       if: always()
