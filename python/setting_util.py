@@ -17,6 +17,12 @@ def github_oauth_client_id() -> str:
     '''
     return setting["oauth"]["github"]["client_id"]
 
+def github_oauth_secret() -> str:
+    '''
+    回傳使用者 Github OAuth 的 secret
+    '''
+    return setting["oauth"]["github"]["secret"]
+
 def google_oauth_enable() -> bool:
     '''
     回傳使用者是否開啟 Google OAuth 功能
@@ -29,9 +35,15 @@ def google_oauth_client_id() -> str:
     '''
     return setting["oauth"]["google"]["client_id"]
 
+def google_oauth_secret() -> str:
+    '''
+    回傳使用者 Google OAuth 的 secret
+    '''
+    return setting["oauth"]["google"]["secret"]
+
 def google_oauth_redirect_url() -> str:
     '''
-    回傳使用者 Google OAuth 的 client ID
+    回傳使用者 Google OAuth 的 redirect URL
     '''
     return setting["oauth"]["google"]["redirect_url"]
 
@@ -43,6 +55,12 @@ def mail_verification_enable() -> bool:
 
 def mail_info() -> str:
     return setting["mail"]["info"]
+
+def mail_redirect_url() -> str:
+    '''
+    回傳信箱 redirect_url 設置值
+    '''
+    return setting["mail"]["redirect_url"]
 
 def database_info() -> list:
     '''

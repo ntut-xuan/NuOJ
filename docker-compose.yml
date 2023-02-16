@@ -35,3 +35,10 @@ services:
       - "mariadb"
     ports:
       - "8080:8080"
+  fake-smtp-server:
+    image: reachfive/fake-smtp-server:latest
+    container_name: fake-smtp-server
+    restart: always
+    ports:
+      - "1026:1025"
+      - "1081:1080"
