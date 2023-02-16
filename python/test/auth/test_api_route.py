@@ -515,6 +515,109 @@ class TestVertifyMailRoute:
         assert json_response["message"] == "Code and handle is not match."
 
 
+class TestSetupHandleRoute:
+    @pytest.fixture()
+    def setup_no_handle_user(self, app: Flask) -> None:
+        with app.app_context():
+            user: User = User(
+                user_uid="335cc4aa-23b2-473d-b065-ba51fbbf4f04", 
+                handle=None, 
+                password="password-does-not-matter",
+                email="no_handle_user@test.com",
+                role=1,
+                email_verified=1
+            )
+            db.session.add(user)
+            db.session.commit()
+    
+    @pytest.fixture()
+    def client_with_hs_cookie(self, app: Flask) -> FlaskClient:
+        client: FlaskClient = app.test_client()
+        codec: HS256JWTCodec = HS256JWTCodec(app.config.get("jwt_key"))
+        
+        hs_cookie: str = codec.encode({"email": "no_handle_user@test.com"})
+        client.set_cookie("", "hs", hs_cookie)
+        
+        return client
+        
+    def test_with_no_handle_user_should_respond_http_status_ok(self, client_with_hs_cookie: FlaskClient, setup_no_handle_user: None):
+        payload: dict[str, str] = {
+            "handle": "test_handle"
+        }
+        
+        response: TestResponse = client_with_hs_cookie.post("/api/auth/setup_handle", json=payload)
+        
+        assert response.status_code == HTTPStatus.OK
+    
+    def test_with_no_handle_user_should_setup_handle_to_user(self, app: Flask, client_with_hs_cookie: FlaskClient, setup_no_handle_user: None):
+        payload: dict[str, str] = {
+            "handle": "test_handle"
+        }
+        
+        response: TestResponse = client_with_hs_cookie.post("/api/auth/setup_handle", json=payload)
+        
+        assert response.status_code == HTTPStatus.OK
+        with app.app_context():
+            user: User | None = User.query.filter(User.email == "no_handle_user@test.com").first()
+            assert user is not None
+            assert user.handle == "test_handle"
+            
+    def test_with_no_hs_cookie_should_respond_http_status_unauthroized(self, app: Flask, client: FlaskClient, setup_no_handle_user: None):
+        payload: dict[str, str] = {
+            "handle": "test_handle"
+        }
+        
+        response: TestResponse = client.post("/api/auth/setup_handle", json=payload)
+        
+        assert response.status_code == HTTPStatus.UNAUTHORIZED
+        assert response.json is not None
+        assert response.json["message"] == "HS cookie is not exists."
+        
+    def test_with_invalid_hs_cookie_should_respond_http_status_unauthroized(self, app: Flask, client: FlaskClient, setup_no_handle_user: None):
+        payload: dict[str, str] = {
+            "handle": "test_handle"
+        }
+        client.set_cookie("", "hs", "invalid_cookie")
+        
+        response: TestResponse = client.post("/api/auth/setup_handle", json=payload)
+        
+        assert response.status_code == HTTPStatus.UNAUTHORIZED
+        assert response.json is not None
+        assert response.json["message"] == "HS cookie is invalid."
+        
+    def test_with_bad_format_payload_should_respond_http_status_bad_request(self, app: Flask, client_with_hs_cookie: FlaskClient, setup_no_handle_user: None):
+        payload: dict[str, str] = {
+            "bad": "payload"
+        }
+        
+        response: TestResponse = client_with_hs_cookie.post("/api/auth/setup_handle", json=payload)
+        
+        assert response.status_code == HTTPStatus.BAD_REQUEST
+        assert response.json is not None
+        assert response.json["message"] == "Wrong payload format."
+        
+    def test_with_invalid_handle_should_respond_http_status_unprocessable_entity(self, app: Flask, client_with_hs_cookie: FlaskClient, setup_no_handle_user: None):
+        payload: dict[str, str] = {
+            "handle": "-invalid-handle"
+        }
+        
+        response: TestResponse = client_with_hs_cookie.post("/api/auth/setup_handle", json=payload)
+        
+        assert response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
+        assert response.json is not None
+        assert response.json["message"] == "Handle is invalid."
+        
+    def test_with_repeated_handle_should_respond_http_status_forbidden(self, app: Flask, client_with_hs_cookie: FlaskClient, setup_no_handle_user: None, setup_test_user: None):
+        payload: dict[str, str] = {
+            "handle": "nuoj"
+        }
+        
+        response: TestResponse = client_with_hs_cookie.post("/api/auth/setup_handle", json=payload)
+        
+        assert response.status_code == HTTPStatus.FORBIDDEN
+        assert response.json is not None
+        assert response.json["message"] == "Handle is repeated."
+
 def _get_cookies(cookie_jar: CookieJar | None) -> tuple[Cookie, ...]:
     if cookie_jar is None:
         return tuple()

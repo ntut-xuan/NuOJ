@@ -33,6 +33,10 @@ class RegisterPayload:
     handle: str
     password: str
 
+@dataclass
+class SetupHandlePayload:
+    handle: str
+
 
 def hash_password(password) -> str:
     m = hashlib.sha256()

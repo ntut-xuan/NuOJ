@@ -6,7 +6,7 @@ from typing import Any, Callable, TypeVar
 
 from flask import Response, current_app, request
 
-from api.auth.auth_util import HS256JWTCodec, LoginPayload, RegisterPayload
+from api.auth.auth_util import HS256JWTCodec, LoginPayload, RegisterPayload, SetupHandlePayload
 from models import User
 from util import make_simple_error_response
 
@@ -35,6 +35,21 @@ def validate_register_payload_format_or_return_bad_request(func: Callable[..., R
         
         try:
             RegisterPayload(**payload)
+        except TypeError:
+            return make_simple_error_response(HTTPStatus.BAD_REQUEST, "Wrong payload format.")
+        
+        return func(*args, **kwargs)
+    return wrapper
+
+def validate_setup_handle_payload_format_or_return_bad_request(func: Callable[..., Response | T]) -> Callable[..., Response | T]:
+    @wraps(func)
+    def wrapper(*args, **kwargs) -> Response | T:
+        payload: dict[str, Any] | None = request.get_json(silent=True)
+        
+        assert payload is not None
+        
+        try:
+            SetupHandlePayload(**payload)
         except TypeError:
             return make_simple_error_response(HTTPStatus.BAD_REQUEST, "Wrong payload format.")
         
@@ -149,6 +164,31 @@ def validate_jwt_is_valid_or_return_unauthorized(func: Callable[..., Response | 
 
         if not codec.is_valid_jwt(jwt):
             return make_simple_error_response(HTTPStatus.UNAUTHORIZED, "JWT is invalid.")
+
+        return func(*args, **kwargs)
+    return wrapper
+
+def validate_hs_cookie_is_exists_or_return_unauthorized(func: Callable[..., Response | T]) -> Callable[..., Response | T]:
+    @wraps(func)
+    def wrapper(*args, **kwargs) -> Response | T:
+        cookie: Cookie | None = request.cookies.get("hs")
+        
+        if cookie is None:
+            return make_simple_error_response(HTTPStatus.UNAUTHORIZED, "HS cookie is not exists.")
+
+        return func(*args, **kwargs)
+    return wrapper
+
+
+def validate_hs_cookie_is_valid_or_return_unauthorized(func: Callable[..., Response | T]) -> Callable[..., Response | T]:
+    @wraps(func)
+    def wrapper(*args, **kwargs) -> Response | T:
+        jwt: Cookie | None = request.cookies.get("hs")
+        key: str = current_app.config.get("jwt_key")
+        codec: HS256JWTCodec = HS256JWTCodec(key)
+
+        if not codec.is_valid_jwt(jwt):
+            return make_simple_error_response(HTTPStatus.UNAUTHORIZED, "HS cookie is invalid.")
 
         return func(*args, **kwargs)
     return wrapper

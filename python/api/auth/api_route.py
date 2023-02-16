@@ -6,7 +6,7 @@ from typing import Any
 from flask import Blueprint, Response, current_app, request, make_response, redirect
 from sqlalchemy.sql import or_
 
-from api.auth.auth_util import HS256JWTCodec, LoginPayload, login, register, verified_the_email_of_handle
+from api.auth.auth_util import HS256JWTCodec, LoginPayload, login, register, setup_handle, verified_the_email_of_handle
 from api.auth.github_oauth_util import github_login
 from api.auth.google_oauth_util import google_login
 from api.auth.oauth_util import OAuthLoginResult
@@ -18,8 +18,11 @@ from api.auth.validator import (
     validate_login_payload_format_or_return_bad_request,
     validate_handle_or_return_unprocessable_entity,
     validate_handle_is_not_repeated_or_return_forbidden,
+    validate_hs_cookie_is_exists_or_return_unauthorized,
+    validate_hs_cookie_is_valid_or_return_unauthorized,
     validate_password_or_return_unprocessable_entity,
     validate_register_payload_format_or_return_bad_request,
+    validate_setup_handle_payload_format_or_return_bad_request,
 )
 from setting.util import Setting
 from models import User
@@ -179,6 +182,33 @@ def verify_mail_route():
     verified_the_email_of_handle(handle)
     return make_response({"message": "OK"}, HTTPStatus.OK)
 
+
+@auth_bp.route("/setup_handle", methods=["POST"])
+@validate_hs_cookie_is_exists_or_return_unauthorized
+@validate_hs_cookie_is_valid_or_return_unauthorized
+@validate_setup_handle_payload_format_or_return_bad_request
+@validate_handle_or_return_unprocessable_entity
+@validate_handle_is_not_repeated_or_return_forbidden
+def setup_handle_route():
+    hs_cookie: str | None = request.cookies.get("hs", None)
+    codec: HS256JWTCodec = HS256JWTCodec(current_app.config.get("jwt_key"))
+    
+    assert hs_cookie is not None
+    
+    hs_payload: dict[str, Any] = codec.decode(hs_cookie)
+    payload: dict[str, Any] | None = request.get_json(silent=True)
+    
+    assert payload is not None
+    
+    email: str | None = hs_payload["data"].get("email", None)
+    handle: str = payload.get("handle", None)
+    
+    assert email is not None
+    
+    setup_handle(email, handle)
+    
+    return make_response({"message": "OK"}, HTTPStatus.OK)
+    
 
 def _get_user_info_from_account(account: str) -> User:
     user: User | None = User.query.filter(or_(User.email == account, User.handle == account)).first()
