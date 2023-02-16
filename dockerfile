@@ -6,7 +6,7 @@ RUN apt-get update && apt-get install -y ssh python3 python3-pip git build-essen
 
 # install nodejs and npm
 RUN curl -sL https://deb.nodesource.com/setup_16.x | bash
-RUN apt-get install nodejs
+RUN apt-get install -y nodejs
 RUN node -v
 RUN npm -v
 
