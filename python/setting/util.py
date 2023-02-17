@@ -4,6 +4,7 @@ import platform
 import requests
 from pathlib import Path
 from typing import Any
+from functools import wraps
 
 
 class Setting:
@@ -24,75 +25,90 @@ class Setting:
         """
         回傳使用者是否開啟 Github OAuth 功能
         """
+        self._raise_value_error_if_setting_is_not_setup()
         return self.setting["oauth"]["github"]["enable"]
 
     def github_oauth_client_id(self) -> str:
         """
         回傳使用者 Github OAuth 的 client ID
         """
+        self._raise_value_error_if_setting_is_not_setup()
         return self.setting["oauth"]["github"]["client_id"]
 
     def github_oauth_secret(self) -> str:
         """
         回傳使用者 Github OAuth 的 client ID
         """
+        self._raise_value_error_if_setting_is_not_setup()
         return self.setting["oauth"]["github"]["secret"]
 
     def google_oauth_enable(self) -> bool:
         """
         回傳使用者是否開啟 Google OAuth 功能
         """
+        self._raise_value_error_if_setting_is_not_setup()
         return self.setting["oauth"]["google"]["enable"]
 
     def google_oauth_client_id(self) -> str:
         """
         回傳使用者 Google OAuth 的 client ID
         """
+        self._raise_value_error_if_setting_is_not_setup()
         return self.setting["oauth"]["google"]["client_id"]
 
     def google_oauth_redirect_url(self) -> str:
         """
         回傳使用者 Google OAuth 的 client ID
         """
+        self._raise_value_error_if_setting_is_not_setup()
         return self.setting["oauth"]["google"]["redirect_url"]
 
     def google_oauth_secret(self) -> str:
         """
         回傳使用者 Google OAuth 的 client ID
         """
+        self._raise_value_error_if_setting_is_not_setup()
         return self.setting["oauth"]["google"]["secret"]
 
     def mail_verification_enable(self) -> bool:
         """
         回傳使用者是否開啟信箱驗證功能
         """
+        self._raise_value_error_if_setting_is_not_setup()
         return self.setting["mail"]["enable"]
 
     def mail_server(self) -> str:
+        self._raise_value_error_if_setting_is_not_setup()
         return self.setting["mail"]["server"]
 
     def mail_port(self) -> int:
+        self._raise_value_error_if_setting_is_not_setup()
         return int(self.setting["mail"]["port"])
 
     def mail_mailname(self) -> str:
+        self._raise_value_error_if_setting_is_not_setup()
         return self.setting["mail"]["mailname"]
 
     def mail_password(self) -> str:
+        self._raise_value_error_if_setting_is_not_setup()
         return self.setting["mail"]["password"]
 
     def mail_info(self) -> str:
+        self._raise_value_error_if_setting_is_not_setup()
         return self.setting["mail"]["info"]
 
     def mail_redirect_url(self) -> str:
         """
         回傳信箱 redirect_url 設置值
         """
+        self._raise_value_error_if_setting_is_not_setup()
         return self.setting["mail"]["redirect_url"]
 
     def database_info(self) -> list:
         """
         回傳使用者設定的 database 連結序列
         """
+        self._raise_value_error_if_setting_is_not_setup()
         return self.setting["architecture"]["database"]
 
     def master_database_url(self) -> str | None:
@@ -127,12 +143,14 @@ class Setting:
         """
         回傳使用者設定的 web application 資料序列
         """
+        self._raise_value_error_if_setting_is_not_setup()
         return self.setting["architecture"]["web_app"]
 
     def judge_server_info(self) -> list:
         """
         回傳使用者設定的 judge server 資料序列
         """
+        self._raise_value_error_if_setting_is_not_setup()
         return self.setting["architecture"]["judge_server"]
 
     # def web_app_heartbeat_check(self) -> list:
@@ -179,3 +197,7 @@ class Setting:
         回傳使用者目前架設的 CPU 名稱
         """
         return platform.processor()
+
+    def _raise_value_error_if_setting_is_not_setup(self):
+        if self.setting is None:
+            raise ValueError("Setting is not setup yet!")
