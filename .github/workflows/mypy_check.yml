@@ -18,4 +18,4 @@ jobs:
     - name: Check types with Mypy
       run: |
         cd python
-        mypy $(git ls-files '*.py') --install-types --non-interactive --config-file python/mypy.ini
+        mypy $(git ls-files '*.py') --install-types --non-interactive --config-file mypy.ini
