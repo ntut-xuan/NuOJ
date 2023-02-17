@@ -16,4 +16,6 @@ jobs:
         pip install -r requirements.txt
         pip install mypy
     - name: Check types with Mypy
-      run: mypy $(git ls-files '*.py') --install-types --non-interactive --config-file python/mypy.ini
+      run: |
+        cd python
+        mypy $(git ls-files '*.py') --install-types --non-interactive --config-file python/mypy.ini
