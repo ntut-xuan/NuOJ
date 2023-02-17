@@ -14,4 +14,4 @@ import re
 import json
 import base64
 
-admin_page = Blueprint('admin_page', __name__)
+admin_page = Blueprint("admin_page", __name__)

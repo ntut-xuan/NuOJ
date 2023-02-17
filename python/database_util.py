@@ -8,19 +8,23 @@ from enum import Enum
 
 from flask import current_app
 
+
 def connect_database() -> pymysql.Connection:
-    conn = pymysql.connect(host="mariadb", user="nuoja", password="@nuoja2023", database="nuoj")
+    conn = pymysql.connect(
+        host="mariadb", user="nuoja", password="@nuoja2023", database="nuoj"
+    )
     return conn
 
+
 def command_execute(command: str, param: tuple) -> dict:
-    '''
+    """
     這個函數可以讓你使用 MySQL 的指令，並將回傳結果轉成一個 dict 回傳。
         param:
             command: MySQL 的指令，需要可以正常運作。
             param: 參數化的參數。
         return:
             一個包含結果的 dict。
-    '''
+    """
     conn = connect_database()
     with conn.cursor() as cursor:
         cursor.execute(command, param)
@@ -35,9 +39,11 @@ def command_execute(command: str, param: tuple) -> dict:
         else:
             return {}
 
+
 def file_storage_tunnel_exist(filename: str, tunnel: TunnelCode) -> bool:
     file_path = _make_file_path(tunnel, filename)
     return os.path.exists(file_path)
+
 
 def file_storage_tunnel_read(filename: str, tunnel: TunnelCode) -> str:
     file_path = _make_file_path(tunnel, filename)
@@ -46,7 +52,8 @@ def file_storage_tunnel_read(filename: str, tunnel: TunnelCode) -> str:
             return file.read()
     else:
         return ""
-    
+
+
 def byte_storage_tunnel_read(filename: str, tunnel: TunnelCode) -> bytes:
     file_path = _make_file_path(tunnel, filename)
     if file_storage_tunnel_exist(filename, tunnel):
@@ -55,11 +62,13 @@ def byte_storage_tunnel_read(filename: str, tunnel: TunnelCode) -> bytes:
     else:
         return 0
 
-def file_storage_tunnel_write(filename: str, data : str, tunnel: TunnelCode) -> None:
+
+def file_storage_tunnel_write(filename: str, data: str, tunnel: TunnelCode) -> None:
     file_path = _make_file_path(tunnel, filename)
     with open(file_path, "w") as file:
         file.write(data)
         file.close()
+
 
 def byte_storage_tunnel_write(filename: str, data: bytes, tunnel: TunnelCode) -> None:
     file_path = _make_file_path(tunnel, filename)
@@ -74,6 +83,7 @@ def file_storage_tunnel_del(filename: str, tunnel: TunnelCode) -> str:
         os.remove(file_path)
     else:
         return ""
+
 
 def _make_file_path(tunnel: TunnelCode, filename: str) -> str:
     storage_path = current_app.config.get("STORAGE_PATH")

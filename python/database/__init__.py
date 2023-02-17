@@ -25,7 +25,8 @@ def set_sqlite_pragma(dbapi_connection, _):
         cursor: sqlite3.Cursor = dbapi_connection.cursor()
         cursor.execute("PRAGMA foreign_keys=ON")
         cursor.close()
-        
+
+
 @click.command("create-db")
 def create_db_command() -> None:
     create_db()

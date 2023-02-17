@@ -1,5 +1,6 @@
 from database import db
 
+
 class User(db.Model):
     user_uid = db.Column(db.String(36), primary_key=True)
     handle = db.Column(db.String(32), unique=True)
@@ -7,7 +8,7 @@ class User(db.Model):
     email = db.Column(db.String(100), nullable=False)
     role = db.Column(db.Integer, nullable=False)
     email_verified = db.Column(db.Integer, nullable=False)
-    
+
     __table_args__ = (db.CheckConstraint(email_verified.in_({0, 1})),)
 
 
