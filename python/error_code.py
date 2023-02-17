@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 class ErrorCode(Enum):
     HANDLE_INVALID = 201
     HANDLE_NOT_FOUND = 202
@@ -19,5 +20,11 @@ class ErrorCode(Enum):
     UPLOAD_FAILED = 801
     UNEXCEPT_ERROR = 999
 
+
 def error_dict(code: ErrorCode, extend_message="") -> dict:
-    return {"status": "Failed", "message": code.name, "extend_message": extend_message, "code": code.value}
+    return {
+        "status": "Failed",
+        "message": code.name,
+        "extend_message": extend_message,
+        "code": code.value,
+    }
