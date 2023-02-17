@@ -15,7 +15,7 @@ ACCESS_TOKEN_URL: Final[str] = "https://oauth2.googleapis.com/token"
 USER_PROFILE_API_URL: Final[str] = "https://www.googleapis.com/oauth2/v2/userinfo"
 
 
-def google_login(code) -> bool:
+def google_login(code) -> OAuthLoginResult:
     access_token: str | None = _get_access_token_from_code(code)
 
     if access_token is None:
@@ -28,8 +28,8 @@ def google_login(code) -> bool:
     return OAuthLoginResult(email, True)
 
 
-def _get_access_token_from_code(code: str) -> str:
-    setting: Setting = current_app.config.get("setting")
+def _get_access_token_from_code(code: str) -> str | None:
+    setting: Setting = current_app.config["setting"]
     client_id = setting.google_oauth_client_id()
     client_secret = setting.google_oauth_secret()
     redirect_uri = setting.google_oauth_redirect_url()

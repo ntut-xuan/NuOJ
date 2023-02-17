@@ -476,6 +476,26 @@ class TestGithubRoute:
         data = jwt_payload["data"]
         assert data["email"] == user_email
         assert data["handle"] == user_handle
+    
+    def test_with_absent_code_should_return_http_status_code_bad_request(
+        self, client: FlaskClient, monkeypatch: pytest.MonkeyPatch
+    ):
+        monkeypatch.setattr(
+            api.auth.github_oauth_util,
+            "ACCESS_TOKEN_URL",
+            "http://0.0.0.0:8080/test/github/access_token",
+        )
+        monkeypatch.setattr(
+            api.auth.github_oauth_util,
+            "USER_PROFILE_API_URL",
+            "http://0.0.0.0:8080/test/github/user_profile",
+        )
+
+        response: TestResponse = client.get(
+            "/api/auth/github_login"
+        )
+
+        assert response.status_code == HTTPStatus.BAD_REQUEST
 
     def test_with_invalid_code_should_return_http_status_code_forbidden(
         self, client: FlaskClient, monkeypatch: pytest.MonkeyPatch
@@ -626,7 +646,7 @@ class TestOAuthInfoRoute:
     def test_with_enabled_github_oauth_and_google_oauth_should_return_correct_github_oauth_url_and_google_oauth_url_in_json(
         self, app: Flask, client: FlaskClient
     ):
-        setting: Setting = app.config.get("setting")
+        setting: Setting = app.config["setting"]
         github_client_id = setting.github_oauth_client_id()
         google_client_id = setting.google_oauth_client_id()
         google_redirect_url = setting.google_oauth_redirect_url()
@@ -634,8 +654,8 @@ class TestOAuthInfoRoute:
 
         response: TestResponse = client.get("/api/auth/oauth_info")
 
-        assert response.json is not None
         response_json: dict[str, str] | None = response.get_json(silent=True)
+        assert response_json is not None
         assert (
             response_json["github_oauth_url"]
             == f"https://github.com/login/oauth/authorize?client_id={github_client_id}&scope=repo"
@@ -664,13 +684,13 @@ class TestOAuthInfoRoute:
             }
         }
         app.config["setting"] = Setting().from_dict(only_github_oauth_enabled_setting)
-        setting: Setting = app.config.get("setting")
+        setting: Setting = app.config["setting"]
         github_client_id = setting.github_oauth_client_id()
 
         response: TestResponse = client.get("/api/auth/oauth_info")
 
-        assert response.json is not None
         response_json: dict[str, str] | None = response.get_json(silent=True)
+        assert response_json is not None
         assert (
             response_json["github_oauth_url"]
             == f"https://github.com/login/oauth/authorize?client_id={github_client_id}&scope=repo"
@@ -696,15 +716,15 @@ class TestOAuthInfoRoute:
             }
         }
         app.config["setting"] = Setting().from_dict(only_google_oauth_enabled_setting)
-        setting: Setting = app.config.get("setting")
+        setting: Setting = app.config["setting"]
         google_client_id = setting.google_oauth_client_id()
         google_redirect_url = setting.google_oauth_redirect_url()
         google_oauth_scope = "https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email"
 
         response: TestResponse = client.get("/api/auth/oauth_info")
 
-        assert response.json is not None
         response_json: dict[str, str] | None = response.get_json(silent=True)
+        assert response_json is not None
         assert (
             response_json["google_oauth_url"]
             == f"https://accounts.google.com/o/oauth2/v2/auth?client_id={google_client_id}&redirect_uri={google_redirect_url}&response_type=code&scope={google_oauth_scope}"
@@ -716,9 +736,7 @@ class TestVertifyMailRoute:
     def test_with_valid_code_should_respond_http_status_ok(
         self, app: Flask, logged_in_client: FlaskClient
     ):
-        mail_verification_codes: dict[str, str] = app.config.get(
-            "mail_verification_code"
-        )
+        mail_verification_codes: dict[str, str] = app.config["mail_verification_code"]
         mail_verification_codes |= {"a-random-uuid-here": "test_account"}
 
         response: TestResponse = logged_in_client.post(
@@ -730,9 +748,7 @@ class TestVertifyMailRoute:
     def test_with_valid_code_should_set_user_mail_verify_status_to_true(
         self, app: Flask, logged_in_client: FlaskClient
     ):
-        mail_verification_codes: dict[str, str] = app.config.get(
-            "mail_verification_code"
-        )
+        mail_verification_codes: dict[str, str] = app.config["mail_verification_code"]
         mail_verification_codes |= {"a-random-uuid-here": "test_account"}
 
         logged_in_client.post("/api/auth/verify_mail?code=a-random-uuid-here")
@@ -751,6 +767,7 @@ class TestVertifyMailRoute:
 
         assert response.status_code == HTTPStatus.UNAUTHORIZED
         json_response: dict[str, str] | None = response.get_json(silent=True)
+        assert json_response is not None
         assert json_response["message"] == "JWT is not exists."
 
     def test_with_invalid_jwt_cookie_should_respond_http_status_forbidden(
@@ -771,6 +788,7 @@ class TestVertifyMailRoute:
 
         assert response.status_code == HTTPStatus.BAD_REQUEST
         json_response: dict[str, str] | None = response.get_json(silent=True)
+        assert json_response is not None
         assert json_response["message"] == "Absent code."
 
     def test_with_invalid_code_should_respond_http_status_forbidden(
@@ -782,14 +800,13 @@ class TestVertifyMailRoute:
 
         assert response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
         json_response: dict[str, str] | None = response.get_json(silent=True)
+        assert json_response is not None
         assert json_response["message"] == "Invalid code."
 
     def test_with_not_match_handle_and_code_should_respond_http_status_forbidden(
         self, app: Flask, logged_in_client: FlaskClient
     ):
-        mail_verification_codes: dict[str, str] = app.config.get(
-            "mail_verification_code"
-        )
+        mail_verification_codes: dict[str, str] = app.config["mail_verification_code"]
         mail_verification_codes |= {"a-random-uuid-here": "some_body"}
 
         response: TestResponse = logged_in_client.post(
@@ -798,6 +815,7 @@ class TestVertifyMailRoute:
 
         assert response.status_code == HTTPStatus.FORBIDDEN
         json_response: dict[str, str] | None = response.get_json(silent=True)
+        assert json_response is not None
         assert json_response["message"] == "Code and handle is not match."
 
 
@@ -819,7 +837,7 @@ class TestSetupHandleRoute:
     @pytest.fixture()
     def client_with_hs_cookie(self, app: Flask) -> FlaskClient:
         client: FlaskClient = app.test_client()
-        codec: HS256JWTCodec = HS256JWTCodec(app.config.get("jwt_key"))
+        codec: HS256JWTCodec = HS256JWTCodec(app.config["jwt_key"])
 
         hs_cookie: str = codec.encode({"email": "no_handle_user@test.com"})
         client.set_cookie("", "hs", hs_cookie)

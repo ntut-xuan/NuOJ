@@ -2,7 +2,7 @@ import os
 from datetime import timedelta
 from urllib.parse import quote
 
-SECRET_KEY: str = os.urandom(24)
+SECRET_KEY: bytes = os.urandom(24)
 PERMANENT_SESSION_LIFETIME = timedelta(days=31)
 STORAGE_PATH: str = "/etc/nuoj/storage"
 SETTING_FILE_PATH: str = "/etc/nuoj/setting.json"

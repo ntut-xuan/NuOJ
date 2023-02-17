@@ -71,8 +71,8 @@ class Setting:
     def mail_server(self) -> str:
         return self.setting["mail"]["server"]
 
-    def mail_port(self) -> str:
-        return self.setting["mail"]["port"]
+    def mail_port(self) -> int:
+        return int(self.setting["mail"]["port"])
 
     def mail_mailname(self) -> str:
         return self.setting["mail"]["mailname"]
@@ -95,7 +95,7 @@ class Setting:
         """
         return self.setting["architecture"]["database"]
 
-    def master_database_url(self) -> str:
+    def master_database_url(self) -> str | None:
         """
         回傳使用者設定的 master database 連結
         """
@@ -104,7 +104,7 @@ class Setting:
                 return data["url"] + ":" + data["port"]
         return None
 
-    def slave_database_url(self) -> str:
+    def slave_database_url(self) -> list[str]:
         """
         回傳使用者設定的 slave database 連結，以序列表示
         """
@@ -114,7 +114,7 @@ class Setting:
                 slave_database.append(data["url"] + ":" + data["port"])
         return slave_database
 
-    def master_database_token(self) -> str:
+    def master_database_token(self) -> str | None:
         """
         回傳使用者設定的 master database 的 token
         """
@@ -135,46 +135,46 @@ class Setting:
         """
         return self.setting["architecture"]["judge_server"]
 
-    def web_app_heartbeat_check(self) -> list:
-        """
-        回傳 web application 資料序列的心跳，以序列呈現
-        """
-        status_list = []
-        for data in self.web_app_info():
-            try:
-                req = requests.get(data["url"] + ":" + data["port"] + "/heartbeat")
-                status_list.append({"name": data["name"], "status": req.status_code})
-            except requests.exceptions.ConnectionError as e:
-                status_list.append({"name": data["name"], "status": 502})
-        return status_list
+    # def web_app_heartbeat_check(self) -> list:
+    #     """
+    #     回傳 web application 資料序列的心跳，以序列呈現
+    #     """
+    #     status_list = []
+    #     for data in self.web_app_info():
+    #         try:
+    #             req = requests.get(data["url"] + ":" + data["port"] + "/heartbeat")
+    #             status_list.append({"name": data["name"], "status": req.status_code})
+    #         except requests.exceptions.ConnectionError as e:
+    #             status_list.append({"name": data["name"], "status": 502})
+    #     return status_list
 
-    def database_heartbeat_check(self) -> list:
-        """
-        回傳 database 資料序列的心跳，以序列呈現
-        """
-        status_list = []
-        for data in self.database_info():
-            try:
-                database_util.connect_database()
-                status_list.append({"name": data["name"], "status": 200})
-            except requests.exceptions.ConnectionError as e:
-                status_list.append({"name": data["name"], "status": 502})
-        return status_list
+    # def database_heartbeat_check(self) -> list:
+    #     """
+    #     回傳 database 資料序列的心跳，以序列呈現
+    #     """
+    #     status_list = []
+    #     for data in self.database_info():
+    #         try:
+    #             database_util.connect_database()
+    #             status_list.append({"name": data["name"], "status": 200})
+    #         except requests.exceptions.ConnectionError as e:
+    #             status_list.append({"name": data["name"], "status": 502})
+    #     return status_list
 
-    def judge_server_heartbeat_check(self) -> list:
-        """
-        回傳 judge server 資料序列的心跳，以序列呈現
-        """
-        status_list = []
-        for data in self.judge_server_info():
-            try:
-                req = requests.get(data["url"] + ":" + data["port"] + "/heartbeat")
-                status_list.append({"name": data["name"], "status": req.status_code})
-            except requests.exceptions.ConnectionError as e:
-                status_list.append({"name": data["name"], "status": 502})
-        return status_list
+    # def judge_server_heartbeat_check(self) -> list:
+    #     """
+    #     回傳 judge server 資料序列的心跳，以序列呈現
+    #     """
+    #     status_list = []
+    #     for data in self.judge_server_info():
+    #         try:
+    #             req = requests.get(data["url"] + ":" + data["port"] + "/heartbeat")
+    #             status_list.append({"name": data["name"], "status": req.status_code})
+    #         except requests.exceptions.ConnectionError as e:
+    #             status_list.append({"name": data["name"], "status": 502})
+    #     return status_list
 
-    def cpu_name() -> str:
+    def cpu_name(self) -> str:
         """
         回傳使用者目前架設的 CPU 名稱
         """
