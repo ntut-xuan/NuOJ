@@ -20,6 +20,7 @@
         "server": "",
         "port": "",
         "mailname": "",
-        "password": ""
+        "password": "",
+        "redirect_url": ""
     }
 }
