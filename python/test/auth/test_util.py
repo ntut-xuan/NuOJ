@@ -22,7 +22,6 @@ from api.auth.auth_util import (
 from api.auth.email_util import MailSender, send_verification_email, _get_mail_sender
 from database import db
 from models import User
-from setting.util import Setting
 from test.util import assert_not_raise
 
 

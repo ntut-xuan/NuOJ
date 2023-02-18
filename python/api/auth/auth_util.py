@@ -80,7 +80,7 @@ def register(email: str, handle: str, password: str) -> None:
 
     # Send the email if the email verification is enabled.
     setting: Setting = current_app.config.get("setting")
-    if setting.mail_verification_enable():
+    if setting.mail.enable:
         thread = FlaskThread(target=send_verification_email, args=[handle, email])
         thread.start()
 
