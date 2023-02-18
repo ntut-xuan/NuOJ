@@ -15,7 +15,7 @@ from app import create_app
 from api.auth.email_util import MailSender, _get_mail_sender
 from database import create_db, db
 from models import User
-from setting.util import Setting
+from setting.util import Setting, SettingBuilder
 
 
 @pytest.fixture
@@ -60,17 +60,8 @@ def logged_in_client(app: Flask) -> FlaskClient:
 
 @pytest.fixture
 def enabled_mail_setting(app: Flask) -> None:
-    disabled_mail_setting = {
-        "mail": {
-            "enable": True,
-            "server": "fake-smtp-server",
-            "port": "1025",
-            "mailname": "test@nuoj.com",
-            "password": "nuoj_test",
-            "redirect_url": "http://test.net/mail_verification",
-        },
-    }
-    app.config["setting"] = Setting().from_dict(disabled_mail_setting)
+    setting: Setting = app.config["setting"]
+    setting.mail.enable = True
 
 
 def _create_storage_folder_structure(storage_path):
@@ -125,5 +116,8 @@ def _setup_setting_to_app_config(app: Flask) -> None:
             "password": "nuoj_test",
             "redirect_url": "http://test.net/mail_verification",
         },
+        "asana": {
+            "token": ""
+        }
     }
-    app.config["setting"] = Setting().from_dict(setting)
+    app.config["setting"] = SettingBuilder().from_dict(setting)

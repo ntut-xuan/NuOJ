@@ -647,9 +647,9 @@ class TestOAuthInfoRoute:
         self, app: Flask, client: FlaskClient
     ):
         setting: Setting = app.config["setting"]
-        github_client_id = setting.github_oauth_client_id()
-        google_client_id = setting.google_oauth_client_id()
-        google_redirect_url = setting.google_oauth_redirect_url()
+        github_client_id = setting.oauth.github.client_id
+        google_client_id = setting.oauth.google.client_id
+        google_redirect_url = setting.oauth.google.redirect_url
         google_oauth_scope = "https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email"
 
         response: TestResponse = client.get("/api/auth/oauth_info")
@@ -668,24 +668,10 @@ class TestOAuthInfoRoute:
     def test_with_only_enabled_github_oauth_should_return_correct_github_oauth_url_in_json(
         self, app: Flask, client: FlaskClient
     ):
-        only_github_oauth_enabled_setting = {
-            "oauth": {
-                "github": {
-                    "enable": True,
-                    "client_id": "some_client_id",
-                    "secret": "some_secret",
-                },
-                "google": {
-                    "enable": False,
-                    "client_id": "some_client_id",
-                    "secret": "some_secret",
-                    "redirect_url": "some_redirect_url",
-                },
-            }
-        }
-        app.config["setting"] = Setting().from_dict(only_github_oauth_enabled_setting)
         setting: Setting = app.config["setting"]
-        github_client_id = setting.github_oauth_client_id()
+        setting.oauth.google.enable = False
+        setting.oauth.github.enable = True
+        github_client_id = setting.oauth.github.client_id
 
         response: TestResponse = client.get("/api/auth/oauth_info")
 
@@ -700,25 +686,11 @@ class TestOAuthInfoRoute:
     def test_with_only_enabled_google_oauth_should_return_correct_google_oauth_url_in_json(
         self, app: Flask, client: FlaskClient
     ):
-        only_google_oauth_enabled_setting = {
-            "oauth": {
-                "github": {
-                    "enable": False,
-                    "client_id": "some_client_id",
-                    "secret": "some_secret",
-                },
-                "google": {
-                    "enable": True,
-                    "client_id": "some_client_id",
-                    "secret": "some_secret",
-                    "redirect_url": "some_redirect_url",
-                },
-            }
-        }
-        app.config["setting"] = Setting().from_dict(only_google_oauth_enabled_setting)
         setting: Setting = app.config["setting"]
-        google_client_id = setting.google_oauth_client_id()
-        google_redirect_url = setting.google_oauth_redirect_url()
+        setting.oauth.google.enable = True
+        setting.oauth.github.enable = False
+        google_client_id = setting.oauth.google.client_id
+        google_redirect_url = setting.oauth.google.redirect_url
         google_oauth_scope = "https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email"
 
         response: TestResponse = client.get("/api/auth/oauth_info")

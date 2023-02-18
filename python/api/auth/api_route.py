@@ -55,7 +55,7 @@ def login_route() -> Response:
     user: User = _get_user_info_from_account(login_payload.account)
     setting: Setting = current_app.config["setting"]
 
-    if setting.mail_verification_enable() and user.email_verified == 0:
+    if setting.mail.enable and user.email_verified == 0:
         return make_simple_error_response(
             HTTPStatus.UNAUTHORIZED, "Mail verification enabled but mail is not verify."
         )
@@ -84,8 +84,8 @@ def register_route() -> Response:
 
     register(email, handle, password)
 
-    setting: Setting = current_app.config["setting"]
-    mail_verification_enabled = setting.mail_verification_enable()
+    setting: Setting = current_app.config.get("setting")
+    mail_verification_enabled = setting.mail.enable
     response: Response = make_response(
         {"message": "OK", "mail_verification_enabled": mail_verification_enabled},
         HTTPStatus.OK,
@@ -97,11 +97,11 @@ def register_route() -> Response:
 def oauth_info_route() -> Response:
     current_setting: Setting = current_app.config["setting"]
 
-    github_status = current_setting.github_oauth_enable()
-    google_status = current_setting.google_oauth_enable()
-    github_client_id = current_setting.github_oauth_client_id()
-    google_client_id = current_setting.google_oauth_client_id()
-    google_redirect_url = current_setting.google_oauth_redirect_url()
+    github_status = current_setting.oauth.github.enable
+    google_status = current_setting.oauth.google.enable
+    github_client_id = current_setting.oauth.github.client_id
+    google_client_id = current_setting.oauth.google.client_id
+    google_redirect_url = current_setting.oauth.google.redirect_url
     google_oauth_scope = "https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email"
 
     response = {"status": "OK"}

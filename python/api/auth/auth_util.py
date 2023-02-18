@@ -79,8 +79,8 @@ def register(email: str, handle: str, password: str) -> None:
     _init_profile_storage_file(user_uid, handle, email)
 
     # Send the email if the email verification is enabled.
-    setting: Setting = current_app.config["setting"]
-    if setting.mail_verification_enable():
+    setting: Setting = current_app.config.get("setting")
+    if setting.mail.enable:
         thread = FlaskThread(target=send_verification_email, args=[handle, email])
         thread.start()
 

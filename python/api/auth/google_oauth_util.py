@@ -28,11 +28,11 @@ def google_login(code) -> OAuthLoginResult:
     return OAuthLoginResult(email, True)
 
 
-def _get_access_token_from_code(code: str) -> str | None:
-    setting: Setting = current_app.config["setting"]
-    client_id = setting.google_oauth_client_id()
-    client_secret = setting.google_oauth_secret()
-    redirect_uri = setting.google_oauth_redirect_url()
+def _get_access_token_from_code(code: str) -> str:
+    setting: Setting = current_app.config.get("setting")
+    client_id = setting.oauth.google.client_id
+    client_secret = setting.oauth.google.secret
+    redirect_uri = setting.oauth.google.redirect_url
 
     payload = {
         "code": code,

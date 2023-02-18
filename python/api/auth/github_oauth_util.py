@@ -16,9 +16,9 @@ USER_PROFILE_API_URL: Final[str] = "https://api.github.com/user"
 
 
 def github_login(code) -> OAuthLoginResult:
-    setting: Setting = current_app.config["setting"]
-    client_id = setting.github_oauth_client_id()
-    client_secret = setting.github_oauth_secret()
+    setting: Setting = current_app.config.get("setting")
+    client_id = setting.oauth.github.client_id
+    client_secret = setting.oauth.github.secret
 
     access_token: str | None = _validate_github_oauth_code_and_get_access_token(
         client_id, client_secret, code

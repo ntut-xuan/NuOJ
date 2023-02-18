@@ -11,7 +11,7 @@ from api.auth.test_route import auth_test_bp
 from database import create_db_command, db
 from page.auth.route import auth_page
 from page.route import page
-from setting.util import Setting
+from setting.util import Setting, SettingBuilder
 
 
 def create_app(test_config: Mapping[str, Any] | None = None) -> Flask:
@@ -24,7 +24,7 @@ def create_app(test_config: Mapping[str, Any] | None = None) -> Flask:
 
     app.config["jwt_key"] = token_hex()
     app.config["mail_verification_code"] = {}
-    app.config["setting"] = Setting().from_json_file(Path("/etc/nuoj/setting.json"))
+    app.config["setting"]: Setting = SettingBuilder().from_json_file(Path("/etc/nuoj/setting.json"))
 
     db.init_app(app)
 
