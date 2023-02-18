@@ -7,7 +7,7 @@ from models import User
 
 @dataclass
 class OAuthLoginResult:
-    email: str
+    email: str | None
     passed: bool
 
 

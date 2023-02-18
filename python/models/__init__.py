@@ -1,7 +1,7 @@
 from database import db
 
 
-class User(db.Model):
+class User(db.Model): # type: ignore[name-defined]
     user_uid = db.Column(db.String(36), primary_key=True)
     handle = db.Column(db.String(32), unique=True)
     password = db.Column(db.String(128), nullable=False)
@@ -12,7 +12,7 @@ class User(db.Model):
     __table_args__ = (db.CheckConstraint(email_verified.in_({0, 1})),)
 
 
-class Profile(db.Model):
+class Profile(db.Model): # type: ignore[name-defined]
     user_uid = db.Column(
         db.ForeignKey(User.user_uid, ondelete="CASCADE", onupdate="CASCADE"),
         primary_key=True,

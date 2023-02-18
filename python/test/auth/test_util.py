@@ -84,9 +84,11 @@ class TestRegisterUtil:
                 email="nuoj@test.com", handle="nuoj_test"
             ).first()
             assert user is not None
-            user_uid = user.user_uid
-            storage_path = current_app.config.get("STORAGE_PATH")
+            user_uid: str = user.user_uid
+            storage_path: str | None = current_app.config.get("STORAGE_PATH")
+            assert storage_path is not None
             user_profile_dir_path: Path = Path(storage_path) / "user_profile/"
+            print(type(user_profile_dir_path))
             assert user_profile_dir_path.exists()
             user_profile_file_path: Path = user_profile_dir_path / (
                 (user_uid) + ".json"
@@ -116,9 +118,7 @@ class TestRegisterUtil:
             register("nuoj@test.com", "nuoj_test", "nuoj_test")
 
             time.sleep(2)
-            mail_verification_codes: dict[str, str] = app.config.get(
-                "mail_verification_code"
-            )
+            mail_verification_codes: dict[str, str] = app.config["mail_verification_code"]
             assert "nuoj_test" in list(mail_verification_codes.values())
 
     def test_register_account_with_mail_verification_disabled_should_not_send_the_email(

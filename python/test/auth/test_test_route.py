@@ -3,12 +3,13 @@ from http import HTTPStatus
 import pytest
 
 from flask import Flask
+from flask.testing import FlaskClient
 from werkzeug.test import TestResponse
 
 
 class TestGithubTestRoute:
     def test_github_access_token_test_route_with_valid_code_should_respond_http_status_ok(
-        self, client: Flask
+        self, client: FlaskClient
     ):
         response: TestResponse = client.post(
             "/test/github/access_token?code=valid_code"
@@ -17,7 +18,7 @@ class TestGithubTestRoute:
         assert response.status_code == HTTPStatus.OK
 
     def test_github_access_token_test_route_with_valid_code_should_respond_valid_access_token(
-        self, client: Flask
+        self, client: FlaskClient
     ):
         response: TestResponse = client.post(
             "/test/github/access_token?code=valid_code"
@@ -28,7 +29,7 @@ class TestGithubTestRoute:
         assert response.json["access_token"] == "valid_access_token"
 
     def test_github_access_token_test_route_with_invalid_code_should_respond_http_status_forbidden(
-        self, client: Flask
+        self, client: FlaskClient
     ):
         response: TestResponse = client.post(
             "/test/github/access_token?code=invalid_code"
@@ -37,7 +38,7 @@ class TestGithubTestRoute:
         assert response.status_code == HTTPStatus.FORBIDDEN
 
     def test_github_user_profile_test_route_with_valid_access_token_should_respond_http_status_ok(
-        self, client: Flask
+        self, client: FlaskClient
     ):
         response: TestResponse = client.get(
             "/test/github/user_profile",
@@ -47,7 +48,7 @@ class TestGithubTestRoute:
         assert response.status_code == HTTPStatus.OK
 
     def test_github_user_profile_test_route_with_valid_access_token_should_respond_correct_payload(
-        self, client: Flask
+        self, client: FlaskClient
     ):
         response: TestResponse = client.get(
             "/test/github/user_profile",
@@ -60,7 +61,7 @@ class TestGithubTestRoute:
         assert response.json["email"] == "oauth_test@nuoj.com"
 
     def test_github_user_profile_test_route_with_invalid_access_token_should_respond_http_status_forbidden(
-        self, client: Flask
+        self, client: FlaskClient
     ):
         response: TestResponse = client.get(
             "/test/github/user_profile",
@@ -82,7 +83,7 @@ class TestGoogleTestRoute:
         return payload
 
     def test_google_access_token_test_route_with_valid_code_should_respond_http_status_ok(
-        self, client: Flask
+        self, client: FlaskClient
     ):
         response: TestResponse = client.post(
             "/test/google/access_token", json=self._get_payload(True)
@@ -91,7 +92,7 @@ class TestGoogleTestRoute:
         assert response.status_code == HTTPStatus.OK
 
     def test_google_access_token_test_route_with_valid_code_should_respond_valid_access_token(
-        self, client: Flask
+        self, client: FlaskClient
     ):
         response: TestResponse = client.post(
             "/test/google/access_token", json=self._get_payload(True)
@@ -102,7 +103,7 @@ class TestGoogleTestRoute:
         assert response.json["access_token"] == "valid_access_token"
 
     def test_google_access_token_test_route_with_invalid_code_should_respond_http_status_forbidden(
-        self, client: Flask
+        self, client: FlaskClient
     ):
         response: TestResponse = client.post(
             "/test/google/access_token", json=self._get_payload(False)
@@ -111,7 +112,7 @@ class TestGoogleTestRoute:
         assert response.status_code == HTTPStatus.FORBIDDEN
 
     def test_google_user_profile_test_route_with_valid_access_token_should_respond_http_status_ok(
-        self, client: Flask
+        self, client: FlaskClient
     ):
         response: TestResponse = client.get(
             "/test/google/user_profile?access_token=valid_access_token"
@@ -120,7 +121,7 @@ class TestGoogleTestRoute:
         assert response.status_code == HTTPStatus.OK
 
     def test_google_user_profile_test_route_with_valid_access_token_should_respond_correct_payload(
-        self, client: Flask
+        self, client: FlaskClient
     ):
         response: TestResponse = client.get(
             "/test/google/user_profile?access_token=valid_access_token"
@@ -131,7 +132,7 @@ class TestGoogleTestRoute:
         assert response.json["email"] == "oauth_test@nuoj.com"
 
     def test_google_user_profile_test_route_with_invalid_access_token_should_respond_http_status_forbidden(
-        self, client: Flask
+        self, client: FlaskClient
     ):
         response: TestResponse = client.get(
             "/test/google/user_profile?access_token=invalid_access_token"

@@ -113,10 +113,10 @@ class TestGoogleOAuthWithMOCK:
             result: OAuthLoginResult = google_login("valid_code")
 
             user: User | None = User.query.filter(User.email == result.email).first()
+            assert user is not None
             profile: Profile | None = Profile.query.filter(
                 Profile.user_uid == user.user_uid
             ).first()
-            assert user is not None
             assert profile is not None
 
     def test_google_login_with_valid_code_and_new_email_should_init_the_user_profile_in_storage(
@@ -136,6 +136,7 @@ class TestGoogleOAuthWithMOCK:
             result: OAuthLoginResult = google_login("valid_code")
 
             user: User | None = User.query.filter(User.email == result.email).first()
+            assert user is not None
             assert file_storage_tunnel_exist(
                 f"{user.user_uid}.json", TunnelCode.USER_PROFILE
             )

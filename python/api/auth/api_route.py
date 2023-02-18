@@ -5,6 +5,7 @@ from typing import Any
 
 from flask import Blueprint, Response, current_app, request, make_response, redirect
 from sqlalchemy.sql import or_
+from werkzeug.wrappers.response import Response as WerkzeugResponse
 
 from api.auth.auth_util import (
     HS256JWTCodec,
@@ -40,8 +41,10 @@ auth_bp = Blueprint("auth", __name__, url_prefix="/api/auth")
 
 @auth_bp.route("/login", methods=["POST"])
 @validate_login_payload_format_or_return_bad_request
-def login_route():
+def login_route() -> Response:
     payload: dict[str, Any] | None = request.get_json(silent=True)
+    assert payload is not None 
+    
     login_payload: LoginPayload = LoginPayload(**payload)
 
     if not login(login_payload.account, login_payload.password):
@@ -50,7 +53,7 @@ def login_route():
         )
 
     user: User = _get_user_info_from_account(login_payload.account)
-    setting: Setting = current_app.config.get("setting")
+    setting: Setting = current_app.config["setting"]
 
     if setting.mail.enable and user.email_verified == 0:
         return make_simple_error_response(
@@ -71,15 +74,17 @@ def login_route():
 @validate_password_or_return_unprocessable_entity
 @validate_email_is_not_repeated_or_return_forbidden
 @validate_handle_is_not_repeated_or_return_forbidden
-def register_route():
+def register_route() -> Response:
     payload: dict[str, Any] | None = request.get_json(silent=True)
+    assert payload is not None 
+    
     email: str = payload["email"]
     handle: str = payload["handle"]
     password: str = payload["password"]
 
     register(email, handle, password)
 
-    setting: Setting = current_app.config.get("setting")
+    setting: Setting = current_app.config["setting"]
     mail_verification_enabled = setting.mail.enable
     response: Response = make_response(
         {"message": "OK", "mail_verification_enabled": mail_verification_enabled},
@@ -89,8 +94,8 @@ def register_route():
 
 
 @auth_bp.route("/oauth_info", methods=["GET"])
-def oauth_info_route():
-    current_setting: Setting = current_app.config.get("setting")
+def oauth_info_route() -> Response:
+    current_setting: Setting = current_app.config["setting"]
 
     github_status = current_setting.oauth.github.enable
     google_status = current_setting.oauth.google.enable
@@ -128,13 +133,21 @@ def verify_jwt_route() -> Response:
 
 
 @auth_bp.route("/github_login", methods=["GET"])
-def github_login_route():
-    code: str = request.args.get("code")
+def github_login_route() -> WerkzeugResponse:
+    code: str | None = request.args.get("code")
+
+    if code is None:
+        return make_simple_error_response(
+            HTTPStatus.BAD_REQUEST,
+            "Absent code.",
+        )
+
     oauth_login_result: OAuthLoginResult = github_login(code)
 
-    response: Response
+    response: WerkzeugResponse
 
     if oauth_login_result.passed:
+        assert oauth_login_result.email is not None
         user: User = _get_user_info_from_account(oauth_login_result.email)
         if user.handle is None:
             response = redirect("/handle_setup")
@@ -151,8 +164,7 @@ def github_login_route():
 
 
 @auth_bp.route("/google_login", methods=["GET"])
-def google_login_route():
-    code: str = request.args.get("code")
+def google_login_route() -> WerkzeugResponse:
     error: str | None = request.args.get("error")
 
     if error is not None:
@@ -161,11 +173,20 @@ def google_login_route():
             "Google OAuth login failed since args have error argument.",
         )
 
+    code: str | None = request.args.get("code")
+    
+    if code is None:
+        make_simple_error_response(
+            HTTPStatus.BAD_REQUEST,
+            "Absent code.",
+        )
+    
     oauth_login_result: OAuthLoginResult = google_login(code)
 
-    response: Response
+    response: WerkzeugResponse
 
     if oauth_login_result.passed:
+        assert oauth_login_result.email is not None
         user: User = _get_user_info_from_account(oauth_login_result.email)
         if user.handle is None:
             response = redirect("/handle_setup")
@@ -183,7 +204,7 @@ def google_login_route():
 
 
 @auth_bp.route("/logout", methods=["POST"])
-def logout_route():
+def logout_route() -> Response:
     resp: Response = Response(json.dumps({"status": "OK"}))
     resp.set_cookie("jwt", value="", expires=0)
     return resp
@@ -192,10 +213,8 @@ def logout_route():
 @auth_bp.route("/verify_mail", methods=["POST"])
 @validate_jwt_is_exists_or_return_unauthorized
 @validate_jwt_is_valid_or_return_unauthorized
-def verify_mail_route():
-    mail_verification_codes: dict[str, str] = current_app.config.get(
-        "mail_verification_code"
-    )
+def verify_mail_route() -> Response:
+    mail_verification_codes: dict[str, str] = current_app.config["mail_verification_code"]
 
     code: str | None = request.args.get("code", None)
 
@@ -207,9 +226,9 @@ def verify_mail_route():
             HTTPStatus.UNPROCESSABLE_ENTITY, "Invalid code."
         )
 
-    jwt_token: str = request.cookies.get("jwt")
-    codec: HS256JWTCodec = HS256JWTCodec(current_app.config.get("jwt_key"))
-    jwt_payload: dict[str, str] = codec.decode(jwt_token)
+    jwt_token: str = request.cookies["jwt"]
+    codec: HS256JWTCodec = HS256JWTCodec(current_app.config["jwt_key"])
+    jwt_payload: dict[str, Any] = codec.decode(jwt_token)
     handle: str = jwt_payload["data"]["handle"]
 
     if handle != mail_verification_codes[code]:
@@ -228,9 +247,9 @@ def verify_mail_route():
 @validate_setup_handle_payload_format_or_return_bad_request
 @validate_handle_or_return_unprocessable_entity
 @validate_handle_is_not_repeated_or_return_forbidden
-def setup_handle_route():
+def setup_handle_route() -> Response:
     hs_cookie: str | None = request.cookies.get("hs", None)
-    codec: HS256JWTCodec = HS256JWTCodec(current_app.config.get("jwt_key"))
+    codec: HS256JWTCodec = HS256JWTCodec(current_app.config["jwt_key"])
 
     assert hs_cookie is not None
 
@@ -262,7 +281,7 @@ def _get_user_info_from_account(account: str) -> User:
 def _set_cookie_to_response(
     name: str,
     payload: dict[str, Any],
-    response: Response,
+    response: Response | WerkzeugResponse,
     expiration_time_delta: timedelta = timedelta(days=1),
 ) -> None:
     codec = HS256JWTCodec(current_app.config["jwt_key"])

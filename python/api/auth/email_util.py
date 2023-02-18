@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from email.mime.image import MIMEImage
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
+from typing import cast
 from uuid import UUID, uuid4
 
 from flask import current_app
@@ -99,9 +100,9 @@ def _get_logo_mime_image() -> MIMEImage:
     return mime_image
 
 
-def _get_mail_content_mime_text(username: str, random_uuid: str) -> str:
+def _get_mail_content_mime_text(username: str, random_uuid: str) -> MIMEText:
     mail_content: str
-    setting: Setting = current_app.config.get("setting")
+    setting: Setting = current_app.config["setting"]
     with open("/etc/nuoj/templates/mail_template.html", "r") as file:
         mail_content = file.read()
     mail_content_with_code = _put_parameter_to_mail_content(

@@ -71,7 +71,7 @@ def _create_storage_folder_structure(storage_path):
     (Path(storage_path) / "user_submission/").mkdir()
 
 
-def _add_test_account():
+def _add_test_account() -> None:
     user: User = User(
         user_uid="cb7ce8d5-8a5a-48e0-b9f0-7247dd5825dd",
         handle="test_account",
@@ -84,7 +84,7 @@ def _add_test_account():
     db.session.commit()
 
 
-def _remove_all_email_from_fake_smtp_server():
+def _remove_all_email_from_fake_smtp_server() -> None:
     sender: MailSender = _get_mail_sender()
     server_url: str = "http://" + sender.server + ":1080/api/emails"
 
@@ -93,7 +93,7 @@ def _remove_all_email_from_fake_smtp_server():
     assert response.status_code == HTTPStatus.OK
 
 
-def _setup_setting_to_app_config(app: Flask):
+def _setup_setting_to_app_config(app: Flask) -> None:
     setting: dict[str, Any] = {
         "oauth": {
             "github": {
