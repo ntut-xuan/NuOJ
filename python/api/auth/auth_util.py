@@ -39,7 +39,7 @@ class SetupHandlePayload:
     handle: str
 
 
-def hash_password(password) -> str:
+def hash_password(password: str) -> str:
     m = hashlib.sha256()
     m.update(password.encode("utf8"))
     password = m.hexdigest()
@@ -79,7 +79,7 @@ def register(email: str, handle: str, password: str) -> None:
     _init_profile_storage_file(user_uid, handle, email)
 
     # Send the email if the email verification is enabled.
-    setting: Setting = current_app.config.get("setting")
+    setting: Setting = current_app.config["setting"]
     if setting.mail.enable:
         thread = FlaskThread(target=send_verification_email, args=[handle, email])
         thread.start()

@@ -16,7 +16,7 @@ USER_PROFILE_API_URL: Final[str] = "https://api.github.com/user"
 
 
 def github_login(code) -> OAuthLoginResult:
-    setting: Setting = current_app.config.get("setting")
+    setting: Setting = current_app.config["setting"]
     client_id = setting.oauth.github.client_id
     client_secret = setting.oauth.github.secret
 
@@ -45,7 +45,7 @@ def _validate_github_oauth_code_and_get_access_token(
     headers: dict[str, str] = {"Accept": "application/json"}
     response: Response = post(ACCESS_TOKEN_URL, params=parameters, headers=headers)
 
-    response_json: dict[str, Any] = json.loads(response.text)
+    response_json: dict[str, str] = json.loads(response.text)
 
     if "access_token" not in response_json:
         return None

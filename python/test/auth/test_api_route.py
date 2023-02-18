@@ -924,4 +924,5 @@ def _verify_data_field_in_cookie_payload(
     (jwt_cookie,) = tuple(filter(lambda x: x.name == cookie_name, cookies))
     assert jwt_cookie.value is not None
     jwt_payload: dict[str, Any] = codec.decode(jwt_cookie.value)
-    return payload == jwt_payload["data"]
+    jwt_data_payload: dict[str, str] = jwt_payload["data"]
+    return payload == jwt_data_payload
