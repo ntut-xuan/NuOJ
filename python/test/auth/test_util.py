@@ -118,7 +118,9 @@ class TestRegisterUtil:
             register("nuoj@test.com", "nuoj_test", "nuoj_test")
 
             time.sleep(2)
-            mail_verification_codes: dict[str, str] = app.config["mail_verification_code"]
+            mail_verification_codes: dict[str, str] = app.config[
+                "mail_verification_code"
+            ]
             assert "nuoj_test" in list(mail_verification_codes.values())
 
     def test_register_account_with_mail_verification_disabled_should_not_send_the_email(

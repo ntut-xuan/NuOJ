@@ -1,5 +1,6 @@
 import json
 import requests
+
 # import setting_util
 import pymysql
 import os
@@ -61,7 +62,7 @@ def byte_storage_tunnel_read(filename: str, tunnel: TunnelCode) -> bytes:
         with open(file_path, "rb") as file:
             return file.read()
     else:
-        return b''
+        return b""
 
 
 def file_storage_tunnel_write(filename: str, data: str, tunnel: TunnelCode) -> None:
