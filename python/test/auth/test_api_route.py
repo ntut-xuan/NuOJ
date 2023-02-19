@@ -362,6 +362,19 @@ class TestJWTVerifyRoute:
 
         assert response.status_code == HTTPStatus.OK
 
+    def test_with_valid_jwt_token_should_have_user_data_payload(
+        self, logged_in_client: FlaskClient
+    ):
+        response: TestResponse = logged_in_client.post("/api/auth/verify_jwt")
+
+        assert response.status_code == HTTPStatus.OK
+        assert response.json is not None
+        response_payload: dict[str, Any] = response.json
+        assert "data" in response_payload
+        user_data_payload: dict[str, str] = response_payload["data"]
+        assert user_data_payload["handle"] == "test_account"
+        assert user_data_payload["email"] == "test_account@nuoj.com"
+
     def test_with_not_exists_jwt_token_should_return_http_status_forbidden(
         self, client: FlaskClient
     ):
