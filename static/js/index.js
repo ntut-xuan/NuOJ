@@ -25,14 +25,10 @@ var LoginComponent = function (_React$Component) {
         key: "componentDidMount",
         value: function componentDidMount() {
             $.ajax({
-                url: "/verify_jwt",
+                url: "/api/auth/verify_jwt",
                 type: "POST",
                 success: function (data, status, xhr) {
-                    if (data["status"] == "OK") {
-                        this.setState({ isLogin: true, handle: data["handle"] });
-                    } else {
-                        this.setState({ isLogin: false });
-                    }
+                    this.setState({ isLogin: true, handle: data["data"]["handle"] });
                 }.bind(this),
                 error: function (status, xhr) {
                     this.setState({ isLogin: false });
