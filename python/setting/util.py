@@ -3,6 +3,7 @@ from pathlib import Path
 from typing import Any
 from dataclasses import dataclass
 
+
 @dataclass
 class OAuthSettingObject:
     enable: bool
@@ -56,10 +57,10 @@ class SettingBuilder:
         self.setting = Setting(
             oauth=OAuthSetting(
                 github=GithubSetting(**dict["oauth"]["github"]),
-                google=GoogleSetting(**dict["oauth"]["google"])
+                google=GoogleSetting(**dict["oauth"]["google"]),
             ),
             mail=MailSetting(**dict["mail"]),
-            asana=AsanaSetting(**dict["asana"])
+            asana=AsanaSetting(**dict["asana"]),
         )
         return self.setting
 

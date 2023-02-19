@@ -476,7 +476,7 @@ class TestGithubRoute:
         data = jwt_payload["data"]
         assert data["email"] == user_email
         assert data["handle"] == user_handle
-    
+
     def test_with_absent_code_should_return_http_status_code_bad_request(
         self, client: FlaskClient, monkeypatch: pytest.MonkeyPatch
     ):
@@ -491,9 +491,7 @@ class TestGithubRoute:
             "http://0.0.0.0:8080/test/github/user_profile",
         )
 
-        response: TestResponse = client.get(
-            "/api/auth/github_login"
-        )
+        response: TestResponse = client.get("/api/auth/github_login")
 
         assert response.status_code == HTTPStatus.BAD_REQUEST
 

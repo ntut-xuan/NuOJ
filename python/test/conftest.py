@@ -116,8 +116,6 @@ def _setup_setting_to_app_config(app: Flask) -> None:
             "password": "nuoj_test",
             "redirect_url": "http://test.net/mail_verification",
         },
-        "asana": {
-            "token": ""
-        }
+        "asana": {"token": ""},
     }
     app.config["setting"] = SettingBuilder().from_dict(setting)

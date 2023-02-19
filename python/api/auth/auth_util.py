@@ -5,6 +5,7 @@ import hashlib
 import threading
 import jwt
 import database_util
+
 # import crypto_util as crypto_util
 from datetime import *
 from tunnel_code import TunnelCode
@@ -199,7 +200,7 @@ class HS256JWTCodec:
 class FlaskThread(threading.Thread):
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
-        self.app: Flask = current_app._get_current_object() # type: ignore[attr-defined]
+        self.app: Flask = current_app._get_current_object()  # type: ignore[attr-defined]
 
     def run(self) -> None:
         with self.app.app_context():

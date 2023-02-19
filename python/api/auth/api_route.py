@@ -43,8 +43,8 @@ auth_bp = Blueprint("auth", __name__, url_prefix="/api/auth")
 @validate_login_payload_format_or_return_bad_request
 def login_route() -> Response:
     payload: dict[str, Any] | None = request.get_json(silent=True)
-    assert payload is not None 
-    
+    assert payload is not None
+
     login_payload: LoginPayload = LoginPayload(**payload)
 
     if not login(login_payload.account, login_payload.password):
@@ -76,8 +76,8 @@ def login_route() -> Response:
 @validate_handle_is_not_repeated_or_return_forbidden
 def register_route() -> Response:
     payload: dict[str, Any] | None = request.get_json(silent=True)
-    assert payload is not None 
-    
+    assert payload is not None
+
     email: str = payload["email"]
     handle: str = payload["handle"]
     password: str = payload["password"]
@@ -174,13 +174,13 @@ def google_login_route() -> WerkzeugResponse:
         )
 
     code: str | None = request.args.get("code")
-    
+
     if code is None:
         make_simple_error_response(
             HTTPStatus.BAD_REQUEST,
             "Absent code.",
         )
-    
+
     oauth_login_result: OAuthLoginResult = google_login(code)
 
     response: WerkzeugResponse
@@ -214,7 +214,9 @@ def logout_route() -> Response:
 @validate_jwt_is_exists_or_return_unauthorized
 @validate_jwt_is_valid_or_return_unauthorized
 def verify_mail_route() -> Response:
-    mail_verification_codes: dict[str, str] = current_app.config["mail_verification_code"]
+    mail_verification_codes: dict[str, str] = current_app.config[
+        "mail_verification_code"
+    ]
 
     code: str | None = request.args.get("code", None)
 
