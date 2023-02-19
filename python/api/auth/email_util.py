@@ -21,12 +21,10 @@ class MailSender:
 
 
 def send_verification_email(username: str, email: str) -> None:
-    random_uuid: UUID = uuid4()
+    random_uuid: str = str(uuid4())
     mail_sender: MailSender = _get_mail_sender()
     logo_image: MIMEImage = _get_logo_mime_image()
-    mime_text_content: MIMEText = _get_mail_content_mime_text(
-        username, str(random_uuid)
-    )
+    mime_text_content: MIMEText = _get_mail_content_mime_text(username, random_uuid)
 
     mime_mail: MIMEMultipart = _build_verification_mail(
         [logo_image], "NuOJ 驗證信件", "NuOJ@noreply.me", email, mime_text_content
