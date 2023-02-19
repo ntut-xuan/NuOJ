@@ -717,52 +717,29 @@ class TestOAuthInfoRoute:
 
 class TestVertifyMailRoute:
     def test_with_valid_code_should_respond_http_status_ok(
-        self, app: Flask, logged_in_client: FlaskClient
+        self, app: Flask, client: FlaskClient
     ):
         mail_verification_codes: dict[str, str] = app.config["mail_verification_code"]
         mail_verification_codes |= {"a-random-uuid-here": "test_account"}
 
-        response: TestResponse = logged_in_client.post(
+        response: TestResponse = client.post(
             "/api/auth/verify_mail?code=a-random-uuid-here"
         )
 
         assert response.status_code == HTTPStatus.OK
 
     def test_with_valid_code_should_set_user_mail_verify_status_to_true(
-        self, app: Flask, logged_in_client: FlaskClient
+        self, app: Flask, client: FlaskClient
     ):
         mail_verification_codes: dict[str, str] = app.config["mail_verification_code"]
         mail_verification_codes |= {"a-random-uuid-here": "test_account"}
 
-        logged_in_client.post("/api/auth/verify_mail?code=a-random-uuid-here")
+        client.post("/api/auth/verify_mail?code=a-random-uuid-here")
 
         with app.app_context():
             user: User | None = User.query.filter(User.handle == "test_account").first()
             assert user is not None
             assert user.email_verified == 1
-
-    def test_with_absent_jwt_cookie_should_respond_http_status_forbidden(
-        self, client: FlaskClient
-    ):
-        response: TestResponse = client.post(
-            "/api/auth/verify_mail?code=a-random-uuid-here"
-        )
-
-        assert response.status_code == HTTPStatus.UNAUTHORIZED
-        json_response: dict[str, str] | None = response.get_json(silent=True)
-        assert json_response is not None
-        assert json_response["message"] == "JWT is not exists."
-
-    def test_with_invalid_jwt_cookie_should_respond_http_status_forbidden(
-        self, client: FlaskClient
-    ):
-        client.set_cookie("", "jwt", "some.invalid.jwt")
-
-        response: TestResponse = client.post(
-            "/api/auth/verify_mail?code=a-random-uuid-here"
-        )
-
-        assert response.status_code == HTTPStatus.UNAUTHORIZED
 
     def test_with_absent_code_should_respond_http_status_forbidden(
         self, logged_in_client: FlaskClient
@@ -785,21 +762,6 @@ class TestVertifyMailRoute:
         json_response: dict[str, str] | None = response.get_json(silent=True)
         assert json_response is not None
         assert json_response["message"] == "Invalid code."
-
-    def test_with_not_match_handle_and_code_should_respond_http_status_forbidden(
-        self, app: Flask, logged_in_client: FlaskClient
-    ):
-        mail_verification_codes: dict[str, str] = app.config["mail_verification_code"]
-        mail_verification_codes |= {"a-random-uuid-here": "some_body"}
-
-        response: TestResponse = logged_in_client.post(
-            "/api/auth/verify_mail?code=a-random-uuid-here"
-        )
-
-        assert response.status_code == HTTPStatus.FORBIDDEN
-        json_response: dict[str, str] | None = response.get_json(silent=True)
-        assert json_response is not None
-        assert json_response["message"] == "Code and handle is not match."
 
 
 class TestSetupHandleRoute:
