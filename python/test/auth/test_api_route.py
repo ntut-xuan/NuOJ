@@ -899,11 +899,14 @@ class TestResendEmailRoute:
         response: TestResponse = client.post("/api/auth/resend_email?account=nuoj")
 
         time.sleep(2)
+        assert response.status_code == HTTPStatus.OK
         with app.app_context():
             sender: MailSender = _get_mail_sender()
-            response: Response = get("http://" + sender.server + ":1080/api/emails")
-            assert response.status_code == HTTPStatus.OK
-            json_response: list[dict[str, Any]] = json.loads(response.text)
+            email_response: Response = get(
+                "http://" + sender.server + ":1080/api/emails"
+            )
+            assert email_response.status_code == HTTPStatus.OK
+            json_response: list[dict[str, Any]] = json.loads(email_response.text)
             assert len(json_response) == 1
             assert json_response[0]["subject"] == "NuOJ 驗證信件"
             assert json_response[0]["to"]["text"] == "nuoj@test.com"
