@@ -8,7 +8,7 @@ class LoginComponent extends React.Component {
     }
     componentDidMount() {
         $.ajax({
-            url: "/session_verification",
+            url: "/verify_jwt",
             type: "POST",
             success: function(data, status, xhr){
                 if(data["status"] == "OK"){

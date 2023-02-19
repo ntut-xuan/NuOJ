@@ -36,11 +36,11 @@ function success_swal(title) {
     });
 }
 
-function error_swal(title, code) {
+function error_swal(title, text) {
     Swal.fire({
         icon: "error",
         title: title,
-        text: getMessageFromCode(code),
+        text: text,
         timer: 1500,
         showConfirmButton: false
     });

@@ -1,8 +1,8 @@
 const ERROR_CODE = Object.freeze({
-    "HANDLE_INVALID": {"code": 201, "message": "Handle 不合法"}, 
-    "HANDLE_NOT_FOUND": {"code": 202, "message": "Handle 不存在"}, 
-    "HANDLE_EXIST": {"code": 203, "message": "Handle 已存在"}, 
-    "HANDLE_REPEAT": {"code": 204, "message": "Handle 已重複"}, 
+    "HANDLE_INVALID": {"code": 201, "message": "Handle 不合法"},
+    "HANDLE_NOT_FOUND": {"code": 202, "message": "Handle 不存在"},
+    "HANDLE_EXIST": {"code": 203, "message": "Handle 已存在"},
+    "HANDLE_REPEAT": {"code": 204, "message": "Handle 已重複"},
     "EMAIL_INVALID": {"code": 302, "message": "信箱不合法"},
     "EMAIL_NOT_FOUND": {"code": 303, "message": "信箱不存在"},
     "EMAIL_NOT_VERIFICATION": {"code": 304, "message": "信箱未驗證"},
@@ -36,11 +36,11 @@ function success_swal(title){
     })
 }
 
-function error_swal(title, code){
+function error_swal(title, text){
     Swal.fire({
         icon: "error",
         title: title,
-        text: getMessageFromCode(code),
+        text: text,
         timer: 1500,
         showConfirmButton: false
     })
