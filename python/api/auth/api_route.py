@@ -220,8 +220,6 @@ def logout_route() -> Response:
 
 
 @auth_bp.route("/verify_mail", methods=["POST"])
-@validate_jwt_is_exists_or_return_unauthorized
-@validate_jwt_is_valid_or_return_unauthorized
 def verify_mail_route() -> Response:
     mail_verification_codes: dict[str, str] = current_app.config[
         "mail_verification_code"
@@ -237,15 +235,7 @@ def verify_mail_route() -> Response:
             HTTPStatus.UNPROCESSABLE_ENTITY, "Invalid code."
         )
 
-    jwt_token: str = request.cookies["jwt"]
-    codec: HS256JWTCodec = HS256JWTCodec(current_app.config["jwt_key"])
-    jwt_payload: dict[str, Any] = codec.decode(jwt_token)
-    handle: str = jwt_payload["data"]["handle"]
-
-    if handle != mail_verification_codes[code]:
-        return make_simple_error_response(
-            HTTPStatus.FORBIDDEN, "Code and handle is not match."
-        )
+    handle: str = mail_verification_codes[code]
 
     del mail_verification_codes[code]
     verified_the_email_of_handle(handle)
