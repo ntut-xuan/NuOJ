@@ -16,3 +16,8 @@ def register_route():
 @auth_page.route("/handle_setup", methods=["GET"])
 def handle_setup():
     return render_template("handle_setup.html", **locals())
+
+
+@auth_page.route("/verify_mail", methods=["GET"])
+def verify_mail():
+    return render_template("verify_mail.html", **locals())
