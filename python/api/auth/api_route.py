@@ -8,10 +8,12 @@ from sqlalchemy.sql import or_
 from werkzeug.wrappers.response import Response as WerkzeugResponse
 
 from api.auth.auth_util import (
+    FlaskThread,
     HS256JWTCodec,
     LoginPayload,
     login,
     register,
+    send_verification_email,
     setup_handle,
     verified_the_email_of_handle,
 )
@@ -265,6 +267,36 @@ def setup_handle_route() -> Response:
     assert email is not None
 
     setup_handle(email, handle)
+
+    return make_response({"message": "OK"}, HTTPStatus.OK)
+
+
+@auth_bp.route("/resend_email", methods=["POST"])
+def resend_email_route() -> Response:
+    setting: Setting = current_app.config["setting"]
+    account: str | None = request.args.get("account")
+
+    if account is None:
+        return make_simple_error_response(
+            HTTPStatus.BAD_REQUEST, "Account parameter is absent."
+        )
+
+    if not setting.mail.enable:
+        return make_simple_error_response(
+            HTTPStatus.FORBIDDEN, "Mail verification is disabled."
+        )
+
+    user: User | None = User.query.filter(
+        or_(User.email == account, User.handle == account)
+    ).first()
+
+    if user is None:
+        return make_simple_error_response(
+            HTTPStatus.UNPROCESSABLE_ENTITY, "Account is absent."
+        )
+
+    thread = FlaskThread(target=send_verification_email, args=[user.handle, user.email])
+    thread.start()
 
     return make_response({"message": "OK"}, HTTPStatus.OK)
 
