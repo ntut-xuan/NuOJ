@@ -25,7 +25,7 @@ var LoginComponent = function (_React$Component) {
         key: "componentDidMount",
         value: function componentDidMount() {
             $.ajax({
-                url: "/session_verification",
+                url: "/verify_jwt",
                 type: "POST",
                 success: function (data, status, xhr) {
                     if (data["status"] == "OK") {

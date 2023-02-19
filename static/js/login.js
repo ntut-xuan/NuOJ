@@ -37,7 +37,7 @@ var LoginButton = function (_React$Component) {
             var random_color = this.state.random_color;
 
             $.ajax({
-                url: "./oauth_info",
+                url: "/api/auth/oauth_info",
                 type: "GET",
                 success: function (data, status, xhr) {
                     if (data["status"] == "OK") {
@@ -139,33 +139,23 @@ var LoginForm = function (_React$Component2) {
                 password = _state3.password;
 
             event.preventDefault();
-            // const shaObj = new jsSHA("SHA-512", "TEXT", { encoding: "UTF8" });
-            // shaObj.update(password)
             $.ajax({
-                url: "./pubkey",
-                type: "GET",
+                url: "/api/auth/login",
+                type: "POST",
+                data: JSON.stringify({ "account": account, "password": password }),
+                dataType: "json",
+                contentType: "application/json",
                 success: function success(data, status, xhr) {
-                    var publick = forge.pki.publicKeyFromPem(data);
-                    $.ajax({
-                        url: "./login",
-                        type: "POST",
-                        data: JSON.stringify({ "account": account, "password": forge.util.encode64(publick.encrypt(forge.util.encodeUtf8(password), 'RSA-OAEP', { md: forge.md.sha256.create(), mgf1: { md: forge.md.sha1.create() } })) }),
-                        dataType: "json",
-                        contentType: "application/json",
-                        success: function success(data, status, xhr) {
-                            if (data["status"] == "OK") {
-                                success_swal("登入成功").then(function () {
-                                    window.location.href = "/";
-                                });
-                            } else {
-                                if (data["code"] === 304) {
-                                    window.location.href = "/mail_check";
-                                } else {
-                                    error_swal("登入失敗", data["code"]);
-                                }
-                            }
-                        }
+                    success_swal("登入成功").then(function () {
+                        window.location.href = "/";
                     });
+                },
+                error: function error(xhr, exception) {
+                    if (xhr.status == 403) {
+                        error_swal("登入失敗", "帳號或密碼錯誤");
+                    } else if (xhr.status == 422) {
+                        error_swal("登入失敗", "錯誤的信箱格式");
+                    }
                 }
             });
         }
