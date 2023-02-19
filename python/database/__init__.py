@@ -20,12 +20,13 @@ from models import User
 # The PRAGMA for enablement must be emitted on all connections before use.
 # See https://docs.sqlalchemy.org/en/20/dialects/sqlite.html#foreign-key-support
 @event.listens_for(Engine, "connect")
-def set_sqlite_pragma(dbapi_connection, _):
+def set_sqlite_pragma(dbapi_connection, _) -> None:
     if isinstance(dbapi_connection, sqlite3.Connection):
         cursor: sqlite3.Cursor = dbapi_connection.cursor()
         cursor.execute("PRAGMA foreign_keys=ON")
         cursor.close()
-        
+
+
 @click.command("create-db")
 def create_db_command() -> None:
     create_db()

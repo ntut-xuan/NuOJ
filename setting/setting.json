@@ -1,9 +1,4 @@
 {
-    "cert": {
-        "enable": false,
-        "fullchain_path": "",
-        "private_key_path": ""
-    },
     "oauth": {
         "github": {
             "enable": true,
@@ -25,31 +20,7 @@
         "server": "",
         "port": "",
         "mailname": "",
-        "password": ""
-    },
-    "architecture": {
-        "web_app": [
-            {
-                "name": "NuOJ Web Application #1",
-                "url": "http://localhost",
-                "port": "80"
-            }
-        ],
-        "database": [
-            {
-                "name": "NuOJ Database",
-                "url": "http://localhost",
-                "type": "master",
-                "port": "3349",
-                "secret": ""
-            }
-        ],
-        "judge_server": [
-            {
-                "name": "NuOJ Judge Server",
-                "url": "http://localhost",
-                "port": "4439"
-            }
-        ]
+        "password": "",
+        "redirect_url": ""
     }
 }
