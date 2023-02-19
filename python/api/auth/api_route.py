@@ -128,7 +128,16 @@ def oauth_info_route() -> Response:
 @validate_jwt_is_exists_or_return_unauthorized
 @validate_jwt_is_valid_or_return_unauthorized
 def verify_jwt_route() -> Response:
-    response: Response = make_response({"message": "OK"}, HTTPStatus.OK)
+    jwt: str = request.cookies["jwt"]
+    key: str = current_app.config["jwt_key"]
+    codec: HS256JWTCodec = HS256JWTCodec(key)
+
+    jwt_payload: dict[str, Any] = codec.decode(jwt)
+    jwt_data_payload: dict[str, str] = jwt_payload["data"]
+
+    response: Response = make_response(
+        {"message": "OK", "data": jwt_data_payload}, HTTPStatus.OK
+    )
     return response
 
 
