@@ -399,7 +399,7 @@ class TestJWTVerifyRoute:
         assert response.json["message"] == "JWT is invalid."
 
 
-class TestOAuthContext:
+class OAuthContext:
     def setup_class(
         self,
         monkeypatch_class,
@@ -515,11 +515,11 @@ class TestOAuthContext:
         assert response.status_code == HTTPStatus.FORBIDDEN
 
 
-class TestGoogleRoute(TestOAuthContext):
+class TestGoogleRoute(OAuthContext):
     def setup_class(self):
         super(TestGoogleRoute, self).setup_class(
             self,
-            api.auth.google_oauth_util,
+            monkeypatch_class=api.auth.google_oauth_util,
             access_token_url="http://0.0.0.0:8080/test/google/access_token",
             user_profile_api_url="http://0.0.0.0:8080/test/google/user_profile",
             oauth_route="/api/auth/google_login",
@@ -535,11 +535,11 @@ class TestGoogleRoute(TestOAuthContext):
         assert response.status_code == HTTPStatus.FORBIDDEN
 
 
-class TestGithubRoute(TestOAuthContext):
+class TestGithubRoute(OAuthContext):
     def setup_class(self):
         super(TestGithubRoute, self).setup_class(
             self,
-            api.auth.github_oauth_util,
+            monkeypatch_class=api.auth.github_oauth_util,
             access_token_url="http://0.0.0.0:8080/test/github/access_token",
             user_profile_api_url="http://0.0.0.0:8080/test/github/user_profile",
             oauth_route="/api/auth/github_login",
