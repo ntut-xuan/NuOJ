@@ -1,3 +1,5 @@
+import json
+import time
 from typing import Any, ClassVar
 from http import HTTPStatus
 from http.cookiejar import Cookie, CookieJar
@@ -5,11 +7,13 @@ from http.cookiejar import Cookie, CookieJar
 import pytest
 from flask import Flask
 from flask.testing import FlaskClient
+from requests import Response, get
 from werkzeug.test import TestResponse
 
 import api.auth.github_oauth_util
 import api.auth.google_oauth_util
 from api.auth.auth_util import HS256JWTCodec
+from api.auth.email_util import MailSender, _get_mail_sender
 from models import User
 from database import db
 from setting.util import Setting
@@ -882,6 +886,60 @@ class TestSetupHandleRoute:
         assert response.status_code == HTTPStatus.FORBIDDEN
         assert response.json is not None
         assert response.json["message"] == "Handle is repeated."
+
+
+class TestResendEmailRoute:
+    def test_with_valid_handle_should_send_email(
+        self,
+        app: Flask,
+        client: FlaskClient,
+        setup_test_user: None,
+        enabled_mail_setting: None,
+    ):
+        response: TestResponse = client.post("/api/auth/resend_email?account=nuoj")
+
+        time.sleep(2)
+        assert response.status_code == HTTPStatus.OK
+        with app.app_context():
+            sender: MailSender = _get_mail_sender()
+            email_response: Response = get(
+                "http://" + sender.server + ":1080/api/emails"
+            )
+            assert email_response.status_code == HTTPStatus.OK
+            json_response: list[dict[str, Any]] = json.loads(email_response.text)
+            assert len(json_response) == 1
+            assert json_response[0]["subject"] == "NuOJ 驗證信件"
+            assert json_response[0]["to"]["text"] == "nuoj@test.com"
+            assert json_response[0]["from"]["text"] == "NuOJ@noreply.me"
+
+    def test_with_absent_account_args_should_respond_http_status_code_bad_request(
+        self, client: FlaskClient, setup_test_user: None, enabled_mail_setting: None
+    ):
+        response: TestResponse = client.post("/api/auth/resend_email")
+
+        assert response.status_code == HTTPStatus.BAD_REQUEST
+        assert response.json is not None
+        assert response.json["message"] == "Account parameter is absent."
+
+    def test_with_disabled_mail_setting_should_respond_http_status_code_forbidden(
+        self, client: FlaskClient, setup_test_user: None
+    ):
+        response: TestResponse = client.post("/api/auth/resend_email?account=nuoj")
+
+        assert response.status_code == HTTPStatus.FORBIDDEN
+        assert response.json is not None
+        assert response.json["message"] == "Mail verification is disabled."
+
+    def test_with_absent_account_should_respond_http_status_code_unprocessable_entity(
+        self, client: FlaskClient, enabled_mail_setting: None
+    ):
+        response: TestResponse = client.post(
+            "/api/auth/resend_email?account=absent_account"
+        )
+
+        assert response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
+        assert response.json is not None
+        assert response.json["message"] == "Account is absent."
 
 
 def _get_cookies(cookie_jar: CookieJar | None) -> tuple[Cookie, ...]:
