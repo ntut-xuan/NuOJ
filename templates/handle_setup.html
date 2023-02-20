@@ -44,16 +44,21 @@
             dataJson["handle"] = handle;
             console.log(handle)
             $.ajax({
-                    url: "./handle-setup",
+                    url: "/api/auth/setup_handle",
                     type: "POST",
                     data: JSON.stringify(dataJson),
                     dataType: "json",
                     contentType: "application/json",
                     success: function(data, status, xhr){
-                        if(data["status"] == "OK"){
-                            success_swal("設置成功").then(() => {window.location.href = "/"})
-                        }else{
-                            error_swal("設置失敗", data["code"])
+                        success_swal("設置成功").then(() => {window.location.href = "/"})
+                    },
+                    error: function(xhr, exception){
+                        if(xhr.status == 401){
+                            error_swal("設置失敗", "HS_INVALID")
+                        }else if(xhr.status == 422){
+                            error_swal("設置失敗", "Handle 不符合規範")
+                        }else if(xhr.status == 403){
+                            error_swal("設置失敗", "Handle 已重複")
                         }
                     }
             });
