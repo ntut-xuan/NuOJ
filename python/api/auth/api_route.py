@@ -180,7 +180,7 @@ def google_login_route() -> WerkzeugResponse:
     error: str | None = request.args.get("error")
 
     if error is not None:
-        make_simple_error_response(
+        return make_simple_error_response(
             HTTPStatus.FORBIDDEN,
             "Google OAuth login failed since args have error argument.",
         )
@@ -188,7 +188,7 @@ def google_login_route() -> WerkzeugResponse:
     code: str | None = request.args.get("code")
 
     if code is None:
-        make_simple_error_response(
+        return make_simple_error_response(
             HTTPStatus.BAD_REQUEST,
             "Absent code.",
         )
