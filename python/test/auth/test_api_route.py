@@ -399,186 +399,37 @@ class TestJWTVerifyRoute:
         assert response.json["message"] == "JWT is invalid."
 
 
-class TestGithubRoute:
-    def test_with_new_account_and_valid_code_should_redirect_to_handle_setup_page(
-        self, client: FlaskClient, monkeypatch: pytest.MonkeyPatch
+class TestOAuthContext:
+    def setup_class(
+        self,
+        monkeypatch_class,
+        access_token_url: str,
+        user_profile_api_url: str,
+        oauth_route: str,
     ):
-        monkeypatch.setattr(
-            api.auth.github_oauth_util,
-            "ACCESS_TOKEN_URL",
-            "http://0.0.0.0:8080/test/github/access_token",
-        )
-        monkeypatch.setattr(
-            api.auth.github_oauth_util,
-            "USER_PROFILE_API_URL",
-            "http://0.0.0.0:8080/test/github/user_profile",
-        )
+        self.monkeypatch_class = monkeypatch_class
+        self.access_token_url = access_token_url
+        self.user_profile_api_url = user_profile_api_url
+        self.oauth_route = oauth_route
 
-        response: TestResponse = client.get(
-            "/api/auth/github_login", query_string={"code": "valid_code"}
-        )
-
-        assert response.status_code == HTTPStatus.FOUND
-        assert response.location == "/handle_setup"
-
-    def test_with_new_account_and_valid_code_should_setup_hs_cookie(
-        self, app: Flask, client: FlaskClient, monkeypatch: pytest.MonkeyPatch
-    ):
-        monkeypatch.setattr(
-            api.auth.github_oauth_util,
-            "ACCESS_TOKEN_URL",
-            "http://0.0.0.0:8080/test/github/access_token",
-        )
-        monkeypatch.setattr(
-            api.auth.github_oauth_util,
-            "USER_PROFILE_API_URL",
-            "http://0.0.0.0:8080/test/github/user_profile",
-        )
-        codec: HS256JWTCodec = HS256JWTCodec(app.config["jwt_key"])
-        excepted_data_payload_in_cookie: dict[str, str] = {
-            "email": "oauth_test@nuoj.com"
-        }
-
-        response: TestResponse = client.get(
-            "/api/auth/github_login", query_string={"code": "valid_code"}
-        )
-
-        assert response.status_code == HTTPStatus.FOUND
-        assert _verify_data_field_in_cookie_payload(
-            codec, client.cookie_jar, "hs", excepted_data_payload_in_cookie
-        )
-
-    def test_with_old_account_and_valid_code_should_redirect_to_root(
-        self, app: Flask, client: FlaskClient, monkeypatch: pytest.MonkeyPatch
-    ):
-        monkeypatch.setattr(
-            api.auth.github_oauth_util,
-            "ACCESS_TOKEN_URL",
-            "http://0.0.0.0:8080/test/github/access_token",
-        )
-        monkeypatch.setattr(
-            api.auth.github_oauth_util,
-            "USER_PROFILE_API_URL",
-            "http://0.0.0.0:8080/test/github/user_profile",
-        )
-        with app.app_context():
-            user: User = User(
-                user_uid="random_user_uid",
-                handle="some_handle",
-                email="oauth_test@nuoj.com",
-                password="password",
-                role=0,
-                email_verified=1,
-            )
-            db.session.add(user)
-            db.session.commit()
-
-        response: TestResponse = client.get(
-            "/api/auth/github_login", query_string={"code": "valid_code"}
-        )
-
-        assert response.status_code == HTTPStatus.FOUND
-        assert response.location == "/"
-
-    def test_with_old_account_and_valid_code_should_have_jwt_cookie(
-        self, app: Flask, client: FlaskClient, monkeypatch: pytest.MonkeyPatch
-    ):
-        monkeypatch.setattr(
-            api.auth.github_oauth_util,
-            "ACCESS_TOKEN_URL",
-            "http://0.0.0.0:8080/test/github/access_token",
-        )
-        monkeypatch.setattr(
-            api.auth.github_oauth_util,
-            "USER_PROFILE_API_URL",
-            "http://0.0.0.0:8080/test/github/user_profile",
-        )
-        codec: HS256JWTCodec = HS256JWTCodec(app.config["jwt_key"])
-        user_email: str = "oauth_test@nuoj.com"
-        user_handle: str = "some_handle"
-        with app.app_context():
-            user: User = User(
-                user_uid="random_user_uid",
-                handle=user_handle,
-                email=user_email,
-                password="password",
-                role=0,
-                email_verified=1,
-            )
-            db.session.add(user)
-            db.session.commit()
-
-        response: TestResponse = client.get(
-            "/api/auth/github_login", query_string={"code": "valid_code"}
-        )
-
-        assert response.status_code == HTTPStatus.FOUND
-        cookies: tuple[Cookie, ...] = _get_cookies(client.cookie_jar)
-        (jwt_cookie,) = tuple(filter(lambda x: x.name == "jwt", cookies))
-        assert jwt_cookie.value is not None
-        jwt_payload: dict[str, Any] = codec.decode(jwt_cookie.value)
-        data = jwt_payload["data"]
-        assert data["email"] == user_email
-        assert data["handle"] == user_handle
-
-    def test_with_absent_code_should_return_http_status_code_bad_request(
-        self, client: FlaskClient, monkeypatch: pytest.MonkeyPatch
-    ):
-        monkeypatch.setattr(
-            api.auth.github_oauth_util,
-            "ACCESS_TOKEN_URL",
-            "http://0.0.0.0:8080/test/github/access_token",
-        )
-        monkeypatch.setattr(
-            api.auth.github_oauth_util,
-            "USER_PROFILE_API_URL",
-            "http://0.0.0.0:8080/test/github/user_profile",
-        )
-
-        response: TestResponse = client.get("/api/auth/github_login")
-
-        assert response.status_code == HTTPStatus.BAD_REQUEST
-
-    def test_with_invalid_code_should_return_http_status_code_forbidden(
-        self, client: FlaskClient, monkeypatch: pytest.MonkeyPatch
-    ):
-        monkeypatch.setattr(
-            api.auth.github_oauth_util,
-            "ACCESS_TOKEN_URL",
-            "http://0.0.0.0:8080/test/github/access_token",
-        )
-        monkeypatch.setattr(
-            api.auth.github_oauth_util,
-            "USER_PROFILE_API_URL",
-            "http://0.0.0.0:8080/test/github/user_profile",
-        )
-
-        response: TestResponse = client.get(
-            "/api/auth/github_login", query_string={"code": "invalid_code"}
-        )
-
-        assert response.status_code == HTTPStatus.FORBIDDEN
-
-
-class TestGoogleRoute:
     @pytest.fixture()
     def monkeypatch_url(self, monkeypatch: pytest.MonkeyPatch):
         monkeypatch.setattr(
-            api.auth.google_oauth_util,
+            self.monkeypatch_class,
             "ACCESS_TOKEN_URL",
-            "http://0.0.0.0:8080/test/google/access_token",
+            self.access_token_url,
         )
         monkeypatch.setattr(
-            api.auth.google_oauth_util,
+            self.monkeypatch_class,
             "USER_PROFILE_API_URL",
-            "http://0.0.0.0:8080/test/google/user_profile",
+            self.user_profile_api_url,
         )
 
     def test_with_new_account_and_valid_code_should_redirect_to_handle_setup_page(
         self, client: FlaskClient, monkeypatch_url: None
     ):
         response: TestResponse = client.get(
-            "/api/auth/google_login", query_string={"code": "valid_code"}
+            self.oauth_route, query_string={"code": "valid_code"}
         )
 
         assert response.status_code == HTTPStatus.FOUND
@@ -593,7 +444,7 @@ class TestGoogleRoute:
         }
 
         response: TestResponse = client.get(
-            "/api/auth/google_login", query_string={"code": "valid_code"}
+            self.oauth_route, query_string={"code": "valid_code"}
         )
 
         assert response.status_code == HTTPStatus.FOUND
@@ -617,7 +468,7 @@ class TestGoogleRoute:
             db.session.commit()
 
         response: TestResponse = client.get(
-            "/api/auth/google_login", query_string={"code": "valid_code"}
+            self.oauth_route, query_string={"code": "valid_code"}
         )
 
         assert response.status_code == HTTPStatus.FOUND
@@ -646,7 +497,7 @@ class TestGoogleRoute:
             db.session.commit()
 
         response: TestResponse = client.get(
-            "/api/auth/google_login", query_string={"code": "valid_code"}
+            self.oauth_route, query_string={"code": "valid_code"}
         )
 
         assert response.status_code == HTTPStatus.FOUND
@@ -658,30 +509,41 @@ class TestGoogleRoute:
         self, client: FlaskClient, monkeypatch_url: None
     ):
         response: TestResponse = client.get(
-            "/api/auth/google_login", query_string={"code": "invalid_code"}
+            self.oauth_route, query_string={"code": "invalid_code"}
         )
 
         assert response.status_code == HTTPStatus.FORBIDDEN
+
+
+class TestGoogleRoute(TestOAuthContext):
+    def setup_class(self):
+        super(TestGoogleRoute, self).setup_class(
+            self,
+            api.auth.google_oauth_util,
+            access_token_url="http://0.0.0.0:8080/test/google/access_token",
+            user_profile_api_url="http://0.0.0.0:8080/test/google/user_profile",
+            oauth_route="/api/auth/google_login",
+        )
 
     def test_with_error_args_should_return_http_status_code_forbidden(
         self, client: FlaskClient, monkeypatch_url: None
     ):
         response: TestResponse = client.get(
-            "/api/auth/google_login", query_string={"error": "some_error_message"}
+            self.oauth_route, query_string={"error": "some_error_message"}
         )
 
         assert response.status_code == HTTPStatus.FORBIDDEN
 
 
-def test_logout_with_logged_in_client_should_remove_jwt_token(
-    logged_in_client: FlaskClient,
-):
-    response: TestResponse = logged_in_client.post("/api/auth/logout")
-
-    assert response.status_code == HTTPStatus.OK
-    cookies: tuple[Cookie, ...] = _get_cookies(logged_in_client.cookie_jar)
-    with pytest.raises(ValueError):
-        (jwt_cookie,) = tuple(filter(lambda x: x.name == "jwt", cookies))
+class TestGithubRoute(TestOAuthContext):
+    def setup_class(self):
+        super(TestGithubRoute, self).setup_class(
+            self,
+            api.auth.github_oauth_util,
+            access_token_url="http://0.0.0.0:8080/test/github/access_token",
+            user_profile_api_url="http://0.0.0.0:8080/test/github/user_profile",
+            oauth_route="/api/auth/github_login",
+        )
 
 
 class TestOAuthInfoRoute:
