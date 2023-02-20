@@ -162,6 +162,7 @@ def github_login_route() -> WerkzeugResponse:
         user: User = _get_user_info_from_account(oauth_login_result.email)
         if user.handle is None:
             response = redirect("/handle_setup")
+            _set_cookie_to_response("hs", {"email": user.email}, response)
         else:
             response = redirect("/")
             _set_cookie_to_response(

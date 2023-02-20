@@ -421,6 +421,33 @@ class TestGithubRoute:
         assert response.status_code == HTTPStatus.FOUND
         assert response.location == "/handle_setup"
 
+    def test_with_new_account_and_valid_code_should_setup_hs_cookie(
+        self, app: Flask, client: FlaskClient, monkeypatch: pytest.MonkeyPatch
+    ):
+        monkeypatch.setattr(
+            api.auth.github_oauth_util,
+            "ACCESS_TOKEN_URL",
+            "http://0.0.0.0:8080/test/github/access_token",
+        )
+        monkeypatch.setattr(
+            api.auth.github_oauth_util,
+            "USER_PROFILE_API_URL",
+            "http://0.0.0.0:8080/test/github/user_profile",
+        )
+        codec: HS256JWTCodec = HS256JWTCodec(app.config["jwt_key"])
+        excepted_data_payload_in_cookie: dict[str, str] = {
+            "email": "oauth_test@nuoj.com"
+        }
+
+        response: TestResponse = client.get(
+            "/api/auth/github_login", query_string={"code": "valid_code"}
+        )
+
+        assert response.status_code == HTTPStatus.FOUND
+        assert _verify_data_field_in_cookie_payload(
+            codec, client.cookie_jar, "hs", excepted_data_payload_in_cookie
+        )
+
     def test_with_old_account_and_valid_code_should_redirect_to_root(
         self, app: Flask, client: FlaskClient, monkeypatch: pytest.MonkeyPatch
     ):
