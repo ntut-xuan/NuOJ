@@ -80,7 +80,16 @@ class RegisterForm extends React.Component {
             dataType: "json",
             contentType: "application/json",
             success(data, status, xhr){
-                success_swal("註冊成功").then(() => {window.location.href = "/"})
+                if(data["mail_verification_enabled"] == false){
+                    success_swal("註冊成功").then(() => {window.location.href = "/"})
+                }else{
+                    Swal.fire({
+                        icon: "success",
+                        title: "註冊成功",
+                        text: "驗證信已寄至信箱，請收信來驗證信箱",
+                        showConfirmButton: true
+                    }).then(() => {window.location.href = "/"})
+                }
             },
             error(xhr, exception){
                 if(xhr.status == 422){
