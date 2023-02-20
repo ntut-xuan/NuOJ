@@ -514,6 +514,14 @@ class OAuthContext:
 
         assert response.status_code == HTTPStatus.FORBIDDEN
 
+    def test_with_absent_code_should_return_http_status_code_bad_request(
+        self, client: FlaskClient, monkeypatch_url: None
+    ):
+
+        response: TestResponse = client.get(self.oauth_route)
+
+        assert response.status_code == HTTPStatus.BAD_REQUEST
+
 
 class TestGoogleRoute(OAuthContext):
     def setup_class(self):
@@ -829,6 +837,17 @@ class TestResendEmailRoute:
         assert response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
         assert response.json is not None
         assert response.json["message"] == "Account is absent."
+
+
+def test_logout_with_logged_in_client_should_remove_jwt_token(
+    logged_in_client: FlaskClient,
+):
+    response: TestResponse = logged_in_client.post("/api/auth/logout")
+
+    assert response.status_code == HTTPStatus.OK
+    cookies: tuple[Cookie, ...] = _get_cookies(logged_in_client.cookie_jar)
+    with pytest.raises(ValueError):
+        (jwt_cookie,) = tuple(filter(lambda x: x.name == "jwt", cookies))
 
 
 def _get_cookies(cookie_jar: CookieJar | None) -> tuple[Cookie, ...]:
