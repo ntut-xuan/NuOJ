@@ -4,11 +4,8 @@ import json
 import hashlib
 import threading
 import jwt
-import database_util
 
-# import crypto_util as crypto_util
 from datetime import *
-from tunnel_code import TunnelCode
 from uuid import uuid4
 
 from typing import Any, Final
@@ -20,6 +17,7 @@ from api.auth.email_util import send_verification_email
 from database import db
 from models import User, Profile
 from setting.util import Setting
+from storage.util import TunnelCode, is_file_exists, write_file
 
 
 @dataclass
@@ -114,7 +112,7 @@ def verified_the_email_of_handle(handle: str) -> None:
 
 
 def _init_profile_storage_file(user_uid: str, handle: str, email: str) -> None:
-    database_util.file_storage_tunnel_write(
+    write_file(
         user_uid + ".json",
         json.dumps({"handle": handle, "email": email, "school": "", "bio": ""}),
         TunnelCode.USER_PROFILE,
@@ -122,9 +120,7 @@ def _init_profile_storage_file(user_uid: str, handle: str, email: str) -> None:
 
 
 def _is_profile_storage_exist(user_uid: str) -> bool:
-    return database_util.file_storage_tunnel_exist(
-        user_uid + ".json", TunnelCode.USER_PROFILE
-    )
+    return is_file_exists(user_uid + ".json", TunnelCode.USER_PROFILE)
 
 
 def _init_user_data_to_database(
