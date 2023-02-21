@@ -14,8 +14,8 @@ from storage.util import (
 )
 
 
-def get_test_file_path(app: Flask):
-    storage_path: str = Path(app.config["STORAGE_PATH"])
+def get_test_file_path(app: Flask) -> Path:
+    storage_path: Path = Path(app.config["STORAGE_PATH"])
     file_path: Path = storage_path / "user_profile" / "test_file"
     return file_path
 
@@ -117,16 +117,16 @@ class TestReadFile:
             file_path: Path = get_test_file_path(app)
             file_path.write_bytes(b"some_test_string")
 
-            text: str = read_file_bytes("test_file", TunnelCode.USER_PROFILE)
+            file_bytes: bytes = read_file_bytes("test_file", TunnelCode.USER_PROFILE)
 
-            assert text == b"some_test_string"
+            assert file_bytes == b"some_test_string"
 
     def test_read_bytes_from_bsent_file_should_return_empty_bytes(self, app: Flask):
         with app.app_context():
 
-            text: str = read_file_bytes("test_file", TunnelCode.USER_PROFILE)
+            file_bytes: bytes = read_file_bytes("test_file", TunnelCode.USER_PROFILE)
 
-            assert text == b""
+            assert file_bytes == b""
 
 
 class TestDeleteFile:
