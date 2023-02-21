@@ -8,7 +8,7 @@ from api.auth.github_oauth_util import (
     _get_user_email_with_access_token,
     _validate_github_oauth_code_and_get_access_token,
 )
-from database_util import TunnelCode, file_storage_tunnel_exist
+from storage.util import TunnelCode, is_file_exists
 from models import Profile, User
 
 
@@ -138,9 +138,7 @@ class TestGithubOAuthWithMOCK:
 
             user: User | None = User.query.filter(User.email == result.email).first()
             assert user is not None
-            assert file_storage_tunnel_exist(
-                f"{user.user_uid}.json", TunnelCode.USER_PROFILE
-            )
+            assert is_file_exists(f"{user.user_uid}.json", TunnelCode.USER_PROFILE)
 
     def test_github_login_with_invalid_code_should_fail_the_verify(
         self, app: Flask, monkeypatch: pytest.MonkeyPatch
