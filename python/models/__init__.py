@@ -48,6 +48,6 @@ class Submission(db.Model):  # type: ignore[name-defined]
     user_uid = db.Column(
         db.ForeignKey(User.user_uid, ondelete="CASCADE", onupdate="CASCADE")
     )
-    veridct = db.Column(db.Enum(SubmissionVerdict), default=SubmissionVerdict.PENDING)
+    verdict = db.Column(db.Enum(SubmissionVerdict), default=SubmissionVerdict.PENDING)
     time = db.Column(db.Float, default=None)
     memory = db.Column(db.Float, default=None)
