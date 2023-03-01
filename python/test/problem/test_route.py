@@ -3,7 +3,8 @@ from json import dumps
 from typing import Any
 
 import pytest
-from flask.testing import Flask, FlaskClient
+from flask import Flask
+from flask.testing import FlaskClient
 from werkzeug.test import TestResponse
 
 from database import db
