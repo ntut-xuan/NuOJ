@@ -110,6 +110,7 @@ def test_submission_model_with_valid_data_should_add_record_to_database(
         submission_from_database: Submission | None = Submission.query.filter(
             Submission.submission_id == 1
         ).first()
+        assert submission_from_database is not None
         assert submission_from_database.submission_id == 1
         assert submission_from_database.problem_id == 1
         assert submission_from_database.time == 1.1
