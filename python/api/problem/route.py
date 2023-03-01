@@ -3,7 +3,7 @@ from http import HTTPStatus
 from json import loads
 from typing import Any
 
-from flask import Blueprint, make_response
+from flask import Blueprint, Response, make_response
 
 from models import Problem, User
 from storage.util import TunnelCode, read_file
@@ -51,7 +51,7 @@ class ProblemData:
 
 
 @problem_bp.route("/<int:id>/", methods=["GET"])
-def get_problems_data_route(id: int):
+def get_problems_data_route(id: int) -> Response:
     problem: Problem | None = Problem.query.filter_by(problem_id=id).first()
 
     if problem is None:
@@ -70,7 +70,7 @@ def get_problems_data_route(id: int):
 
 
 @problem_bp.route("/", methods=["GET"])
-def get_all_problems_data_route():
+def get_all_problems_data_route() -> Response:
     problems: list[Problem] = Problem.query.all()
 
     payload: dict[str, Any] = {
@@ -95,6 +95,8 @@ def __get_problem_data_with_problem_token(
     problem_raw_data: str = read_file(f"{problem_token}.json", TunnelCode.PROBLEM)
     problem_dict: dict[str, Any] = loads(problem_raw_data)
     user: User | None = User.query.filter_by(user_uid=problem_author).first()
+
+    assert user is not None
 
     problem_data: ProblemData = ProblemData(
         content=ProblemContent(**problem_dict["problem_content"]),
