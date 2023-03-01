@@ -6,7 +6,6 @@ import pytest
 from flask import Flask
 from werkzeug.test import TestResponse
 
-from api.problem.route import ProblemContent, ProblemData, ProblemSetting
 from database import db
 from models import Problem, User
 from storage.util import TunnelCode, write_file
