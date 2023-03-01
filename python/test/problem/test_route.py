@@ -3,7 +3,7 @@ from json import dumps
 from typing import Any
 
 import pytest
-from flask import Flask
+from flask.testing import Flask, FlaskClient
 from werkzeug.test import TestResponse
 
 from database import db
@@ -90,9 +90,9 @@ def setup_problem(
 
 
 def test_get_specific_problem_with_exists_problem_should_respond_the_problem(
-    client: Flask, setup_problem: None
+    client: FlaskClient, setup_problem: None
 ):
-    excepted_response_payload: dict[str, dict[str, str]] = {
+    excepted_response_payload: dict[str, dict[str, Any]] = {
         "content": {
             "title": "the_first_problem",
             "description": "some_description",
@@ -112,7 +112,7 @@ def test_get_specific_problem_with_exists_problem_should_respond_the_problem(
 
 
 def test_get_specific_problem_with_absent_problem_should_respond_http_status_forbidden(
-    client: Flask, setup_problem: None
+    client: FlaskClient, setup_problem: None
 ):
     response: TestResponse = client.get("/api/problem/3/")
 
@@ -120,9 +120,9 @@ def test_get_specific_problem_with_absent_problem_should_respond_http_status_for
 
 
 def test_get_all_problem_should_respond_all_the_problem(
-    client: Flask, setup_problem: None
+    client: FlaskClient, setup_problem: None
 ):
-    excepted_response_payload: dict[str, dict[str, str]] = {
+    excepted_response_payload: dict[str, Any] = {
         "count": 2,
         "result": [
             {
