@@ -15,7 +15,7 @@ var User_info = function (_React$Component) {
         var _this = _possibleConstructorReturn(this, (User_info.__proto__ || Object.getPrototypeOf(User_info)).call(this, props));
 
         _this.state = {
-            isLogin: false,
+            isLogin: undefined,
             handle: ""
         };
         _this.check_cookie = _this.check_cookie.bind(_this);
@@ -32,15 +32,13 @@ var User_info = function (_React$Component) {
         value: function check_cookie() {
             var _this2 = this;
 
-            fetch("/session_verification", { method: "POST" }).then(function (resp) {
+            fetch("/api/auth/verify_jwt", { method: "POST" }).then(function (resp) {
                 return resp.json();
             }).then(function (json) {
-                if (json.status == "OK") {
-                    _this2.setState({
-                        isLogin: true,
-                        handle: json.handle
-                    });
-                }
+                _this2.setState({
+                    isLogin: true,
+                    handle: json.data.handle
+                });
             });
         }
     }, {
@@ -62,7 +60,7 @@ var User_info = function (_React$Component) {
                         )
                     )
                 );
-            } else {
+            } else if (this.state.isLogin === false) {
                 main = [React.createElement(
                     "div",
                     { className: "w-full h-fit my-auto text-center" },
@@ -222,37 +220,25 @@ var Problem_list = function (_React$Component3) {
     _createClass(Problem_list, [{
         key: "componentDidMount",
         value: function componentDidMount() {
-            this.getProblems(0, 50);
-        }
-    }, {
-        key: "getProblems",
-        value: function getProblems(j, i) {
-            var _this5 = this;
-
-            fetch("/all_problem_list?" + new URLSearchParams({ numbers: i, from: j })).then(function (res) {
-                return res.json();
-            }).then(function (json) {
-
-                var index = Math.ceil(json.data.length / 9);
-                if (index == 0) index = 1;
-
-                _this5.setState({
-                    problems: _this5.state.problems.concat(json.data),
-                    max: index
-                });
-            });
-        }
-    }, {
-        key: "getTotalNum",
-        value: function getTotalNum() {
-            var _this6 = this;
-
-            fetch("/profile_problem_setting").then(function (res) {
-                return res.json();
-            }).then(function (data) {
-                _this6.setState({
-                    problem_number: data["count"]
-                });
+            $.ajax({
+                url: "/api/problem",
+                type: "GET",
+                success: function (data, status, xhr) {
+                    var problems = [];
+                    for (var i = 0; i < data["count"]; i++) {
+                        var problem_map = data["result"][i];
+                        var problem_object = {
+                            id: problem_map["id"],
+                            title: problem_map["data"]["content"]["title"],
+                            author: problem_map["data"]["author"]["handle"]
+                        };
+                        problems.push(problem_object);
+                    }
+                    this.setState({
+                        problems: problems,
+                        total_problem_num: data["count"]
+                    });
+                }.bind(this)
             });
         }
     }, {
@@ -260,10 +246,7 @@ var Problem_list = function (_React$Component3) {
         value: function render_col() {
             var main = [];
             var problems = this.state.problems;
-            for (var i = 0; i < 9; i++) {
-                if (i >= problems.length) {
-                    break;
-                }
+            for (var i = 0; i < problems.length; i++) {
                 var col = React.createElement(
                     "tr",
                     { className: "hover:bg-slate-100 z-40 border" },

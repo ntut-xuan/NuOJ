@@ -2,7 +2,7 @@ class User_info extends React.Component{
     constructor(props){
         super(props)
         this.state={
-            isLogin : false,
+            isLogin : undefined,
             handle : ""
         }
         this.check_cookie = this.check_cookie.bind(this)
@@ -13,15 +13,13 @@ class User_info extends React.Component{
     }
 
     check_cookie(){
-        fetch("/session_verification",{method : "POST"}).then((resp)=>{
+        fetch("/api/auth/verify_jwt",{method : "POST"}).then((resp)=>{
             return resp.json()
         }).then((json)=>{
-            if(json.status=="OK"){
-                this.setState({
-                    isLogin : true,
-                    handle : json.handle
-                })
-            }
+            this.setState({
+                isLogin : true,
+                handle : json.data.handle
+            })
         })
     }
 
@@ -37,7 +35,7 @@ class User_info extends React.Component{
                 </div>
             )
         }
-        else{
+        else if(this.state.isLogin === false){
             main=[
                 <div className="w-full h-fit my-auto text-center">
                     <p className="text-base lg:text-2xl inline-block align-middle leading-normal my-0 font-['Noto_Sans_TC'] border-b-2 border-black border-opacity-0 duration-500 hover:border-black hover:border-opacity-100 cursor-pointer"> 
@@ -117,49 +115,40 @@ class Problem_list extends React.Component{
         this.state={
             problems : [],
             total_problem_num : 0,
-            page_now : 1,
-            max : 1
+            page_now: 1,
+            max: 1,
         }
         this.render_col = this.render_col.bind(this)
     }
 
     componentDidMount(){
-        this.getProblems(0,50)
-    }
-
-    getProblems(j,i){
-        fetch("/all_problem_list?"+new URLSearchParams({numbers:i,from:j})).then((res)=>{
-            return res.json()
-        }).then((json)=>{
-            
-            var index = Math.ceil(json.data.length/9)
-            if(index == 0) index =1
-            
-            this.setState({
-                problems : this.state.problems.concat(json.data),
-                max : index
-            })
-        })
-    }
-
-    getTotalNum(){
-        fetch("/profile_problem_setting").then((res)=>{
-            return res.json()
-        }).then((data)=>{
-            this.setState({
-                problem_number : data["count"]
-            })
+        $.ajax({
+            url: "/api/problem",
+            type: "GET",
+            success: function(data, status, xhr){
+                let problems = []
+                for(let i = 0; i < data["count"]; i++){
+                    let problem_map = data["result"][i];
+                    let problem_object = {
+                        id: problem_map["id"],
+                        title: problem_map["data"]["content"]["title"],
+                        author: problem_map["data"]["author"]["handle"],
+                    }
+                    problems.push(problem_object)
+                }
+                this.setState({
+                    problems: problems,
+                    total_problem_num: data["count"]
+                })
+            }.bind(this)
         })
     }
 
     render_col(){
         var main=[];
         const problems = this.state.problems
-        for(var i=0;i<9;i++){
-            if(i>=(problems.length)){
-                break
-            }
-            var col=(
+        for(let i = 0; i < problems.length; i++){
+            let col=(
                 <tr className="hover:bg-slate-100 z-40 border">
                     <td className="px-6 py-4 z-10"> {problems[i].id} </td>
                     <td className="px-6 py-4 z-10 text-blue-700"> <a href={`/problem/${problems[i].id}`}>{problems[i].title}</a> </td>
