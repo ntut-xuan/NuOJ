@@ -33,6 +33,7 @@ class App extends React.Component {
             url: "/api/problem/" + problemID,
             type: "GET",
             success: function(data, status, xhr){
+                document.title = `NuOJ - ${data["content"]["title"]}`
                 this.setState({
                     basic_setting: data["setting"],
                     problem_content: data["content"],
