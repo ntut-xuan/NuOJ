@@ -35,6 +35,11 @@ services:
       - "mariadb"
     ports:
       - "8080:8080"
+  nuoj-sandbox:
+    build: ./sandbox
+    container_name: nuoj-sandbox
+    ports:
+      - "4439:4439"
   fake-smtp-server:
     image: reachfive/fake-smtp-server:latest
     container_name: fake-smtp-server
