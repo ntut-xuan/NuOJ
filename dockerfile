@@ -20,7 +20,7 @@ RUN mkdir /etc/nuoj/storage/user_submission/
 RUN cp /etc/nuoj/setting/setting.json /etc/nuoj/setting.json
 
 # install tailwindcss and react.js from npm
-WORKDIR /etc/fastshop
+WORKDIR /etc/nuoj
 RUN npm install -D tailwindcss
 RUN npm install babel-cli@6 babel-preset-react-app@3
 
