@@ -673,6 +673,10 @@ video {
   margin-top: 1.25rem;
 }
 
+.box-border {
+  box-sizing: border-box;
+}
+
 .block {
   display: block;
 }
