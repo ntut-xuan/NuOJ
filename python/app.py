@@ -39,7 +39,6 @@ def create_app(test_config: Mapping[str, Any] | None = None) -> Flask:
     app.register_blueprint(auth_page_bp)
     app.register_blueprint(page)
     app.register_blueprint(problem_page_bp)
-    app.register_blueprint(submission_page_bp)
 
     @app.route("/static/<path:path>")
     def fetch_static_file_from_specific_path(path):
