@@ -12,7 +12,6 @@ from api.auth.test_route import auth_test_bp
 from database import create_db_command, db
 from page.auth.route import auth_page_bp
 from page.problem.route import problem_page_bp
-from page.submission.route import submission_page_bp
 from page.route import page
 from setting.util import Setting, SettingBuilder
 
