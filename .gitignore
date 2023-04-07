@@ -162,7 +162,6 @@ cython_debug/
 *.pem
 setting.json
 package-lock.json
-package.json
 node_modules
 /storage
 .DS_Store
