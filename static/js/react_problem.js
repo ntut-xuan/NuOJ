@@ -15,7 +15,7 @@ var User_info = function (_React$Component) {
         var _this = _possibleConstructorReturn(this, (User_info.__proto__ || Object.getPrototypeOf(User_info)).call(this, props));
 
         _this.state = {
-            isLogin: undefined,
+            isLogin: false,
             handle: ""
         };
         _this.check_cookie = _this.check_cookie.bind(_this);
@@ -49,7 +49,7 @@ var User_info = function (_React$Component) {
                 var herf = "/profile/" + this.state.handle;
                 main = React.createElement(
                     "div",
-                    { className: "w-full h-fit my-auto text-center" },
+                    { className: "w-full h-fit my-auto text-right" },
                     React.createElement(
                         "p",
                         { className: "text-base lg:text-2xl inline-block align-middle leading-normal my-0 font-['Noto_Sans_TC'] border-b-2 border-black border-opacity-0 duration-500 hover:border-black hover:border-opacity-100 cursor-pointer" },
@@ -61,9 +61,9 @@ var User_info = function (_React$Component) {
                     )
                 );
             } else if (this.state.isLogin === false) {
-                main = [React.createElement(
+                main = [React.createElement("div", { className: "w-full" }), React.createElement(
                     "div",
-                    { className: "w-full h-fit my-auto text-center" },
+                    { className: "w-full h-fit my-auto text-right" },
                     React.createElement(
                         "p",
                         { className: "text-base lg:text-2xl inline-block align-middle leading-normal my-0 font-['Noto_Sans_TC'] border-b-2 border-black border-opacity-0 duration-500 hover:border-black hover:border-opacity-100 cursor-pointer" },
@@ -75,7 +75,7 @@ var User_info = function (_React$Component) {
                     )
                 ), React.createElement(
                     "div",
-                    { className: "w-full h-fit my-auto text-center" },
+                    { className: "w-full h-fit my-auto text-right" },
                     React.createElement(
                         "p",
                         { className: "text-base lg:text-2xl inline-block align-middle leading-normal my-0 font-['Noto_Sans_TC'] border-b-2 border-black border-opacity-0 duration-500 hover:border-black hover:border-opacity-100 cursor-pointer" },
@@ -290,7 +290,7 @@ var Problem_list = function (_React$Component3) {
         value: function render() {
             var main = [React.createElement(
                 "table",
-                { className: "w-full text-lg text-black dark:text-gray-400 text-center relative table-auto whitespace-nowrap leading-normal" },
+                { className: "w-full text-lg text-black font-sans text-center relative table-auto whitespace-nowrap leading-normal" },
                 React.createElement(
                     "thead",
                     null,
@@ -324,7 +324,7 @@ var Problem_list = function (_React$Component3) {
                     null,
                     React.createElement(this.render_col, null)
                 )
-            ), React.createElement(Page_selecter, { showing: this.state.page_now, max: this.state.max })];
+            ), React.createElement(Page_selecter, { showing: this.state.page_now, m: true, ax: this.state.max })];
             return main;
         }
     }]);
