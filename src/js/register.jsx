@@ -40,7 +40,7 @@ class RegisterButton extends React.Component {
         if(github_oauth_url != null){
             render_component.push(github_submit)
         }
-        if(google_submit != null){
+        if(google_oauth_url != null){
             render_component.push(google_submit)
         }
         if(status == null){
