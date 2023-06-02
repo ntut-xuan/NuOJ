@@ -153,7 +153,7 @@ var Introduce = function (_React$Component2) {
                                 bio: json.bio
                             }
                         };
-                        _this3.setState({ profile_data: profile_data, mode: false });
+                        _this3.setState({ profile_data: profile_data });
                     });
                 }
             });

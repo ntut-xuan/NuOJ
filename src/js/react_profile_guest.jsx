@@ -100,7 +100,7 @@ class Introduce extends React.Component {
                         bio: json.bio
                     }
                 }
-                this.setState({profile_data: profile_data, mode: false})
+                this.setState({profile_data: profile_data})
             })  
         }
     })
