@@ -10,8 +10,9 @@ from util import make_simple_error_response
 
 T = TypeVar("T")
 
+
 def user_should_exists_or_return_http_status_forbidden(
-        func: Callable[..., Response | T]
+    func: Callable[..., Response | T]
 ) -> Callable[..., Response | T]:
     @wraps(func)
     def wrapper(*args, **kwargs) -> Response | T:
@@ -21,7 +22,7 @@ def user_should_exists_or_return_http_status_forbidden(
 
         if user is None:
             return make_simple_error_response(HTTPStatus.FORBIDDEN)
-        
+
         return func(*args, **kwargs)
 
     return wrapper
