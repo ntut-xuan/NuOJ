@@ -3,7 +3,7 @@ from secrets import token_hex
 from pathlib import Path
 from typing import Mapping, Any
 
-from flask import Flask, send_from_directory
+from flask import Flask, send_from_directory, render_template
 from flask.wrappers import Response
 
 from api.auth.api_route import auth_bp
@@ -51,6 +51,10 @@ def create_app(test_config: Mapping[str, Any] | None = None) -> Flask:
     @app.route("/heartbeat", methods=["GET"])
     def fetch_heartbeat():
         return Response(json.dumps({"status": "OK"}), mimetype="application/json")
+
+    @app.route("/profile/<string:name>", methods=["GET"])
+    def profile_page(name):
+        return render_template("profile.html", **locals())
 
     # crypto_util.GenerateKey()
     return app
