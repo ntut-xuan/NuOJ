@@ -3,7 +3,7 @@ from secrets import token_hex
 from pathlib import Path
 from typing import Mapping, Any
 
-from flask import Flask, send_from_directory, render_template
+from flask import Flask, send_from_directory
 from flask.wrappers import Response
 
 from api.auth.api_route import auth_bp
@@ -16,7 +16,7 @@ from page.problem.route import problem_page_bp
 from page.profile.route import profile_page_bp
 from page.submission.route import submission_page_bp
 from page.route import page
-from setting.util import Setting, SettingBuilder
+from setting.util import SettingBuilder
 
 
 def create_app(test_config: Mapping[str, Any] | None = None) -> Flask:
