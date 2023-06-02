@@ -14,7 +14,7 @@ profile_bp = Blueprint("profile", __name__, url_prefix="/api/profile")
 @profile_bp.route("/<string:name>", methods=["GET"])
 @user_should_exists_or_return_http_status_forbidden
 def fetch_profile(name: str) -> Response:
-    user: User | None = _get_user_by_name(name)
+    user: User = _get_user_by_name(name)
     profile: Profile = _get_profile_by_name(name)
 
     payload: dict[str, str] = {
