@@ -75,7 +75,7 @@ class TestProfileRoute:
                 f"{USER_UID}.{IMG_TYPE}", b"testing_bytes", TunnelCode.USER_AVATER
             )
 
-        response: TestResponse = client.get("/api/profile/avatar/test_user")
+        response: TestResponse = client.get("/api/profile/test_user/avatar")
 
         assert response.status_code == HTTPStatus.OK
         assert response.data == b"testing_bytes"
@@ -83,6 +83,6 @@ class TestProfileRoute:
     def test_fetch_profile_image_with_invalid_user_should_return_http_status_code_forbidden(
         self, client: FlaskClient
     ):
-        response: TestResponse = client.get("/api/profile/avatar/test_user")
+        response: TestResponse = client.get("/api/profile/test_user/avatar")
 
         assert response.status_code == HTTPStatus.FORBIDDEN

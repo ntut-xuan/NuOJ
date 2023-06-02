@@ -25,7 +25,7 @@ def fetch_profile(name: str) -> Response:
     return make_response(payload)
 
 
-@profile_bp.route("/avatar/<string:name>", methods=["GET"])
+@profile_bp.route("/<string:name>/avatar", methods=["GET"])
 @user_should_exists_or_return_http_status_forbidden
 def fetch_profile_avatar(name: str):
     profile: Profile = _get_user_profile_by_name(name)
