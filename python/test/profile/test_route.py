@@ -3,7 +3,8 @@ from typing import Final
 
 import pytest
 from flask import Flask
-from flask.testing import FlaskClient, TestResponse
+from flask.testing import FlaskClient
+from werkzeug.test import TestResponse
 
 from database import db
 from models import Profile, User
