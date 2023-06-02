@@ -16,7 +16,7 @@ EMAIL: Final[str] = "test_user@nuoj.test"
 SCHOOL: Final[str] = "ntut"
 BIO: Final[str] = "Hi I'm testing user"
 IMG_TYPE: Final[str] = "jpg"
-
+ROLE: Final[int] = 1
 
 class TestProfileRoute:
     @pytest.fixture()
@@ -27,7 +27,7 @@ class TestProfileRoute:
                 handle=HANDLE,
                 password="1160130875fda0812c99c5e3f1a03516471a6370c4f97129b221938eb4763e63",  # SHA256(test_user)
                 email=EMAIL,
-                role=1,
+                role=ROLE,
                 email_verified=1,
             )
             db.session.add(user)
@@ -52,6 +52,8 @@ class TestProfileRoute:
             "email": EMAIL,
             "school": SCHOOL,
             "bio": BIO,
+            "handle": HANDLE,
+            "role": ROLE
         }
 
         response: TestResponse = client.get("/api/profile/test_user")
