@@ -70,7 +70,6 @@ class Introduce extends React.Component {
                     bio : ""
                 }
             },
-            mode : false
         }
         this.changing_mode = this.change_mode.bind(this)
         this.get_profile = this.get_profile.bind(this)

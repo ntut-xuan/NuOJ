@@ -116,8 +116,7 @@ var Introduce = function (_React$Component2) {
                     school: "",
                     bio: ""
                 }
-            },
-            mode: false
+            }
         };
         _this2.changing_mode = _this2.change_mode.bind(_this2);
         _this2.get_profile = _this2.get_profile.bind(_this2);
