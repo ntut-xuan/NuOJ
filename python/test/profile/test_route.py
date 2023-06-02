@@ -47,7 +47,7 @@ class TestProfileRoute:
     def test_fetch_profile_should_return_correct_profile_response(
         self, client: FlaskClient, setup_user_and_profile: None
     ):
-        excepted_payload: dict[str, str] = {
+        excepted_payload: dict[str, str | int] = {
             "user_uid": USER_UID,
             "email": EMAIL,
             "school": SCHOOL,
