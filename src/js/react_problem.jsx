@@ -2,7 +2,7 @@ class User_info extends React.Component{
     constructor(props){
         super(props)
         this.state={
-            isLogin : undefined,
+            isLogin : false,
             handle : ""
         }
         this.check_cookie = this.check_cookie.bind(this)
@@ -28,7 +28,7 @@ class User_info extends React.Component{
         if(this.state.isLogin){
             var herf = "/profile/"+this.state.handle
             main = (
-                <div className="w-full h-fit my-auto text-center">
+                <div className="w-full h-fit my-auto text-right">
                     <p className="text-base lg:text-2xl inline-block align-middle leading-normal my-0 font-['Noto_Sans_TC'] border-b-2 border-black border-opacity-0 duration-500 hover:border-black hover:border-opacity-100 cursor-pointer"> 
                         <a href={herf}>{this.state.handle}</a> 
                     </p>
@@ -37,12 +37,15 @@ class User_info extends React.Component{
         }
         else if(this.state.isLogin === false){
             main=[
-                <div className="w-full h-fit my-auto text-center">
+                <div className="w-full">
+
+                </div>,
+                <div className="w-full h-fit my-auto text-right">
                     <p className="text-base lg:text-2xl inline-block align-middle leading-normal my-0 font-['Noto_Sans_TC'] border-b-2 border-black border-opacity-0 duration-500 hover:border-black hover:border-opacity-100 cursor-pointer"> 
                         <a href="/login">登入</a> 
                     </p>
                 </div>,
-                <div className="w-full h-fit my-auto text-center">
+                <div className="w-full h-fit my-auto text-right">
                     <p className="text-base lg:text-2xl inline-block align-middle leading-normal my-0 font-['Noto_Sans_TC'] border-b-2 border-black border-opacity-0 duration-500 hover:border-black hover:border-opacity-100 cursor-pointer"> 
                         <a href="/register">註冊</a> 
                     </p>
@@ -165,7 +168,7 @@ class Problem_list extends React.Component{
 
     render(){
         var main=[
-            <table className="w-full text-lg text-black dark:text-gray-400 text-center relative table-auto whitespace-nowrap leading-normal">
+            <table className="w-full text-lg text-black font-sans text-center relative table-auto whitespace-nowrap leading-normal">
                 <thead>
                     <tr>
                         <th scope="col" className="sticky top-0 bg-orange-200 px-6 py-3 w-[10%]">題目 ID</th>
@@ -178,7 +181,7 @@ class Problem_list extends React.Component{
                     <this.render_col></this.render_col>
                 </tbody>
             </table>,
-            <Page_selecter showing={this.state.page_now} max={this.state.max}></Page_selecter>
+            <Page_selecter showing={this.state.page_now} m  ax={this.state.max}></Page_selecter>
         ]
         return main
     }
