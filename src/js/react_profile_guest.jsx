@@ -93,7 +93,7 @@ class Introduce extends React.Component {
                     main: {
                         img: "/api/profile/" + handle + "/avatar",
                         handle: handle,
-                        accountType: json.role // Should be supported in API but not yet implement.
+                        accountType: json.role
                     },
                     sub: {
                         email: json.email,
