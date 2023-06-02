@@ -85,18 +85,26 @@ class Introduce extends React.Component {
     var location = window.location.href.split("/")
     const handle = location[location.length-1] 
 
-        fetch("/get_profile/"+handle).then((res)=>{
-            return res.json()
-        }).then((json)=>{
-            const status = json.status;
-            if( status == "OK"){
-                this.setState({profile_data : json.data})
-            }
-            else{
-                error_swal("請先登入").then(() => {window.location.href = "/" })
-            }
-        })
-        
+    fetch("/api/profile/" + handle).then((response) => {
+        if(response.ok){
+            response.json().then((json) => {
+                console.log(json)
+                let profile_data = {
+                    main: {
+                        img: "/api/profile/" + handle + "/avatar",
+                        handle: handle,
+                        accountType: json.role // Should be supported in API but not yet implement.
+                    },
+                    sub: {
+                        email: json.email,
+                        school: json.school,
+                        bio: json.bio
+                    }
+                }
+                this.setState({profile_data: profile_data, mode: false})
+            })  
+        }
+    })
     }
     
     update_profile(i){

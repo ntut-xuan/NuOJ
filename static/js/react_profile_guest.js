@@ -138,15 +138,23 @@ var Introduce = function (_React$Component2) {
             var location = window.location.href.split("/");
             var handle = location[location.length - 1];
 
-            fetch("/get_profile/" + handle).then(function (res) {
-                return res.json();
-            }).then(function (json) {
-                var status = json.status;
-                if (status == "OK") {
-                    _this3.setState({ profile_data: json.data });
-                } else {
-                    error_swal("請先登入").then(function () {
-                        window.location.href = "/";
+            fetch("/api/profile/" + handle).then(function (response) {
+                if (response.ok) {
+                    response.json().then(function (json) {
+                        console.log(json);
+                        var profile_data = {
+                            main: {
+                                img: "/api/profile/" + handle + "/avatar",
+                                handle: handle,
+                                accountType: json.role // Should be supported in API but not yet implement.
+                            },
+                            sub: {
+                                email: json.email,
+                                school: json.school,
+                                bio: json.bio
+                            }
+                        };
+                        _this3.setState({ profile_data: profile_data, mode: false });
                     });
                 }
             });
