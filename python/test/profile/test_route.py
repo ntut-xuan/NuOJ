@@ -2,8 +2,8 @@ from http import HTTPStatus
 from typing import Final
 
 import pytest
-from flask import Flask, Response
-from flask.testing import FlaskClient
+from flask import Flask
+from flask.testing import FlaskClient, TestResponse
 
 from database import db
 from models import Profile, User
@@ -51,14 +51,14 @@ class TestProfileRoute:
             "bio": BIO
         }
         
-        response: Response = client.get("/api/profile/test_user")
+        response: TestResponse = client.get("/api/profile/test_user")
 
         assert response.status_code == HTTPStatus.OK
         assert response.json is not None
         assert response.json == excepted_payload
 
     def test_fetch_profile_with_invalid_user_should_return_http_status_forbidden(self, client: FlaskClient):
-        response: Response = client.get("/api/profile/invalid_user")
+        response: TestResponse = client.get("/api/profile/invalid_user")
 
         assert response.status_code == HTTPStatus.FORBIDDEN
 
@@ -66,12 +66,12 @@ class TestProfileRoute:
         with app.app_context():
             write_file_bytes(f"{USER_UID}.{IMG_TYPE}", b"testing_bytes", TunnelCode.USER_AVATER)
 
-        response: Response = client.get("/api/profile/avatar/test_user")
+        response: TestResponse = client.get("/api/profile/avatar/test_user")
 
         assert response.status_code == HTTPStatus.OK
         assert response.data == b"testing_bytes"
 
     def test_fetch_profile_image_with_invalid_user_should_return_http_status_code_forbidden(self, client: FlaskClient):
-        response: Response = client.get("/api/profile/avatar/test_user")
+        response: TestResponse = client.get("/api/profile/avatar/test_user")
 
         assert response.status_code == HTTPStatus.FORBIDDEN
