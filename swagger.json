@@ -1,0 +1,300 @@
+{
+    "openapi": "3.0.3",
+    "info": {
+        "version": "0.1.0",
+        "title": "NuOJ administractor API documentation"
+    },
+    "paths": {
+        "/heartbeat": {
+            "get": {
+                "tags": [
+                    "system"
+                ],
+                "summary": "The route for checking the heartbeat of the system.",
+                "responses": {
+                    "200": {
+                        "description": "OK.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/heartbeat_response"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/login": {
+            "post": {
+                "tags": [
+                    "auth"
+                ],
+                "summary": "The route for login.",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/login_requestbody"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/message_ok"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "The format of the payload is incorrect.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "The format of the payload is incorrect."
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "The mail verification enabled but mail is not verify.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "The mail verification enabled but mail is not verify."
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Incorrect account or password.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Incorrect account or password."
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/register": {
+            "post": {
+                "tags": [
+                    "auth"
+                ],
+                "summary": "The route for register.",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/register_requestbody"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/message_ok"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "The format of the payload is incorrect.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "The format of the payload is incorrect."
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "The email or the handle is repeated.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "The email or the handle is repeated."
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "The email, the handle or the password is invalid.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Handle is invalid."
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/oauth_info": {
+            "get": {
+                "tags": [
+                    "auth"
+                ],
+                "summary": "The info of the OAuth.",
+                "responses": {
+                    "200": {
+                        "description": "OK.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/oauth_info_response"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/verify_jwt": {
+            "post": {
+                "tags": [
+                    "auth"
+                ],
+                "summary": "The route to verify the JWT cookie.",
+                "responses": {
+                    "200": {
+                        "description": "OK.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/message_ok"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "The jwt is invalid."
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "heartbeat_response": {
+                "type": "object",
+                "properties": {
+                    "status": {
+                        "type": "string",
+                        "example": "OK"
+                    }
+                }
+            },
+            "login_requestbody": {
+                "type": "object",
+                "properties": {
+                    "account": {
+                        "type": "string",
+                        "description": "The login account.",
+                        "example": "nuoj_test"
+                    },
+                    "password": {
+                        "type": "string",
+                        "description": "The password of the account.",
+                        "example": "some_password"
+                    }
+                }
+            },
+            "register_requestbody": {
+                "type": "object",
+                "properties": {
+                    "email": {
+                        "type": "string",
+                        "example": "nuoj_test@nuoj.net"
+                    },
+                    "handle": {
+                        "type": "string",
+                        "example": "nuoj_user"
+                    },
+                    "password": {
+                        "type": "string",
+                        "example": "nuoj_password"
+                    }
+                }
+            },
+            "oauth_info_response": {
+                "type": "object",
+                "properties": {
+                    "status": {
+                        "type": "string",
+                        "example": "OK"
+                    },
+                    "github_oauth_url": {
+                        "type": "string",
+                        "description": "Should be present if GitHun OAuth enabled.",
+                        "example": "https://github.com/login/oauth/authorize?client_id=..."
+                    },
+                    "google_oauth_url": {
+                        "type": "string",
+                        "description": "Should be present if Google OAuth enabled.",
+                        "example": "https://accounts.google.com/o/oauth2/v2/auth"
+                    }
+                }
+            },
+            "message_ok": {
+                "type": "object",
+                "properties": {
+                    "message": {
+                        "type": "string",
+                        "example": "OK."
+                    }
+                }
+            }
+        }
+
+    }
+}
