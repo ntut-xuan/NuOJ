@@ -631,6 +631,93 @@
                     }
                 }
             }
+        },
+        "/api/profile/{handle}": {
+            "get": {
+                "summary": "The route to get the profile of the specific handle.",
+                "tags": [
+                    "profile"
+                ],
+                "parameters": [
+                    {
+                        "name": "handle",
+                        "in": "path",
+                        "description": "The specific handle."
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/profile_handle_response"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Absent user.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Absent user."
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/profile/{handle}/avatar": {
+            "get": {
+                "summary": "The route to get the avatar of the specific handle.",
+                "tags": [
+                    "profile"
+                ],
+                "parameters": [
+                    {
+                        "name": "handle",
+                        "in": "path",
+                        "description": "The specific handle."
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK.",
+                        "content": {
+                            "image/*": {
+                                "schema": {
+                                    "type": "string",
+                                    "format": "binary"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Absent user.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Absent user."
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
     },
     "components": {
@@ -692,6 +779,35 @@
                         "type": "string",
                         "description": "Should be present if Google OAuth enabled.",
                         "example": "https://accounts.google.com/o/oauth2/v2/auth"
+                    }
+                }
+            },
+            "profile_handle_response": {
+                "type": "object",
+                "properties": {
+                    "user_uid": {
+                        "type": "string",
+                        "example": "8d828772-50a5-4496-8114-0bf64132c125"
+                    },
+                    "email": {
+                        "type": "string",
+                        "example": "nuoj_test@nuoj.net"
+                    },
+                    "school": {
+                        "type": "string",
+                        "example": "nuoj_school"
+                    },
+                    "bio": {
+                        "type": "string",
+                        "example": "Hi I'm testing account."
+                    },
+                    "handle": {
+                        "type": "string",
+                        "example": "nuoj_test"
+                    },
+                    "role": {
+                        "type": "integer",
+                        "example": 0
                     }
                 }
             },
