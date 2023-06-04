@@ -2,10 +2,11 @@
     "openapi": "3.0.3",
     "info": {
         "version": "0.1.0",
+        "description": "The Swagger Documenatation for administractor API",
         "title": "NuOJ administractor API documentation"
     },
     "paths": {
-        "/heartbeat": {
+        "/api/heartbeat": {
             "get": {
                 "tags": [
                     "system"
@@ -25,7 +26,7 @@
                 }
             }
         },
-        "/login": {
+        "/api/auth/login": {
             "post": {
                 "tags": [
                     "auth"
@@ -102,7 +103,7 @@
                 }
             }
         },
-        "/register": {
+        "/api/auth/register": {
             "post": {
                 "tags": [
                     "auth"
@@ -179,7 +180,7 @@
                 }
             }
         },
-        "/oauth_info": {
+        "/api/auth/oauth_info": {
             "get": {
                 "tags": [
                     "auth"
@@ -199,7 +200,7 @@
                 }
             }
         },
-        "/verify_jwt": {
+        "/api/auth/verify_jwt": {
             "post": {
                 "tags": [
                     "auth"
@@ -217,7 +218,164 @@
                         }
                     },
                     "403": {
-                        "description": "The jwt is invalid."
+                        "description": "The jwt is invalid.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "JWT is invalid."
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/auth/github_login": {
+            "get": {
+                "tags": [
+                    "auth"
+                ],
+                "summary": "The rotue for GitHub OAuth.",
+                "parameters": [
+                    {
+                        "name": "code",
+                        "in": "query",
+                        "description": "OAuth code.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK. It should redirect to the setup page to setup the handle or the index page."
+                    },
+                    "400": {
+                        "description": "The code is absent.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Absent code."
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "GitHub OAuth login failed.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "GitHub OAuth login failed."
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/auth/google_login": {
+            "get": {
+                "tags": [
+                    "auth"
+                ],
+                "parameters": [
+                    {
+                        "name": "error",
+                        "in": "query",
+                        "description": "Present if Google OAuth is error.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "code",
+                        "in": "query",
+                        "description": "OAuth code.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "summary": "The route for Google OAuth.",
+                "responses": {
+                    "200": {
+                        "description": "OK. It should redirect to the setup page to setup the handle or the index page."
+                    },
+                    "400": {
+                        "description": "The code is absent.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Absent code."
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Google OAuth login failed.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Google OAuth login failed."
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/auth/logout": {
+            "post": {
+                "tags": [
+                    "auth"
+                ],
+                "summary": "The route for logout.",
+                "responses": {
+                    "200": {
+                        "description": "OK.",
+                        "content": {
+                            "application/json":{
+                                "schema":{
+                                    "type": "object",
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "OK"
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }
