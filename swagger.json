@@ -2,8 +2,8 @@
     "openapi": "3.0.3",
     "info": {
         "version": "0.1.0",
-        "description": "The Swagger Documenatation for administractor API",
-        "title": "NuOJ administractor API documentation"
+        "description": "The Swagger Documenatation for development",
+        "title": "NuOJ development API documentation"
     },
     "paths": {
         "/api/heartbeat": {
