@@ -444,6 +444,10 @@
         },
         "/api/auth/setup_handle": {
             "post": {
+                "tags": [
+                    "auth"
+                ],
+                "summary": "The route to setup the handle.",
                 "parameters": [
                     {
                         "name": "hs",
@@ -542,6 +546,83 @@
                                         "message": {
                                             "type": "string",
                                             "example": "Invalid handle."
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/auth/resend_email": {
+            "post": {
+                "tags": [
+                    "auth"
+                ],
+                "summary": "The route to resend the email.",
+                "parameters": [
+                    {
+                        "name": "account",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/message_ok"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Account parameter is absent.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Account parameter is absent."
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Mail verification is disabled.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Mail verification is disabled."
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Account is absent.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Account is absent."
                                         }
                                     }
                                 }
