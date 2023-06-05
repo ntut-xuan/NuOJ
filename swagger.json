@@ -673,6 +673,50 @@
                         }
                     }
                 }
+            },
+            "put": {
+                "summary": "The route to modify the profile with specific handle.",
+                "tags": [
+                    "profile"
+                ],
+                "parameters": [
+                    {
+                        "name": "handle",
+                        "in": "path",
+                        "description": "The specific handle"
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "school": {
+                                        "type": "string",
+                                        "example": "ntut"
+                                    },
+                                    "bio": {
+                                        "type": "string",
+                                        "example": "Hi I'm another bio."
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/message_ok"
+                                }
+                            }
+                        }
+                    }
+                }
             }
         },
         "/api/profile/{handle}/avatar": {
