@@ -642,7 +642,11 @@
                     {
                         "name": "handle",
                         "in": "path",
-                        "description": "The specific handle."
+                        "description": "The specific handle.",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
                     }
                 ],
                 "responses": {
@@ -683,7 +687,11 @@
                     {
                         "name": "handle",
                         "in": "path",
-                        "description": "The specific handle"
+                        "description": "The specific handle",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
                     }
                 ],
                 "requestBody": {
@@ -729,7 +737,11 @@
                     {
                         "name": "handle",
                         "in": "path",
-                        "description": "The specific handle."
+                        "description": "The specific handle.",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
                     }
                 ],
                 "responses": {
