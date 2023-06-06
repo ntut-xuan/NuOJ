@@ -955,6 +955,64 @@
                     }
                 }
             }
+        },
+        "/api/submit": {
+            "post": {
+                "summary": "The route to submit the code.",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/submit_requestbody"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "$ref": "#/components/responses/200_message_ok"
+                    },
+                    "400": {
+                        "$ref": "#/components/responses/400_incorrect_format"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/401_authentication_required"
+                    },
+                    "403": {
+                        "description": "The problem with specific ID is unavailable.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "The problem with specific ID is unavailable."
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "The problem ID is invalid.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "The problem with spcific ID is invalid."
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
     },
     "components": {
@@ -1148,6 +1206,23 @@
                                 "example": "Laboris deserunt commodo dolore eu officia amet veniam tempor est duis do adipisicing."
                             }
                         }
+                    }
+                }
+            },
+            "submit_requestbody": {
+                "type": "object",
+                "properties": {
+                    "code": {
+                        "type": "string",
+                        "example": "print('Hello World')"
+                    },
+                    "compiler": {
+                        "type": "string",
+                        "example": "C++14 (g++)"
+                    },
+                    "problem_id": {
+                        "type": "integer",
+                        "example": 1
                     }
                 }
             }
