@@ -654,6 +654,63 @@
                         }
                     }
                 }
+            },
+            "put": {
+                "summary": "The route to update the avatar of the specific handle.",
+                "tags": [
+                    "profile"
+                ],
+                "parameters": [
+                    {
+                        "name": "handle",
+                        "in": "path",
+                        "description": "The specific handle.",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "$ref": "#/components/responses/200_message_ok"
+                    },
+                    "400": {
+                        "description": "The payload has been forbidden by the server.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "The payload is not the image."
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/401_authentication_required"
+                    },
+                    "403": {
+                        "description": "No permission to change the user's personal information.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "No permission to change the user's personal information."
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
     },
@@ -810,7 +867,7 @@
                             "properties": {
                                 "message": {
                                     "type": "string",
-                                    "example": "Permission Denied. The JWT is invalid or the logined account is no permission to edit the profile."
+                                    "example": "Authentication required."
                                 }
                             }
                         }
