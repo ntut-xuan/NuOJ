@@ -1,9 +1,18 @@
 import io
 from http import HTTPStatus
 
-from flask import Blueprint, Response, make_response, send_file
+from flask import Blueprint, Response, make_response, request, send_file
 
-from api.profile.validator import user_should_exists_or_return_http_status_forbidden
+from api.auth.validator import (
+    validate_jwt_is_exists_or_return_unauthorized,
+    validate_jwt_is_valid_or_return_unauthorized
+)
+from api.profile.validator import (
+    operator_should_be_owner_or_return_http_status_forbidden,
+    payload_should_have_correct_format_or_return_http_status_bad_request,
+    user_should_exists_or_return_http_status_forbidden,
+)
+from database import db
 from models import Profile, User
 from storage.util import TunnelCode, is_file_exists, read_file_bytes
 from util import make_simple_error_response
@@ -27,6 +36,24 @@ def fetch_profile(name: str) -> Response:
     }
 
     return make_response(payload)
+
+@profile_bp.route("/<string:name>", methods=["PUT"])
+@user_should_exists_or_return_http_status_forbidden
+@payload_should_have_correct_format_or_return_http_status_bad_request
+@validate_jwt_is_exists_or_return_unauthorized
+@validate_jwt_is_valid_or_return_unauthorized
+@operator_should_be_owner_or_return_http_status_forbidden
+def update_profile(name: str) -> Response:
+    profile: Profile = _get_profile_by_name(name)
+    payload: dict[str, str] | None = request.get_json(silent=True)
+
+    assert payload is not None
+
+    for key, value in payload.items():
+        setattr(profile, key, value)
+    
+    db.session.commit()
+    return make_response({"message": "OK"})
 
 
 @profile_bp.route("/<string:name>/avatar", methods=["GET"])
