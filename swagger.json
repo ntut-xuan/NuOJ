@@ -686,7 +686,7 @@
                         "$ref": "#/components/responses/200_message_ok"
                     },
                     "400": {
-                        "description": "The payload has been forbidden by the server.",
+                        "description": "The payload has been forbidden by the server, or the account with specific handle is absent",
                         "content": {
                             "application/json": {
                                 "schema": {
