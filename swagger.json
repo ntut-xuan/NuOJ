@@ -587,7 +587,10 @@
                         "$ref": "#/components/responses/400_incorrect_format"
                     },
                     "401": {
-                        "description": "Permission Denied. The JWT is invalid or the logined account is no permission to edit the profile.",
+                        "$ref": "#/components/responses/401_authentication_required"
+                    },
+                    "403": {
+                        "description": "No permission to change the user's personal information.",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -595,7 +598,7 @@
                                     "properties": {
                                         "message": {
                                             "type": "string",
-                                            "example": "Permission Denied. The JWT is invalid or the logined account is no permission to edit the profile."
+                                            "example": "No permission to change the user's personal information."
                                         }
                                     }
                                 }
@@ -792,6 +795,22 @@
                                 "message": {
                                     "type": "string",
                                     "example": "Absent code."
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "401_authentication_required": {
+                "description": "Authentication required.",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "message": {
+                                    "type": "string",
+                                    "example": "Permission Denied. The JWT is invalid or the logined account is no permission to edit the profile."
                                 }
                             }
                         }
