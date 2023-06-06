@@ -722,6 +722,239 @@
                     }
                 }
             }
+        },
+        "/api/problem/{problem_id}": {
+            "get": {
+                "summary": "The route to get the problem.",
+                "tags": [
+                    "problem"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/problem_response"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid problem ID or problem is absent.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Invalid problem ID."
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "No permission to access the problem.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "No permission to access the problem."
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "summary": "The route to update the problem",
+                "tags": [
+                    "problem"
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/problem_requestbody"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "$ref": "#/components/responses/200_message_ok"
+                    },
+                    "400": {
+                        "description": "The problem with specific problem ID is absent, the format of the payload is invalid, or the problem ID is invalid.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "The problem with specific problem ID is absent, or the problem ID is invalid."
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/401_authentication_required"
+                    },
+                    "403": {
+                        "description": "Permission denied.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Permission denied."
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Invalid time limit or memory limit, or the limit in the payload is reach the max limit.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Invalid time limit or memory limit, or the limit in the payload is reach the max limit."
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "summary": "The route to delete the problem.",
+                "tags": [
+                    "problem"
+                ],
+                "responses": {
+                    "200": {
+                        "$ref": "#/components/responses/200_message_ok"
+                    },
+                    "400": {
+                        "description": "Invalid problem ID or the problem with specific ID is absent.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Invalid problem ID or the problem with specific ID is absent."
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401":{
+                        "$ref": "#/components/responses/401_authentication_required"
+                    }
+                }
+            }
+        },
+        "/api/problem": {
+            "get": {
+                "summary": "The route to get all the problem.",
+                "tags": [
+                    "problem"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/problem_response"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "summary": "The route to add the problem.",
+                "tags": [
+                    "problem"
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/problem_requestbody"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "$ref": "#/components/responses/200_message_ok"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/401_authentication_required"
+                    },
+                    "403": {
+                        "description": "Permission denied.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Permission denied."
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Invalid time limit or memory limit, or the limit in the payload is reach the max limit.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Invalid time limit or memory limit, or the limit in the payload is reach the max limit."
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
     },
     "components": {
@@ -821,6 +1054,100 @@
                     "message": {
                         "type": "string",
                         "example": "OK."
+                    }
+                }
+            },
+            "problem_response": {
+                "type": "object",
+                "properties": {
+                    "header": {
+                        "type": "object",
+                        "properties": {
+                            "problem_pid": {
+                                "type": "string",
+                                "example": "66570e6a-dd25-4461-8af7-d51aacba3c02"
+                            },
+                            "title": {
+                                "type": "string",
+                                "example": "Example Problem"
+                            },
+                            "time_limit": {
+                                "type": "integer",
+                                "description": "The time limit in seconds.",
+                                "example": 5
+                            },
+                            "memory_limit": {
+                                "type": "integer",
+                                "description": "The memory limit in kilobytes.",
+                                "example": 131072
+                            }
+                        }
+                    },
+                    "content": {
+                        "type": "object",
+                        "properties": {
+                            "description": {
+                                "type": "string",
+                                "example": "Nulla quis ad fugiat ullamco sit eu culpa laboris nisi nostrud cupidatat mollit."
+                            },
+                            "input_description": {
+                                "type": "string",
+                                "example": "Aliquip est commodo dolore laborum tempor minim enim culpa commodo qui consectetur."
+                            },
+                            "output_description": {
+                                "type": "string",
+                                "example": "Sit excepteur et irure laboris cillum anim aliqua laborum."
+                            },
+                            "note": {
+                                "type": "string",
+                                "example": "Laboris deserunt commodo dolore eu officia amet veniam tempor est duis do adipisicing."
+                            }
+                        }
+                    }
+                }
+            },
+            "problem_requestbody": {
+                "type": "object",
+                "properties": {
+                    "header": {
+                        "type": "object",
+                        "properties": {
+                            "title": {
+                                "type": "string",
+                                "example": "Example Problem"
+                            },
+                            "time_limit": {
+                                "type": "integer",
+                                "description": "The time limit in seconds.",
+                                "example": 5
+                            },
+                            "memory_limit": {
+                                "type": "integer",
+                                "description": "The memory limit in kilobytes.",
+                                "example": 131072
+                            }
+                        }
+                    },
+                    "content": {
+                        "type": "object",
+                        "properties": {
+                            "description": {
+                                "type": "string",
+                                "example": "Nulla quis ad fugiat ullamco sit eu culpa laboris nisi nostrud cupidatat mollit."
+                            },
+                            "input_description": {
+                                "type": "string",
+                                "example": "Aliquip est commodo dolore laborum tempor minim enim culpa commodo qui consectetur."
+                            },
+                            "output_description": {
+                                "type": "string",
+                                "example": "Sit excepteur et irure laboris cillum anim aliqua laborum."
+                            },
+                            "note": {
+                                "type": "string",
+                                "example": "Laboris deserunt commodo dolore eu officia amet veniam tempor est duis do adipisicing."
+                            }
+                        }
                     }
                 }
             }
