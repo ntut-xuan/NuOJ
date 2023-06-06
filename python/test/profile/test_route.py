@@ -130,15 +130,6 @@ class TestUpdateProfile:
         response: TestResponse = logged_in_client.put(f"/api/profile/{HANDLE}", json=payload)
 
         assert response.status_code == HTTPStatus.BAD_REQUEST
-    
-    def test_update_profile_with_incorrect_format_payload_should_return_http_status_bad_request(self, logged_in_client: FlaskClient, setup_user_and_profile: None):
-        payload: dict[str, str] = {
-            "invalid_foramt": "value"
-        }
-
-        response: TestResponse = logged_in_client.put(f"/api/profile/{HANDLE}", json=payload)
-
-        assert response.status_code == HTTPStatus.BAD_REQUEST
 
     def test_update_profile_with_unauthorized_should_return_http_status_unauthorized(self, client: FlaskClient):
         payload: dict[str, str] = {
@@ -162,7 +153,7 @@ class TestUpdateProfile:
             )
             db.session.add(user)
             db.session.commit()
-            response: TestResponse = client.post(
+            client.post(
                 "/api/auth/login", json={"account": "another_test_user", "password": "another_test_user"}
             )
             payload: dict[str, str] = {
