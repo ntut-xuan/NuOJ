@@ -18,32 +18,34 @@ BIO: Final[str] = "Hi I'm testing user"
 IMG_TYPE: Final[str] = "jpg"
 ROLE: Final[int] = 1
 
+
+@pytest.fixture()
+def setup_user_and_profile(app: Flask):
+    with app.app_context():
+        user: User = User(
+            user_uid=USER_UID,
+            handle=HANDLE,
+            password="1160130875fda0812c99c5e3f1a03516471a6370c4f97129b221938eb4763e63",  # SHA256(test_user)
+            email=EMAIL,
+            role=ROLE,
+            email_verified=1,
+        )
+        db.session.add(user)
+        db.session.flush()
+
+        profile: Profile = Profile(
+            user_uid=USER_UID,
+            img_type=IMG_TYPE,
+            email=EMAIL,
+            school=SCHOOL,
+            bio=BIO,
+        )
+
+        db.session.add(profile)
+        db.session.commit()
+
+
 class TestProfileRoute:
-    @pytest.fixture()
-    def setup_user_and_profile(self, app: Flask):
-        with app.app_context():
-            user: User = User(
-                user_uid=USER_UID,
-                handle=HANDLE,
-                password="1160130875fda0812c99c5e3f1a03516471a6370c4f97129b221938eb4763e63",  # SHA256(test_user)
-                email=EMAIL,
-                role=ROLE,
-                email_verified=1,
-            )
-            db.session.add(user)
-            db.session.flush()
-
-            profile: Profile = Profile(
-                user_uid=USER_UID,
-                img_type=IMG_TYPE,
-                email=EMAIL,
-                school=SCHOOL,
-                bio=BIO,
-            )
-
-            db.session.add(profile)
-            db.session.commit()
-
     def test_fetch_profile_should_return_correct_profile_response(
         self, client: FlaskClient, setup_user_and_profile: None
     ):
@@ -88,3 +90,64 @@ class TestProfileRoute:
         response: TestResponse = client.get("/api/profile/test_user/avatar")
 
         assert response.status_code == HTTPStatus.FORBIDDEN
+
+class TestUpdateProfile:
+    def test_update_profile_with_valid_payload_should_return_http_status_ok(self, app: Flask, logged_in_client: FlaskClient, setup_user_and_profile: None):
+        payload: dict[str, str] = {
+            "school": "new_school",
+            "bio": "Hi this is a new bio."
+        }
+
+        response: TestResponse = logged_in_client.put(f"/api/profile/{HANDLE}", json=payload)
+
+        assert response.status_code == HTTPStatus.OK
+
+    def test_update_profile_with_partial_payload_should_return_http_status_ok(self, app: Flask, logged_in_client: FlaskClient, setup_user_and_profile: None):
+        payload: dict[str, str] = {
+            "school": "new_school",
+        }
+
+        response: TestResponse = logged_in_client.put(f"/api/profile/{HANDLE}", json=payload)
+
+        assert response.status_code == HTTPStatus.OK
+
+    def test_update_profile_with_valid_payload_should_update_the_payload(self, app: Flask, logged_in_client: FlaskClient, setup_user_and_profile: None):
+        payload: dict[str, str] = {
+            "school": "new_school",
+            "bio": "Hi this is a new bio."
+        }
+
+        logged_in_client.put(f"/api/profile/{HANDLE}", json=payload)
+
+        with app.app_context():
+            profile: Profile = Profile.query.filter_by(user_uid=USER_UID).first()
+            assert profile.school == payload["school"]
+            assert profile.bio == payload["bio"]
+
+    def test_update_profile_with_incorrect_format_payload_should_update_the_payload(self, logged_in_client: FlaskClient, setup_user_and_profile: None):
+        payload: dict[str, str] = {
+            "invalid_foramt": "value"
+        }
+
+        response: TestResponse = logged_in_client.put(f"/api/profile/{HANDLE}", json=payload)
+
+        assert response.status_code == HTTPStatus.BAD_REQUEST
+    
+    def test_update_profile_with_incorrect_format_payload_should_update_the_payload(self, logged_in_client: FlaskClient, setup_user_and_profile: None):
+        payload: dict[str, str] = {
+            "invalid_foramt": "value"
+        }
+
+        response: TestResponse = logged_in_client.put(f"/api/profile/{HANDLE}", json=payload)
+
+        assert response.status_code == HTTPStatus.BAD_REQUEST
+
+    def test_update_profile_with_unauthorized_should_update_the_payload(self, client: FlaskClient):
+        payload: dict[str, str] = {
+            "school": "new_school",
+            "bio": "Hi this is a new bio."
+        }
+
+        response: TestResponse = client.put(f"/api/profile/{HANDLE}", json=payload)
+
+        assert response.status_code == HTTPStatus.UNAUTHORIZED
