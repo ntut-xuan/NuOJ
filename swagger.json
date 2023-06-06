@@ -14,14 +14,7 @@
                 "summary": "The route for checking the heartbeat of the system.",
                 "responses": {
                     "200": {
-                        "description": "OK.",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/heartbeat_response"
-                                }
-                            }
-                        }
+                        "$ref": "#/components/responses/200_message_ok"
                     }
                 }
             }
@@ -43,30 +36,10 @@
                 },
                 "responses": {
                     "200": {
-                        "description": "OK.",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/message_ok"
-                                }
-                            }
-                        }
+                        "$ref": "#/components/responses/200_message_ok"
                     },
                     "400": {
-                        "description": "The format of the payload is incorrect.",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "The format of the payload is incorrect."
-                                        }
-                                    }
-                                }
-                            }
-                        }
+                        "$ref": "#/components/responses/400_incorrect_format"
                     },
                     "401": {
                         "description": "The mail verification enabled but mail is not verify.",
@@ -120,30 +93,10 @@
                 },
                 "responses": {
                     "200": {
-                        "description": "OK.",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/message_ok"
-                                }
-                            }
-                        }
+                        "$ref": "#/components/responses/200_message_ok"
                     },
                     "400": {
-                        "description": "The format of the payload is incorrect.",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "The format of the payload is incorrect."
-                                        }
-                                    }
-                                }
-                            }
-                        }
+                        "$ref": "#/components/responses/400_incorrect_format"
                     },
                     "403": {
                         "description": "The email or the handle is repeated.",
@@ -188,14 +141,7 @@
                 "summary": "The info of the OAuth.",
                 "responses": {
                     "200": {
-                        "description": "OK.",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/oauth_info_response"
-                                }
-                            }
-                        }
+                        "$ref": "#/components/responses/200_message_ok"
                     }
                 }
             }
@@ -208,14 +154,7 @@
                 "summary": "The route to verify the JWT cookie.",
                 "responses": {
                     "200": {
-                        "description": "OK.",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/message_ok"
-                                }
-                            }
-                        }
+                        "$ref": "#/components/responses/200_message_ok"
                     },
                     "403": {
                         "description": "The jwt is invalid.",
@@ -257,20 +196,7 @@
                         "description": "OK. It should redirect to the setup page to setup the handle or the index page."
                     },
                     "400": {
-                        "description": "The code is absent.",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Absent code."
-                                        }
-                                    }
-                                }
-                            }
-                        }
+                        "$ref": "#/components/responses/400_absent_code"
                     },
                     "403": {
                         "description": "GitHub OAuth login failed.",
@@ -320,20 +246,7 @@
                         "description": "OK. It should redirect to the setup page to setup the handle or the index page."
                     },
                     "400": {
-                        "description": "The code is absent.",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Absent code."
-                                        }
-                                    }
-                                }
-                            }
-                        }
+                        "$ref": "#/components/responses/400_absent_code"
                     },
                     "403": {
                         "description": "Google OAuth login failed.",
@@ -408,20 +321,7 @@
                         }
                     },
                     "400": {
-                        "description": "Absent code.",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Absent code."
-                                        }
-                                    }
-                                }
-                            }
-                        }
+                        "$ref": "#/components/responses/400_absent_code"
                     },
                     "422": {
                         "description": "Invalid code.",
@@ -479,30 +379,10 @@
                 },
                 "responses": {
                     "200": {
-                        "description": "OK.",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/message_ok"
-                                }
-                            }
-                        }
+                        "$ref": "#/components/responses/200_message_ok"
                     },
                     "400": {
-                        "description": "The format of the payload is incorrect.",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "The format of the payload is incorrect."
-                                        }
-                                    }
-                                }
-                            }
-                        }
+                        "$ref": "#/components/responses/400_incorrect_format"
                     },
                     "401": {
                         "description": "HS cookie is invalid.",
@@ -572,14 +452,7 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK.",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/message_ok"
-                                }
-                            }
-                        }
+                        "$ref": "#/components/responses/200_message_ok"
                     },
                     "400": {
                         "description": "Account parameter is absent.",
@@ -651,14 +524,7 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK.",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/profile_handle_response"
-                                }
-                            }
-                        }
+                        "$ref": "#/components/responses/200_message_ok"
                     },
                     "403": {
                         "description": "Absent user.",
@@ -715,11 +581,23 @@
                 },
                 "responses": {
                     "200": {
-                        "description": "OK.",
+                        "$ref": "#/components/responses/200_message_ok"
+                    },
+                    "400": {
+                        "$ref": "#/components/responses/400_incorrect_format"
+                    },
+                    "401": {
+                        "description": "Permission Denied. The JWT is invalid or the logined account is no permission to edit the profile.",
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/message_ok"
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Permission Denied. The JWT is invalid or the logined account is no permission to edit the profile."
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -873,6 +751,50 @@
                     "message": {
                         "type": "string",
                         "example": "OK."
+                    }
+                }
+            }
+        },
+        "responses": {
+            "200_message_ok": {
+                "description": "OK.",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "$ref": "#/components/schemas/message_ok"
+                        }
+                    }
+                }
+            },
+            "400_incorrect_format": {
+                "description": "The format of the payload is incorrect.",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "message": {
+                                    "type": "string",
+                                    "example": "The format of the payload is incorrect."
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "400_absent_code": {
+                "description": "Absent code.",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "message": {
+                                    "type": "string",
+                                    "example": "Absent code."
+                                }
+                            }
+                        }
                     }
                 }
             }
