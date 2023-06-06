@@ -671,6 +671,16 @@
                         }
                     }
                 ],
+                "requestBody": {
+                    "content": {
+                        "image/*": {
+                            "schema": {
+                                "type": "object",
+                                "format": "binary"
+                            }
+                        }
+                    }
+                },
                 "responses": {
                     "200": {
                         "$ref": "#/components/responses/200_message_ok"
