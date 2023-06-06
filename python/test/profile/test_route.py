@@ -203,6 +203,13 @@ class TestUpdateProfileAvatar:
             avatar_bytes: bytes = read_file_bytes(f"{USER_UID}.png", TunnelCode.USER_AVATER)
             assert avatar_bytes == get_testing_image_bytes
 
+    def test_update_profile_avatar_with_invalid_image_should_return_http_status_bad_request(self, logged_in_client: FlaskClient, setup_user_and_profile: None, setup_image: None, get_testing_image_bytes: bytes):
+        invalid_image = b"<php>"
+        
+        response: TestResponse = logged_in_client.put(f"/api/profile/{HANDLE}/avatar", data=invalid_image)
+
+        assert response.status_code == HTTPStatus.BAD_REQUEST
+
     def test_update_profile_avatar_with_unauthorized_should_return_http_status_unauthorized(self, client: FlaskClient, get_testing_image_bytes: bytes):
         response: TestResponse = client.put(f"/api/profile/{HANDLE}/avatar", data=get_testing_image_bytes)
 
