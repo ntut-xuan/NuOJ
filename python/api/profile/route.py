@@ -3,9 +3,14 @@ from http import HTTPStatus
 
 from flask import Blueprint, Response, make_response, request, send_file
 
+from api.auth.validator import (
+    validate_jwt_is_exists_or_return_unauthorized,
+    validate_jwt_is_valid_or_return_unauthorized
+)
 from api.profile.validator import (
+    operator_should_be_owner_or_return_http_status_forbidden,
     payload_should_have_correct_format_or_return_http_status_bad_request,
-    user_should_exists_or_return_http_status_forbidden
+    user_should_exists_or_return_http_status_forbidden,
 )
 from database import db
 from models import Profile, User
@@ -35,6 +40,9 @@ def fetch_profile(name: str) -> Response:
 @profile_bp.route("/<string:name>", methods=["PUT"])
 @user_should_exists_or_return_http_status_forbidden
 @payload_should_have_correct_format_or_return_http_status_bad_request
+@validate_jwt_is_exists_or_return_unauthorized
+@validate_jwt_is_valid_or_return_unauthorized
+@operator_should_be_owner_or_return_http_status_forbidden
 def update_profile(name: str) -> Response:
     profile: Profile = _get_profile_by_name(name)
     payload: dict[str, str] | None = request.get_json(silent=True)

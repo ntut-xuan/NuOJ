@@ -10,29 +10,27 @@ from database import db
 from models import Profile, User
 from storage.util import TunnelCode, write_file_bytes
 
-USER_UID: Final[str] = "1490c454-4903-4df6-8321-3125092004a7"
-HANDLE: Final[str] = "test_user"
-EMAIL: Final[str] = "test_user@nuoj.test"
+USER_UID = ""
+HANDLE: Final[str] = "test_account"
+EMAIL: Final[str] = "test_account@nuoj.test"
 SCHOOL: Final[str] = "ntut"
 BIO: Final[str] = "Hi I'm testing user"
 IMG_TYPE: Final[str] = "jpg"
 ROLE: Final[int] = 1
 
+@pytest.fixture(autouse=True)
+def get_user_uid(app: Flask):
+    with app.app_context():
+        global USER_UID
+        user: User | None = User.query.filter_by(handle=HANDLE).first()
+        
+        assert user is not None
+
+        USER_UID = user.user_uid
 
 @pytest.fixture()
 def setup_user_and_profile(app: Flask):
     with app.app_context():
-        user: User = User(
-            user_uid=USER_UID,
-            handle=HANDLE,
-            password="1160130875fda0812c99c5e3f1a03516471a6370c4f97129b221938eb4763e63",  # SHA256(test_user)
-            email=EMAIL,
-            role=ROLE,
-            email_verified=1,
-        )
-        db.session.add(user)
-        db.session.flush()
-
         profile: Profile = Profile(
             user_uid=USER_UID,
             img_type=IMG_TYPE,
@@ -111,7 +109,7 @@ class TestUpdateProfile:
 
         assert response.status_code == HTTPStatus.OK
 
-    def test_update_profile_with_valid_payload_should_update_the_payload(self, app: Flask, logged_in_client: FlaskClient, setup_user_and_profile: None):
+    def test_update_profile_with_valid_payload_should_update_the_profile(self, app: Flask, logged_in_client: FlaskClient, setup_user_and_profile: None):
         payload: dict[str, str] = {
             "school": "new_school",
             "bio": "Hi this is a new bio."
@@ -124,7 +122,7 @@ class TestUpdateProfile:
             assert profile.school == payload["school"]
             assert profile.bio == payload["bio"]
 
-    def test_update_profile_with_incorrect_format_payload_should_update_the_payload(self, logged_in_client: FlaskClient, setup_user_and_profile: None):
+    def test_update_profile_with_incorrect_format_payload_should_return_http_status_bad_request(self, logged_in_client: FlaskClient, setup_user_and_profile: None):
         payload: dict[str, str] = {
             "invalid_foramt": "value"
         }
@@ -133,7 +131,7 @@ class TestUpdateProfile:
 
         assert response.status_code == HTTPStatus.BAD_REQUEST
     
-    def test_update_profile_with_incorrect_format_payload_should_update_the_payload(self, logged_in_client: FlaskClient, setup_user_and_profile: None):
+    def test_update_profile_with_incorrect_format_payload_should_return_http_status_bad_request(self, logged_in_client: FlaskClient, setup_user_and_profile: None):
         payload: dict[str, str] = {
             "invalid_foramt": "value"
         }
@@ -142,7 +140,7 @@ class TestUpdateProfile:
 
         assert response.status_code == HTTPStatus.BAD_REQUEST
 
-    def test_update_profile_with_unauthorized_should_update_the_payload(self, client: FlaskClient):
+    def test_update_profile_with_unauthorized_should_return_http_status_unauthorized(self, client: FlaskClient):
         payload: dict[str, str] = {
             "school": "new_school",
             "bio": "Hi this is a new bio."
@@ -151,3 +149,27 @@ class TestUpdateProfile:
         response: TestResponse = client.put(f"/api/profile/{HANDLE}", json=payload)
 
         assert response.status_code == HTTPStatus.UNAUTHORIZED
+
+    def test_update_profile_with_not_owner_should_return_http_status_unauthorized(self, app: Flask, client: FlaskClient):
+        with app.app_context():
+            user: User = User(
+                user_uid="d08afcd4-2b7e-4d2f-899e-abad4b76fa2a",
+                handle="another_test_user",
+                password="e8bf178f625d581191a6bbe4581a0c6779f78bd0ed72ed75c0675777fdbdf2dd", # sha256(another_test_user)
+                email="another_test_user@nuoj.net",
+                role=0,
+                email_verified=1
+            )
+            db.session.add(user)
+            db.session.commit()
+            response: TestResponse = client.post(
+                "/api/auth/login", json={"account": "another_test_user", "password": "another_test_user"}
+            )
+            payload: dict[str, str] = {
+                "school": "new_school",
+                "bio": "Hi this is a new bio."
+            }
+
+            response: TestResponse = client.put(f"/api/profile/{HANDLE}", json=payload)
+
+            assert response.status_code == HTTPStatus.FORBIDDEN
