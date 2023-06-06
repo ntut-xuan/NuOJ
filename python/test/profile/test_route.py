@@ -1,14 +1,17 @@
 from http import HTTPStatus
+from io import BytesIO
+from pathlib import Path
 from typing import Final
 
 import pytest
-from flask import Flask
+from flask import Flask, current_app
 from flask.testing import FlaskClient
+from PIL import Image
 from werkzeug.test import TestResponse
 
 from database import db
 from models import Profile, User
-from storage.util import TunnelCode, write_file_bytes
+from storage.util import TunnelCode, read_file_bytes, write_file_bytes
 
 USER_UID = ""
 HANDLE: Final[str] = "test_account"
@@ -164,5 +167,70 @@ class TestUpdateProfile:
             }
 
             response: TestResponse = client.put(f"/api/profile/{HANDLE}", json=payload)
+
+            assert response.status_code == HTTPStatus.FORBIDDEN
+
+
+class TestUpdateProfileAvatar:
+    @pytest.fixture()
+    def setup_image(self, app: Flask):
+        with app.app_context():
+            write_file_bytes(
+                f"{USER_UID}.{IMG_TYPE}", b'testing_bytes', TunnelCode.USER_AVATER
+            )
+
+    @pytest.fixture()
+    def get_testing_image_bytes(self) -> bytes:
+        image: Image = Image.new("RGB", (10, 10))
+        image_binary = BytesIO()
+        image.save(image_binary, format='PNG')
+
+        return image_binary.getvalue()
+
+    def test_update_profile_avatar_with_valid_avatar_should_return_http_status_ok(self, logged_in_client: FlaskClient, setup_user_and_profile: None, setup_image: None, get_testing_image_bytes: bytes):
+        image: Image = Image.new("RGB", (10, 10))
+        image_binary = BytesIO()
+        image.save(image_binary, format='PNG')
+        
+        response: TestResponse = logged_in_client.put(f"/api/profile/{HANDLE}/avatar", data=get_testing_image_bytes)
+
+        assert response.status_code == HTTPStatus.OK
+
+    def test_update_profile_avatar_with_valid_avatar_should_update_the_image(self, app: Flask, logged_in_client: FlaskClient, setup_user_and_profile: None, setup_image: None, get_testing_image_bytes: bytes):
+        logged_in_client.put(f"/api/profile/{HANDLE}/avatar", data=get_testing_image_bytes)
+
+        with app.app_context():
+            avatar_bytes: bytes = read_file_bytes(f"{USER_UID}.png", TunnelCode.USER_AVATER)
+            assert avatar_bytes == get_testing_image_bytes
+
+    def test_update_profile_avatar_with_invalid_image_should_return_http_status_bad_request(self, logged_in_client: FlaskClient, setup_user_and_profile: None, setup_image: None, get_testing_image_bytes: bytes):
+        invalid_image = b"<php>"
+        
+        response: TestResponse = logged_in_client.put(f"/api/profile/{HANDLE}/avatar", data=invalid_image)
+
+        assert response.status_code == HTTPStatus.BAD_REQUEST
+
+    def test_update_profile_avatar_with_unauthorized_should_return_http_status_unauthorized(self, client: FlaskClient, get_testing_image_bytes: bytes):
+        response: TestResponse = client.put(f"/api/profile/{HANDLE}/avatar", data=get_testing_image_bytes)
+
+        assert response.status_code == HTTPStatus.UNAUTHORIZED
+    
+    def test_update_profile_avatar_with_not_owner_should_return_http_status_forbidden(self, app: Flask, client: FlaskClient, get_testing_image_bytes: bytes):
+        with app.app_context():
+            user: User = User(
+                    user_uid="d08afcd4-2b7e-4d2f-899e-abad4b76fa2a",
+                    handle="another_test_user",
+                    password="e8bf178f625d581191a6bbe4581a0c6779f78bd0ed72ed75c0675777fdbdf2dd", # sha256(another_test_user)
+                    email="another_test_user@nuoj.net",
+                    role=0,
+                    email_verified=1
+                )
+            db.session.add(user)
+            db.session.commit()
+            client.post(
+                "/api/auth/login", json={"account": "another_test_user", "password": "another_test_user"}
+            )
+            
+            response: TestResponse = client.put(f"/api/profile/{HANDLE}/avatar", data=get_testing_image_bytes)
 
             assert response.status_code == HTTPStatus.FORBIDDEN

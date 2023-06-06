@@ -1,9 +1,11 @@
 from dataclasses import dataclass
 from functools import wraps
+from io import BytesIO
 from http import HTTPStatus
 from typing import Any, Callable, Final, TypeVar
 
 from flask import Response, current_app, request
+from PIL import Image
 
 from api.auth.auth_util import (
     HS256JWTCodec
@@ -76,5 +78,21 @@ def operator_should_be_owner_or_return_http_status_forbidden(
         if jwt_data["handle"] != kwargs["name"]:
             return make_simple_error_response(HTTPStatus.FORBIDDEN, "No permission to change the user's personal information.")
 
+        return func(*args, **kwargs)
+    return wrapper
+
+
+def validate_image_or_return_bad_request(
+    func: Callable[..., Response | T]
+) -> Callable[..., Response | T]:
+    @wraps(func)
+    def wrapper(*args, **kwargs) -> Response | T:
+        data: bytes = request.data
+        try:
+            image: Image = Image.open(BytesIO(data))
+            image.verify()
+        except Exception:
+            return make_simple_error_response(HTTPStatus.BAD_REQUEST, "The payload has been forbidden by the server.")
+        
         return func(*args, **kwargs)
     return wrapper
