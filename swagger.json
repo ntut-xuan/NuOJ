@@ -813,20 +813,7 @@
                         "$ref": "#/components/responses/401_authentication_required"
                     },
                     "403": {
-                        "description": "Permission denied.",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Permission denied."
-                                        }
-                                    }
-                                }
-                            }
-                        }
+                        "$ref": "#/components/responses/403_permission_denied"
                     },
                     "422": {
                         "description": "Invalid time limit or memory limit, or the limit in the payload is reach the max limit.",
@@ -922,20 +909,7 @@
                         "$ref": "#/components/responses/401_authentication_required"
                     },
                     "403": {
-                        "description": "Permission denied.",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Permission denied."
-                                        }
-                                    }
-                                }
-                            }
-                        }
+                        "$ref": "#/components/responses/403_permission_denied"
                     },
                     "422": {
                         "description": "Invalid time limit or memory limit, or the limit in the payload is reach the max limit.",
@@ -1163,8 +1137,17 @@
                         }
                     },
                     "author": {
-                        "type": "string",
-                        "example": "test_account"
+                        "type": "object",
+                        "properties": {
+                            "user_uid": {
+                                "type": "string",
+                                "example": "8d828772-50a5-4496-8114-0bf64132c125"
+                            },
+                            "handle": {
+                                "type": "string",
+                                "example": "test_account"
+                            }
+                        }
                     }
                 }
             },
@@ -1284,6 +1267,22 @@
                                 "message": {
                                     "type": "string",
                                     "example": "Authentication required."
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "403_permission_denied": {
+                "description": "Permission denied.",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "message": {
+                                    "type": "string",
+                                    "example": "Permission denied."
                                 }
                             }
                         }
