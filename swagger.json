@@ -1161,6 +1161,10 @@
                                 "example": "Laboris deserunt commodo dolore eu officia amet veniam tempor est duis do adipisicing."
                             }
                         }
+                    },
+                    "author": {
+                        "type": "string",
+                        "example": "test_account"
                     }
                 }
             },
