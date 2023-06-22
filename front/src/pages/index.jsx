@@ -1,7 +1,7 @@
 import { NavBar } from "../share/navbar";
 import ntut_logo from '/ntut_logo.png'
 import bgUrl from '/index.jpg'
-import './index.css'
+import '../assets/index.css'
 
 const Index = () =>(
     <div className={`absolute h-full w-full bg-cover`} style={{ backgroundImage: `url(${bgUrl})`}}>
