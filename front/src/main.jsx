@@ -2,6 +2,7 @@ import { createRoot } from 'react-dom/client'
 import React,{ Suspense } from 'react'
 import { BrowserRouter as Router, useRoutes } from "react-router-dom";
 import routes from '~react-pages'
+import { AuthProvider } from './share/auth';
 
 const root = createRoot(document.getElementById("root"))
 
@@ -16,9 +17,11 @@ const Main = () =>{
 
 const renderPage = () => {
   root.render(
-        <Router>
-          <Main/>
-        </Router>
+    <AuthProvider>
+      <Router>
+        <Main/>
+      </Router>
+    </AuthProvider>
   )
 }
 

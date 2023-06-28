@@ -12,6 +12,7 @@ const Index = () =>(
                     {title: '關於', href: "/about"},
                     {title: '狀態', href: '/status'}
                 ]}
+                style={"p-10 w-full flex justify-between"}
             />
             <div className="absolute left-[50%] top-[50%] -translate-x-[50%] -translate-y-[50%] text-center w-[80%]">
                 <p className="text-white text-5xl m-5 hover:text-gray-400 font-medium "> Welcome to NuOJ! </p>
