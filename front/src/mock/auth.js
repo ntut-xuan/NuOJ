@@ -30,6 +30,44 @@ export const AuthHandler = [
     return res(ctx.status(200), ctx.cookie("jwt", "", { expires: 0 }));
   }),
 
+  rest.post("/api/auth/register", async (req, res, ctx) => {
+    let json = await req.json();
+    let {handle, password, email} = json;
+    if (handle === undefined || password === undefined || email === undefined){
+      return res(
+        ctx.status(400),
+        ctx.json({ message: "The format of the payload is incorrect." })
+      );
+    }
+    else if (handle === "" || password === "" || email === ""){
+      return res(
+        ctx.status(400),
+        ctx.json({ message: "The format of the payload is incorrect." })
+      );
+    }
+    else if (handle === "pony" || email === "test@test.com") {
+      return res(
+        ctx.status(403),
+        ctx.json({ message: "The email or the handle is repeated." })
+      );
+    }
+    else if (handle === "invalidHandle" || email === "invalidEmail" || password === "invalidPassword") {
+      return res(
+        ctx.status(422),
+        ctx.json({ message: `message": "Handle is invalid.` })
+      );
+    }
+    else{
+      return res(
+        ctx.status(200),
+        ctx.json({
+          "message": "OK.",
+        })
+      )
+    }
+
+  }),
+
   rest.post("/api/auth/verify_jwt", async (req, res, ctx) => {
     let jwt = await req.cookies?.jwt;
     if (jwt === "ya") {
