@@ -9,9 +9,9 @@ export const AuthHandler = [
         ctx.json({ message: "The format of the payload is incorrect." })
       );
     }
-    if (req_json.account === "pony" && req_json.password === "pony0819") {
+    if (req_json.account === "pony" && req_json.password === "0000") {
       return res(ctx.cookie("jwt", "ya"));
-    } else if (req_json.account === "roy" && req_json.password === "pon0819") {
+    } else if (req_json.account === "roy" && req_json.password === "0000") {
       return res(
         ctx.status(401),
         ctx.json({
