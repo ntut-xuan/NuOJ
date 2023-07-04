@@ -28,8 +28,8 @@ const renderPage = () => {
 
 if (import.meta.env.DEV) {
   import('./mock/mocks')
-    .then(({ authWorker }) => {
-      authWorker.start();
+    .then(({ workers }) => {
+      workers.start();
       // profileWorker.start();
     }) 
     .then(() => renderPage())
