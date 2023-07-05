@@ -27,7 +27,7 @@ const ProblemList = () =>{
     }
 
     return(
-        <div className="w-full bg-gray-100 bg-opacity-80 cover">
+        <div className="w-full bg-gray-100 bg-opacity-80 min-h-screen">
             <NavBar
                 links={[
                     {title: "題目列表", href: "/problem/list"},

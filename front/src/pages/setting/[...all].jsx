@@ -54,7 +54,7 @@ const Setting = () =>{
                         {title: '關於', href: "/about"},
                         {title: '狀態', href: '/status'}
                     ]}
-                    sytle={'bg-black p-10 w-full flex justify-between'}
+                    style={'bg-black p-10 w-full flex justify-between'}
                 />
                 <div className='mx-auto max-w-5xl flex'>
                     <SettingNav links={links} />

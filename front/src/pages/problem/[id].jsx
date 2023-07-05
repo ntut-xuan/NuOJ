@@ -36,7 +36,7 @@ const ProblemDetail = ()=>{
     ]
 
     return(
-        <div className='bg-gray-100'>
+        <div className='w-full bg-gray-100 bg-opacity-80 min-h-screen'>
             <NavBar
                 style = {"bg-black p-10 w-full flex justify-between"}
                 links = {[

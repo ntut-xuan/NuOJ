@@ -1,0 +1,10 @@
+.bg-cover{
+    margin: 0;
+    height: max(100svh, 67rem);
+}
+
+.profile-container{
+    width: min(15rem, 20svh);
+    margin-left: 5rem;
+    margin-right: 5rem;
+}

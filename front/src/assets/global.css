@@ -1,3 +1,8 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.cover{
+    height: max(100svh, 56rem);
+    width: 100%;
+}
