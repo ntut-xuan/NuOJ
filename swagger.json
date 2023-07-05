@@ -933,6 +933,7 @@
         "/api/submit": {
             "post": {
                 "summary": "The route to submit the code.",
+                "tags": ["submit"],
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -981,6 +982,45 @@
                                             "example": "The problem with spcific ID is invalid."
                                         }
                                     }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/submission": {
+            "get": {
+                "summary": "The route for get all the submission data.",
+                "tags": ["submission"],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/submission_response"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/submission/{submission_id}": {
+            "get": {
+                "summary": "The route for get specific data of submission.",
+                "tags": ["submission"],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/submission_response"
                                 }
                             }
                         }
@@ -1210,6 +1250,65 @@
                     "problem_id": {
                         "type": "integer",
                         "example": 1
+                    }
+                }
+            },
+            "submission_response": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "date": {
+                        "type": "string",
+                        "format": "date",
+                        "description": "ISO8601 Date Format",
+                        "example": "20230705T235853+0800"
+                    },
+                    "user": {
+                        "type": "object",
+                        "properties": {
+                            "user_uid": {
+                                "type": "integer",
+                                "example": 1
+                            },
+                            "handle": {
+                                "type": "string",
+                                "example": "ntut-xuan"
+                            },
+                            "email": {
+                                "type": "string",
+                                "example": "ntut-xuan"
+                            }
+                        }
+                    },
+                    "problem": {
+                        "type": "string",
+                        "example": "Hello World"
+                    },
+                    "compiler": {
+                        "type": "string",
+                        "example": "C++14"
+                    },
+                    "verdict": {
+                        "type": "object",
+                        "properties": {
+                            "verdict": {
+                                "type": "string",
+                                "example": "Wrong Answer"
+                            },
+                            "time": {
+                                "type": "integer",
+                                "description": "In milliseconds",
+                                "example": 1500
+                            },
+                            "memory": {
+                                "type": "integer",
+                                "description": "In kilobytes",
+                                "example": "131072"
+                            }
+                        }
                     }
                 }
             }
