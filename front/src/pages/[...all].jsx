@@ -1,4 +1,3 @@
-import { useRouteError } from "react-router-dom";
 import LogoMin from '/logo_min.png'
 
 export default function ErrorPage() {

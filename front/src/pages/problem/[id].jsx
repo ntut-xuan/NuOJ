@@ -1,6 +1,6 @@
 import { useParams } from 'react-router-dom';
 import { useState, useEffect } from 'react';
-import { NavBar } from '../../share/navbar';
+import { NavBar } from '@/share/navbar';
 
 const ProblemDetail = ()=>{
     let id = useParams().id;

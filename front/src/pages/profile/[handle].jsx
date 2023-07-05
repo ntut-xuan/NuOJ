@@ -1,8 +1,7 @@
 import { useEffect, useState, useContext } from "react";
 import { useParams } from "react-router-dom";
-import { NavBar } from "../../share/navbar";
-import { getImgSrc, getUserInfo } from '../../share/profile_api';
-import { RequireAuth } from "../../share/auth";
+import { NavBar } from "@/share/navbar";
+import { getImgSrc, getUserInfo } from '@/share/profile_api';
 
 const UserInfo = ({handle}) =>{
     const [info, setInfo] = useState({school:'', email: "",role: 0, bio: "" });
@@ -57,7 +56,7 @@ const Profile = () =>{
                     {title: '關於', href: "/about"},
                     {title: '狀態', href: '/status'}
                 ]}
-                sytle={'bg-black p-10 w-full flex justify-between'}
+                style={'bg-black p-10 w-full flex justify-between'}
             />
             <UserInfo handle={handle}></UserInfo>
         </div>
