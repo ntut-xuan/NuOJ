@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { Form } from '@/share/form'
-import { auth_context } from "@/share/auth";
+import { Form } from '@/compoments/form'
+import { auth_context } from "@/compoments/auth";
 import { useContext } from "react";
-import { success_swal, error_swal } from "@/share/error";
-import { show_mail_confirm_swal } from '@/share/email';
+import { success_swal, error_swal } from "@/compoments/error";
+import { show_mail_confirm_swal } from '@/compoments/email';
 
 const Login = ()=>{
     const [color, setColor] = useState("");

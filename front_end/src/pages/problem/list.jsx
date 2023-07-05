@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Table } from './compoments/table';
-import { NavBar } from '@/share/navbar';
+import { NavBar } from '@/compoments/navbar';
 import logo_min from '/logo_min.png';
 import { useEffect } from 'react';
 

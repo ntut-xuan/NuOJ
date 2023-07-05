@@ -1,8 +1,8 @@
 import { Link } from 'react-router-dom';
 import logo from '/logo-white.svg';
-import { auth_context } from "../share/auth";
+import { auth_context } from "./auth";
 import { useContext, useState, createContext } from "react";
-import { error_swal, success_swal } from "../share/error";
+import { error_swal, success_swal } from "./error";
 import { useNavigate, useLocation } from 'react-router-dom';
 
 const UserDropDown = ({handle}) =>{

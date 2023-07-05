@@ -1,6 +1,6 @@
-import { NavBar } from '../../share/navbar';
+import { NavBar } from '../../compoments/navbar';
 import { useNavigate, Routes, Route, Link } from 'react-router-dom';
-import { auth_context, RequireAuth } from '../../share/auth';
+import { auth_context, RequireAuth } from '../../compoments/auth';
 import { useContext, useEffect, Suspense } from 'react';
 import SetProfile from './compoments/profile';
 

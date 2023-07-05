@@ -1,4 +1,4 @@
-import { NavBar } from "../share/navbar";
+import { NavBar } from "../compoments/navbar";
 import ntut_logo from '/ntut_logo.png'
 import bgUrl from '/index.jpg'
 

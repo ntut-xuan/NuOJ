@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { success_swal, error_swal } from "@/share/error";
-import { Form } from "@/share/form"
+import { success_swal, error_swal } from "@/compoments/error";
+import { Form } from "@/compoments/form"
 
 
 

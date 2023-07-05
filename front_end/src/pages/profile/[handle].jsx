@@ -1,7 +1,7 @@
 import { useEffect, useState, useContext } from "react";
 import { useParams } from "react-router-dom";
-import { NavBar } from "@/share/navbar";
-import { getImgSrc, getUserInfo } from '@/share/profile_api';
+import { NavBar } from "@/compoments/navbar";
+import { getImgSrc, getUserInfo } from '@/compoments/profile_api';
 
 const UserInfo = ({handle}) =>{
     const [info, setInfo] = useState({school:'', email: "",role: 0, bio: "" });

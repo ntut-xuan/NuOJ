@@ -1,7 +1,7 @@
-import { getImgSrc, getUserInfo } from '@/share/profile_api';
+import { getImgSrc, getUserInfo } from '@/compoments/profile_api';
 import { useContext, useEffect, useState, useRef } from 'react';
-import { auth_context, RequireAuth } from '@/share/auth';
-import { success_swal } from '@/share/error';
+import { auth_context, RequireAuth } from '@/compoments/auth';
+import { success_swal } from '@/compoments/error';
 import img_x from '/x.svg'
 
 const Input = ({val, title, callback})=>{
