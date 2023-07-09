@@ -3,56 +3,19 @@ from http import HTTPStatus
 from json import loads
 from typing import Any
 
-from flask import Blueprint, Response, make_response
+from flask import Blueprint, Response, current_app, make_response, request
 
+from api.auth.validator import (
+    HS256JWTCodec,
+    validate_jwt_is_exists_or_return_unauthorized, 
+    validate_jwt_is_valid_or_return_unauthorized
+)
+from api.problem.dataclass import ProblemHead, ProblemContent, ProblemData
 from models import Problem, User
 from storage.util import TunnelCode, read_file
 from util import make_simple_error_response
 
 problem_bp = Blueprint("problem", __name__, url_prefix="/api/problem")
-
-
-@dataclass
-class ProblemContent:
-    title: str
-    description: str
-    input_description: str
-    output_description: str
-    note: str
-
-
-@dataclass
-class ProblemSetting:
-    time_limit: float
-    memory_limit: float
-
-
-@dataclass
-class ProblemData:
-    content: ProblemContent
-    basic_setting: ProblemSetting
-    problem_pid: str
-    author: User
-
-    def __dict__(self):
-        return {
-            "head": {
-                "title": self.content.title,
-                "time_limit": self.basic_setting.time_limit,
-                "memory_limit": self.basic_setting.memory_limit,
-                "problem_pid": self.problem_pid
-            },
-            "content": {
-                "description": self.content.description,
-                "input_description": self.content.input_description,
-                "output_description": self.content.output_description,
-                "note": self.content.note,
-            },
-            "author": {
-                "user_uid": self.author.user_uid, 
-                "handle": self.author.handle
-            },
-        }
 
 
 @problem_bp.route("/<int:id>/", methods=["GET"])
@@ -80,7 +43,7 @@ def get_all_problems_data_route() -> Response:
     ]
 
     return make_response(payload)
-
+    
 
 def __get_problem_file_data_with_problem_token(
     problem_token: str
@@ -103,11 +66,21 @@ def __get_problem_data_object_with_problem_pid(problem_pid: str) -> ProblemData:
     assert user is not None
 
     problem_dict = __get_problem_file_data_with_problem_token(problem_token)
+    problem_dict["head"] |= {"problem_pid": problem_id}
+
     problem_data: ProblemData = ProblemData(
-        content=ProblemContent(**problem_dict["problem_content"]),
-        basic_setting=ProblemSetting(**problem_dict["basic_setting"]),
-        problem_pid=problem_id,
+        content=ProblemContent(**problem_dict["content"]),
+        head=ProblemHead(**problem_dict["head"]),
         author=user,
     )
 
     return problem_data
+
+
+def __get_handle_from_cookie(cookie: str):
+    key: str = current_app.config["jwt_key"]
+    codec: HS256JWTCodec = HS256JWTCodec(key)
+    payload: dict[str, Any] = codec.decode(cookie)
+
+    handle: str = payload["data"]["handle"]
+    return handle

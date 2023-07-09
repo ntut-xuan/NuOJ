@@ -15,24 +15,32 @@ from storage.util import TunnelCode, write_file
 @pytest.fixture
 def setup_problem_to_storage(app: Flask):
     first_problem_payload: dict[str, Any] = {
-        "problem_content": {
+        "head": {
             "title": "the_first_problem",
+            "problem_pid": 1,
+            "time_limit": 1, 
+            "memory_limit": 48763
+        },
+        "content": {
             "description": "some_description",
             "input_description": "some_input_description",
             "output_description": "some_output_description",
             "note": "some_note",
-        },
-        "basic_setting": {"time_limit": 1, "memory_limit": 48763},
+        }
     }
     second_problem_payload: dict[str, Any] = {
-        "problem_content": {
+        "head": {
             "title": "the_second_problem",
+            "problem_pid": 2,
+            "time_limit": 3,
+            "memory_limit": 48763
+        },
+        "content": {
             "description": "some_description",
             "input_description": "some_input_description",
             "output_description": "some_output_description",
             "note": "some_note",
         },
-        "basic_setting": {"time_limit": 3, "memory_limit": 48763},
     }
 
     with app.app_context():
