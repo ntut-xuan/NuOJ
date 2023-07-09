@@ -3,13 +3,8 @@ from http import HTTPStatus
 from json import loads
 from typing import Any
 
-from flask import Blueprint, Response, current_app, make_response, request
+from flask import Blueprint, Response, make_response
 
-from api.auth.validator import (
-    HS256JWTCodec,
-    validate_jwt_is_exists_or_return_unauthorized, 
-    validate_jwt_is_valid_or_return_unauthorized
-)
 from api.problem.dataclass import ProblemHead, ProblemContent, ProblemData
 from models import Problem, User
 from storage.util import TunnelCode, read_file
