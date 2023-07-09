@@ -38,9 +38,9 @@ class ProblemData:
         return {
             "head": {
                 "title": self.content.title,
-                "problem_pid": self.problem_pid,
                 "time_limit": self.basic_setting.time_limit,
                 "memory_limit": self.basic_setting.memory_limit,
+                "problem_pid": self.problem_pid
             },
             "content": {
                 "description": self.content.description,
@@ -64,12 +64,9 @@ def get_problems_data_route(id: int) -> Response:
             HTTPStatus.FORBIDDEN, "The problem with the specific ID is not found."
         )
 
-    problem_token: str = problem.problem_token
-    problem_author: str = problem.problem_author
+    problem_pid: str = problem.problem_id
 
-    problem_data: ProblemData = __get_problem_data_with_problem_token(
-        problem_token, problem_author
-    )
+    problem_data: ProblemData = __get_problem_data_object_with_problem_pid(problem_pid)
 
     return make_response(problem_data.__dict__())
 
@@ -78,35 +75,38 @@ def get_problems_data_route(id: int) -> Response:
 def get_all_problems_data_route() -> Response:
     problems: list[Problem] = Problem.query.all()
 
-    payload: dict[str, Any] = {
-        "count": len(problems),
-        "result": [
-            {
-                "id": problem.problem_id,
-                "data": __get_problem_data_with_problem_token(
-                    problem.problem_token, problem.problem_author
-                ).__dict__(),
-            }
-            for problem in problems
-        ],
-    }
+    payload: dict[str, Any] = [
+        __get_problem_data_object_with_problem_pid(problem.problem_id).__dict__() for problem in problems
+    ]
 
     return make_response(payload)
 
 
-def __get_problem_data_with_problem_token(
-    problem_token: str, problem_author: str, problem_pid: str
+def __get_problem_file_data_with_problem_token(
+    problem_token: str
 ) -> ProblemData:
     problem_raw_data: str = read_file(f"{problem_token}.json", TunnelCode.PROBLEM)
     problem_dict: dict[str, Any] = loads(problem_raw_data)
-    user: User | None = User.query.filter_by(user_uid=problem_author).first()
 
+    return problem_dict
+
+
+def __get_problem_data_object_with_problem_pid(problem_pid: str) -> ProblemData:
+    problem: Problem | None = Problem.query.filter_by(problem_id=problem_pid).first()
+    assert problem is not None
+    
+    problem_id: str = problem.problem_id
+    problem_token: str = problem.problem_token
+    problem_author: str = problem.problem_author
+
+    user: User | None = User.query.filter_by(user_uid=problem_author).first()
     assert user is not None
 
+    problem_dict = __get_problem_file_data_with_problem_token(problem_token)
     problem_data: ProblemData = ProblemData(
         content=ProblemContent(**problem_dict["problem_content"]),
         basic_setting=ProblemSetting(**problem_dict["basic_setting"]),
-        problem_pid=problem_pid,
+        problem_pid=problem_id,
         author=user,
     )
 

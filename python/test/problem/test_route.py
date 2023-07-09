@@ -94,15 +94,22 @@ def test_get_specific_problem_with_exists_problem_should_respond_the_problem(
     client: FlaskClient, setup_problem: None
 ):
     excepted_response_payload: dict[str, dict[str, Any]] = {
-        "content": {
+        "head": {
             "title": "the_first_problem",
+            "problem_pid": 1,
+            "time_limit": 1,
+            "memory_limit": 48763
+        },
+        "content": {
             "description": "some_description",
             "input_description": "some_input_description",
             "output_description": "some_output_description",
             "note": "some_note",
         },
-        "setting": {"time_limit": 1, "memory_limit": 48763},
-        "author": {"user_uid": "problem_test_user", "handle": "problem_test_user"},
+        "author": {
+            "user_uid": "problem_test_user", 
+            "handle": "problem_test_user"
+        },
     }
 
     response: TestResponse = client.get("/api/problem/1/")
@@ -123,45 +130,44 @@ def test_get_specific_problem_with_absent_problem_should_respond_http_status_for
 def test_get_all_problem_should_respond_all_the_problem(
     client: FlaskClient, setup_problem: None
 ):
-    excepted_response_payload: dict[str, Any] = {
-        "count": 2,
-        "result": [
-            {
-                "id": 1,
-                "data": {
-                    "content": {
-                        "title": "the_first_problem",
-                        "description": "some_description",
-                        "input_description": "some_input_description",
-                        "output_description": "some_output_description",
-                        "note": "some_note",
-                    },
-                    "setting": {"time_limit": 1, "memory_limit": 48763},
-                    "author": {
-                        "user_uid": "problem_test_user",
-                        "handle": "problem_test_user",
-                    },
-                },
+    excepted_response_payload: list[dict[str, Any]] = [
+        {
+            "head": {
+                "title": "the_first_problem",
+                "problem_pid": 1,
+                "time_limit": 1,
+                "memory_limit": 48763
             },
-            {
-                "id": 2,
-                "data": {
-                    "content": {
-                        "title": "the_second_problem",
-                        "description": "some_description",
-                        "input_description": "some_input_description",
-                        "output_description": "some_output_description",
-                        "note": "some_note",
-                    },
-                    "setting": {"time_limit": 3, "memory_limit": 48763},
-                    "author": {
-                        "user_uid": "problem_test_user",
-                        "handle": "problem_test_user",
-                    },
-                },
+            "content": {
+                "description": "some_description",
+                "input_description": "some_input_description",
+                "output_description": "some_output_description",
+                "note": "some_note",
             },
-        ],
-    }
+            "author": {
+                "user_uid": "problem_test_user",
+                "handle": "problem_test_user",
+            }
+        },
+        {
+            "head": {
+                "title": "the_second_problem",
+                "problem_pid": 2,
+                "time_limit": 3,
+                "memory_limit": 48763
+            },
+            "content": {
+                "description": "some_description",
+                "input_description": "some_input_description",
+                "output_description": "some_output_description",
+                "note": "some_note",
+            },
+            "author": {
+                "user_uid": "problem_test_user",
+                "handle": "problem_test_user",
+            },
+        },
+    ]
 
     response: TestResponse = client.get("/api/problem/")
 
