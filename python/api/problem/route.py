@@ -75,7 +75,7 @@ def get_problems_data_route(id: int) -> Response:
 def get_all_problems_data_route() -> Response:
     problems: list[Problem] = Problem.query.all()
 
-    payload: dict[str, Any] = [
+    payload: list[dict[str, Any]] = [
         __get_problem_data_object_with_problem_pid(problem.problem_id).__dict__() for problem in problems
     ]
 
@@ -84,7 +84,7 @@ def get_all_problems_data_route() -> Response:
 
 def __get_problem_file_data_with_problem_token(
     problem_token: str
-) -> ProblemData:
+) -> dict[str, Any]:
     problem_raw_data: str = read_file(f"{problem_token}.json", TunnelCode.PROBLEM)
     problem_dict: dict[str, Any] = loads(problem_raw_data)
 
