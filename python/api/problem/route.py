@@ -31,22 +31,27 @@ class ProblemSetting:
 class ProblemData:
     content: ProblemContent
     basic_setting: ProblemSetting
+    problem_pid: str
     author: User
 
     def __dict__(self):
         return {
-            "content": {
+            "head": {
                 "title": self.content.title,
+                "problem_pid": self.problem_pid,
+                "time_limit": self.basic_setting.time_limit,
+                "memory_limit": self.basic_setting.memory_limit,
+            },
+            "content": {
                 "description": self.content.description,
                 "input_description": self.content.input_description,
                 "output_description": self.content.output_description,
                 "note": self.content.note,
             },
-            "setting": {
-                "time_limit": self.basic_setting.time_limit,
-                "memory_limit": self.basic_setting.memory_limit,
+            "author": {
+                "user_uid": self.author.user_uid, 
+                "handle": self.author.handle
             },
-            "author": {"user_uid": self.author.user_uid, "handle": self.author.handle},
         }
 
 
@@ -90,7 +95,7 @@ def get_all_problems_data_route() -> Response:
 
 
 def __get_problem_data_with_problem_token(
-    problem_token: str, problem_author: str
+    problem_token: str, problem_author: str, problem_pid: str
 ) -> ProblemData:
     problem_raw_data: str = read_file(f"{problem_token}.json", TunnelCode.PROBLEM)
     problem_dict: dict[str, Any] = loads(problem_raw_data)
@@ -101,6 +106,7 @@ def __get_problem_data_with_problem_token(
     problem_data: ProblemData = ProblemData(
         content=ProblemContent(**problem_dict["problem_content"]),
         basic_setting=ProblemSetting(**problem_dict["basic_setting"]),
+        problem_pid=problem_pid,
         author=user,
     )
 
