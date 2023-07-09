@@ -75,12 +75,3 @@ def __get_problem_data_object_with_problem_pid(problem_pid: str) -> ProblemData:
     )
 
     return problem_data
-
-
-def __get_handle_from_cookie(cookie: str):
-    key: str = current_app.config["jwt_key"]
-    codec: HS256JWTCodec = HS256JWTCodec(key)
-    payload: dict[str, Any] = codec.decode(cookie)
-
-    handle: str = payload["data"]["handle"]
-    return handle
