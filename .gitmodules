@@ -1,3 +1,6 @@
 [submodule "sandbox"]
 	path = sandbox
 	url = git@github.com:ntut-xuan/NuOJ-Sandbox.git
+[submodule "front-end"]
+	path = front-end
+	url = git@github.com:Ponywen0819/NuOJ-Front-End.git
