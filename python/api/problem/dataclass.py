@@ -31,7 +31,7 @@ class ProblemContent:
             "description": self.description,
             "input_description": self.input_description,
             "output_description": self.output_description,
-            "memory_limit": self.note
+            "note": self.note
         }
 
 
