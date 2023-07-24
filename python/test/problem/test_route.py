@@ -17,7 +17,6 @@ def setup_problem_to_storage(app: Flask):
     first_problem_payload: dict[str, Any] = {
         "head": {
             "title": "the_first_problem",
-            "problem_pid": 1,
             "time_limit": 1, 
             "memory_limit": 48763
         },
@@ -31,7 +30,6 @@ def setup_problem_to_storage(app: Flask):
     second_problem_payload: dict[str, Any] = {
         "head": {
             "title": "the_second_problem",
-            "problem_pid": 2,
             "time_limit": 3,
             "memory_limit": 48763
         },

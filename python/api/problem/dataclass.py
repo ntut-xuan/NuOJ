@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from typing import Any
 
 from models import User
 
@@ -40,6 +41,15 @@ class ProblemData:
     head: ProblemHead
     content: ProblemContent
     author: User
+
+    def __storage_dict__(self):
+        head: dict[str, Any] = self.head.__dict__()
+        content: dict[str, Any] = self.content.__dict__()
+        del head["problem_pid"]
+        return {
+            "head": head,
+            "content": content
+        }
 
     def __dict__(self):
         return {
