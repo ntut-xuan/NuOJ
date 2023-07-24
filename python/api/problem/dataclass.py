@@ -10,6 +10,14 @@ class ProblemHead:
     time_limit: float
     memory_limit: float
 
+    def __dict__(self):
+        return {
+            "title": self.title,
+            "problem_pid": self.problem_pid,
+            "time_limit": self.time_limit,
+            "memory_limit": self.memory_limit
+        }
+
 
 @dataclass
 class ProblemContent:
@@ -17,6 +25,14 @@ class ProblemContent:
     input_description: str
     output_description: str
     note: str
+
+    def __dict__(self):
+        return {
+            "description": self.description,
+            "input_description": self.input_description,
+            "output_description": self.output_description,
+            "memory_limit": self.note
+        }
 
 
 @dataclass
@@ -27,18 +43,8 @@ class ProblemData:
 
     def __dict__(self):
         return {
-            "head": {
-                "title": self.head.title,
-                "time_limit": self.head.time_limit,
-                "memory_limit": self.head.memory_limit,
-                "problem_pid": self.head.problem_pid
-            },
-            "content": {
-                "description": self.content.description,
-                "input_description": self.content.input_description,
-                "output_description": self.content.output_description,
-                "note": self.content.note,
-            },
+            "head": self.head.__dict__(),
+            "content": self.content.__dict__(),
             "author": {
                 "user_uid": self.author.user_uid, 
                 "handle": self.author.handle
