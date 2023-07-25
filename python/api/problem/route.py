@@ -1,13 +1,18 @@
 from dataclasses import dataclass
 from http import HTTPStatus
-from json import loads
+from json import dumps, loads
 from typing import Any
+from uuid import uuid4
 
-from flask import Blueprint, Response, make_response
+from flask import Blueprint, Response, make_response, request
 
+from api.auth.auth_util import get_user_by_jwt_token
+from api.auth.validator import validate_jwt_is_exists_or_return_unauthorized, validate_jwt_is_valid_or_return_unauthorized
 from api.problem.dataclass import ProblemHead, ProblemContent, ProblemData
+from api.problem.validate import validate_problem_request_payload_or_return_bad_request
+from database import db
 from models import Problem, User
-from storage.util import TunnelCode, read_file
+from storage.util import TunnelCode, read_file, write_file
 from util import make_simple_error_response
 
 problem_bp = Blueprint("problem", __name__, url_prefix="/api/problem")
@@ -38,6 +43,36 @@ def get_all_problems_data_route() -> Response:
     ]
 
     return make_response(payload)
+
+
+@problem_bp.route("/", methods=["POST"])
+@validate_jwt_is_exists_or_return_unauthorized
+@validate_jwt_is_valid_or_return_unauthorized
+@validate_problem_request_payload_or_return_bad_request
+def add_problem_data_route() -> Response:
+    payload: dict[str, Any] = request.get_json(silent=True)
+    jwt: str | None = request.cookies.get("jwt")
+    assert jwt is not None
+    user: User = get_user_by_jwt_token(jwt)
+
+    # register problem to database
+    problem_token: str = str(uuid4())
+    problem: Problem = Problem(problem_token=problem_token, problem_author=user.user_uid)
+    db.session.add(problem)
+    db.session.commit()
+
+    payload["head"] |= {"problem_pid": problem.problem_id}
+    problem_data: ProblemData = ProblemData(
+        head=ProblemHead(**payload["head"]),
+        content=ProblemContent(**payload["content"]),
+        author=user
+    )
+
+    # write content into file
+    write_file(f"{problem_token}.json", dumps(problem_data.__storage_dict__()), TunnelCode.PROBLEM)
+
+    # return 200 ok
+    return make_response({"message": "OK."})
     
 
 def __get_problem_file_data_with_problem_token(

@@ -1,5 +1,5 @@
 from http import HTTPStatus
-from json import dumps
+from json import dumps, loads
 from typing import Any
 
 import pytest
@@ -9,7 +9,7 @@ from werkzeug.test import TestResponse
 
 from database import db
 from models import Problem, User
-from storage.util import TunnelCode, write_file
+from storage.util import TunnelCode, read_file, write_file
 
 
 @pytest.fixture
@@ -180,3 +180,63 @@ def test_get_all_problem_should_respond_all_the_problem(
     assert response.status_code == HTTPStatus.OK
     assert response.json is not None
     assert response.json == excepted_response_payload
+
+
+def test_add_problem_should_add_the_problem_into_database(app: Flask, logged_in_client: FlaskClient):
+    payload: dict[str, Any] = {
+        "head": {
+            "title": "the_second_problem",
+            "time_limit": 3,
+            "memory_limit": 48763
+        },
+        "content": {
+            "description": "some_description",
+            "input_description": "some_input_description",
+            "output_description": "some_output_description",
+            "note": "some_note",
+        },
+    }
+
+    response: TestResponse = logged_in_client.post("/api/problem/", json=payload)
+
+    assert response.status_code == HTTPStatus.OK
+    with app.app_context():
+        problem: Problem | None = Problem.query.filter_by(problem_id=1).first()
+        assert problem is not None
+        assert problem.problem_author == "cb7ce8d5-8a5a-48e0-b9f0-7247dd5825dd"
+
+
+def test_add_problem_should_add_the_storage_data(app: Flask, logged_in_client: FlaskClient):
+    payload: dict[str, Any] = {
+        "head": {
+            "title": "the_second_problem",
+            "time_limit": 3,
+            "memory_limit": 48763
+        },
+        "content": {
+            "description": "some_description",
+            "input_description": "some_input_description",
+            "output_description": "some_output_description",
+            "note": "some_note",
+        },
+    }
+
+    response: TestResponse = logged_in_client.post("/api/problem/", json=payload)
+
+    assert response.status_code == HTTPStatus.OK
+    with app.app_context():
+        problem: Problem | None = Problem.query.filter_by(problem_id=1).first()
+        assert problem is not None
+        storage_file_data: dict[str, Any] = loads(read_file(f"{problem.problem_token}.json", TunnelCode.PROBLEM))
+        assert storage_file_data["head"] == payload["head"]
+        assert storage_file_data["content"] == payload["content"]
+
+
+def test_add_problem_with_wrong_payload_should_return_http_status_bad_request(app: Flask, logged_in_client: FlaskClient):
+    payload: dict[str, Any] = {
+        "bla": ":)",
+    }
+
+    response: TestResponse = logged_in_client.post("/api/problem/", json=payload)
+
+    assert response.status_code == HTTPStatus.BAD_REQUEST

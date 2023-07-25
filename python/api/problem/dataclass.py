@@ -3,21 +3,28 @@ from typing import Any
 
 from models import User
 
-
 @dataclass
-class ProblemHead:
+class ProblemHeadWithoutPid:
     title: str
-    problem_pid: int
     time_limit: float
     memory_limit: float
 
     def __dict__(self):
         return {
             "title": self.title,
-            "problem_pid": self.problem_pid,
             "time_limit": self.time_limit,
             "memory_limit": self.memory_limit
         }
+
+
+@dataclass
+class ProblemHead(ProblemHeadWithoutPid):
+    problem_pid: int
+
+    def __dict__(self):
+        problem_head: dict[str, Any] = super().__dict__()
+        problem_head |= {"problem_pid": self.problem_pid}
+        return problem_head
 
 
 @dataclass
