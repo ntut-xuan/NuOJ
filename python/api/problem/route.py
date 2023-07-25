@@ -9,7 +9,7 @@ from flask import Blueprint, Response, make_response, request
 from api.auth.auth_util import get_user_by_jwt_token
 from api.auth.validator import validate_jwt_is_exists_or_return_unauthorized, validate_jwt_is_valid_or_return_unauthorized
 from api.problem.dataclass import ProblemHead, ProblemContent, ProblemData
-from api.problem.validate import validate_problem_request_payload_or_return_bad_request
+from api.problem.validate import validate_problem_request_payload_is_exist_or_return_bad_request, validate_problem_request_payload_format_or_return_bad_request, validate_problem_request_payload_is_valid_or_return_bad_request
 from database import db
 from models import Problem, User
 from storage.util import TunnelCode, read_file, write_file
@@ -48,7 +48,9 @@ def get_all_problems_data_route() -> Response:
 @problem_bp.route("/", methods=["POST"])
 @validate_jwt_is_exists_or_return_unauthorized
 @validate_jwt_is_valid_or_return_unauthorized
-@validate_problem_request_payload_or_return_bad_request
+@validate_problem_request_payload_is_exist_or_return_bad_request
+@validate_problem_request_payload_format_or_return_bad_request
+@validate_problem_request_payload_is_valid_or_return_bad_request
 def add_problem_data_route() -> Response:
     payload: dict[str, Any] = request.get_json(silent=True)
     jwt: str | None = request.cookies.get("jwt")

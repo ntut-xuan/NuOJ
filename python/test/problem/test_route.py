@@ -240,3 +240,62 @@ def test_add_problem_with_wrong_payload_should_return_http_status_bad_request(ap
     response: TestResponse = logged_in_client.post("/api/problem/", json=payload)
 
     assert response.status_code == HTTPStatus.BAD_REQUEST
+    
+def test_add_problem_with_invalid_time_limit_should_return_http_status_bad_request(logged_in_client: FlaskClient):
+    payload: dict[str, Any] = {
+        "head": {
+            "title": "the_second_problem",
+            "time_limit": -1,
+            "memory_limit": 48763
+        },
+        "content": {
+            "description": "some_description",
+            "input_description": "some_input_description",
+            "output_description": "some_output_description",
+            "note": "some_note",
+        },
+    }
+
+    response: TestResponse = logged_in_client.post("/api/problem/", json=payload)
+
+    assert response.status_code == HTTPStatus.BAD_REQUEST
+
+
+def test_add_problem_with_invalid_memory_limit_should_return_http_status_bad_request(logged_in_client: FlaskClient):
+    payload: dict[str, Any] = {
+        "head": {
+            "title": "the_second_problem",
+            "time_limit": 10,
+            "memory_limit": -1
+        },
+        "content": {
+            "description": "some_description",
+            "input_description": "some_input_description",
+            "output_description": "some_output_description",
+            "note": "some_note",
+        },
+    }
+    
+    response: TestResponse = logged_in_client.post("/api/problem/", json=payload)
+
+    assert response.status_code == HTTPStatus.BAD_REQUEST
+
+
+def test_add_problem_with_invalid_title_should_return_http_status_bad_request(logged_in_client: FlaskClient):
+    payload: dict[str, Any] = {
+        "head": {
+            "title": "",
+            "time_limit": 10,
+            "memory_limit": 48763
+        },
+        "content": {
+            "description": "some_description",
+            "input_description": "some_input_description",
+            "output_description": "some_output_description",
+            "note": "some_note",
+        },
+    }
+    
+    response: TestResponse = logged_in_client.post("/api/problem/", json=payload)
+
+    assert response.status_code == HTTPStatus.BAD_REQUEST
