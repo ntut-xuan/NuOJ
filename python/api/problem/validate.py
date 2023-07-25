@@ -71,7 +71,7 @@ def validate_problem_request_payload_is_valid_or_return_unprocessable_entity(
             assert payload.head.time_limit > 0
             assert payload.head.memory_limit > 0
         except Exception:
-            return make_simple_error_response(HTTPStatus.UNPROCESSABLE_ENTITY, "Invalid payload")
+            return make_simple_error_response(HTTPStatus.UNPROCESSABLE_ENTITY, "Invalid time limit or memory limit, or the limit in the payload is reach the max limit.")
 
         return func(*args, **kwargs)
 
