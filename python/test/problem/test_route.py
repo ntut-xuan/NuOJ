@@ -287,3 +287,21 @@ def test_add_problem_with_invalid_title_should_return_http_status_bad_request(
     response: TestResponse = logged_in_client.post("/api/problem/", json=payload)
 
     assert response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
+
+
+def test_add_problem_with_unauthorized_should_return_http_status_unauthorized(
+    app: Flask, client: FlaskClient
+):
+    payload: dict[str, Any] = {
+        "head": {"title": "the_second_problem", "time_limit": 3, "memory_limit": 48763},
+        "content": {
+            "description": "some_description",
+            "input_description": "some_input_description",
+            "output_description": "some_output_description",
+            "note": "some_note",
+        },
+    }
+
+    response: TestResponse = client.post("/api/problem/", json=payload)
+
+    assert response.status_code == HTTPStatus.UNAUTHORIZED
