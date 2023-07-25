@@ -9,6 +9,8 @@ from api.problem.dataclass import ProblemContent, ProblemHeadWithoutPid
 from util import make_simple_error_response
 
 T = TypeVar("T")
+
+
 @dataclass
 class ProblemPayload:
     head: ProblemHeadWithoutPid
@@ -22,11 +24,10 @@ def validate_problem_request_payload_is_exist_or_return_bad_request(
     def wrapper(*args, **kwargs) -> Response | T:
         payload: dict[str, Any] | None = request.get_json(silent=True)
         if payload is None:
-            return make_simple_error_response(
-                HTTPStatus.BAD_REQUEST, "Require payload"
-            )
-        
+            return make_simple_error_response(HTTPStatus.BAD_REQUEST, "Require payload")
+
         return func(*args, **kwargs)
+
     return wrapper
 
 
@@ -41,7 +42,7 @@ def validate_problem_request_payload_format_or_return_bad_request(
         try:
             ProblemPayload(
                 head=ProblemHeadWithoutPid(**payload["head"]),
-                content=ProblemContent(**payload["content"])
+                content=ProblemContent(**payload["content"]),
             )
         except Exception:
             return make_simple_error_response(
@@ -49,6 +50,7 @@ def validate_problem_request_payload_format_or_return_bad_request(
             )
 
         return func(*args, **kwargs)
+
     return wrapper
 
 
@@ -63,15 +65,14 @@ def validate_problem_request_payload_is_valid_or_return_bad_request(
         try:
             payload: ProblemPayload = ProblemPayload(
                 head=ProblemHeadWithoutPid(**payload["head"]),
-                content=ProblemContent(**payload["content"])
+                content=ProblemContent(**payload["content"]),
             )
             assert len(payload.head.title) > 0
             assert payload.head.time_limit > 0
             assert payload.head.memory_limit > 0
         except Exception:
-            return make_simple_error_response(
-                HTTPStatus.BAD_REQUEST, "Invalid payload"
-            )
+            return make_simple_error_response(HTTPStatus.BAD_REQUEST, "Invalid payload")
 
         return func(*args, **kwargs)
+
     return wrapper

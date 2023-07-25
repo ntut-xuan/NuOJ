@@ -3,6 +3,7 @@ from typing import Any
 
 from models import User
 
+
 @dataclass
 class ProblemHeadWithoutPid:
     title: str
@@ -13,7 +14,7 @@ class ProblemHeadWithoutPid:
         return {
             "title": self.title,
             "time_limit": self.time_limit,
-            "memory_limit": self.memory_limit
+            "memory_limit": self.memory_limit,
         }
 
 
@@ -39,7 +40,7 @@ class ProblemContent:
             "description": self.description,
             "input_description": self.input_description,
             "output_description": self.output_description,
-            "note": self.note
+            "note": self.note,
         }
 
 
@@ -53,17 +54,11 @@ class ProblemData:
         head: dict[str, Any] = self.head.__dict__()
         content: dict[str, Any] = self.content.__dict__()
         del head["problem_pid"]
-        return {
-            "head": head,
-            "content": content
-        }
+        return {"head": head, "content": content}
 
     def __dict__(self):
         return {
             "head": self.head.__dict__(),
             "content": self.content.__dict__(),
-            "author": {
-                "user_uid": self.author.user_uid, 
-                "handle": self.author.handle
-            },
+            "author": {"user_uid": self.author.user_uid, "handle": self.author.handle},
         }

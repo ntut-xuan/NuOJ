@@ -15,24 +15,16 @@ from storage.util import TunnelCode, read_file, write_file
 @pytest.fixture
 def setup_problem_to_storage(app: Flask):
     first_problem_payload: dict[str, Any] = {
-        "head": {
-            "title": "the_first_problem",
-            "time_limit": 1, 
-            "memory_limit": 48763
-        },
+        "head": {"title": "the_first_problem", "time_limit": 1, "memory_limit": 48763},
         "content": {
             "description": "some_description",
             "input_description": "some_input_description",
             "output_description": "some_output_description",
             "note": "some_note",
-        }
+        },
     }
     second_problem_payload: dict[str, Any] = {
-        "head": {
-            "title": "the_second_problem",
-            "time_limit": 3,
-            "memory_limit": 48763
-        },
+        "head": {"title": "the_second_problem", "time_limit": 3, "memory_limit": 48763},
         "content": {
             "description": "some_description",
             "input_description": "some_input_description",
@@ -104,7 +96,7 @@ def test_get_specific_problem_with_exists_problem_should_respond_the_problem(
             "title": "the_first_problem",
             "problem_pid": 1,
             "time_limit": 1,
-            "memory_limit": 48763
+            "memory_limit": 48763,
         },
         "content": {
             "description": "some_description",
@@ -112,10 +104,7 @@ def test_get_specific_problem_with_exists_problem_should_respond_the_problem(
             "output_description": "some_output_description",
             "note": "some_note",
         },
-        "author": {
-            "user_uid": "problem_test_user", 
-            "handle": "problem_test_user"
-        },
+        "author": {"user_uid": "problem_test_user", "handle": "problem_test_user"},
     }
 
     response: TestResponse = client.get("/api/problem/1/")
@@ -142,7 +131,7 @@ def test_get_all_problem_should_respond_all_the_problem(
                 "title": "the_first_problem",
                 "problem_pid": 1,
                 "time_limit": 1,
-                "memory_limit": 48763
+                "memory_limit": 48763,
             },
             "content": {
                 "description": "some_description",
@@ -153,14 +142,14 @@ def test_get_all_problem_should_respond_all_the_problem(
             "author": {
                 "user_uid": "problem_test_user",
                 "handle": "problem_test_user",
-            }
+            },
         },
         {
             "head": {
                 "title": "the_second_problem",
                 "problem_pid": 2,
                 "time_limit": 3,
-                "memory_limit": 48763
+                "memory_limit": 48763,
             },
             "content": {
                 "description": "some_description",
@@ -182,13 +171,11 @@ def test_get_all_problem_should_respond_all_the_problem(
     assert response.json == excepted_response_payload
 
 
-def test_add_problem_should_add_the_problem_into_database(app: Flask, logged_in_client: FlaskClient):
+def test_add_problem_should_add_the_problem_into_database(
+    app: Flask, logged_in_client: FlaskClient
+):
     payload: dict[str, Any] = {
-        "head": {
-            "title": "the_second_problem",
-            "time_limit": 3,
-            "memory_limit": 48763
-        },
+        "head": {"title": "the_second_problem", "time_limit": 3, "memory_limit": 48763},
         "content": {
             "description": "some_description",
             "input_description": "some_input_description",
@@ -206,13 +193,11 @@ def test_add_problem_should_add_the_problem_into_database(app: Flask, logged_in_
         assert problem.problem_author == "cb7ce8d5-8a5a-48e0-b9f0-7247dd5825dd"
 
 
-def test_add_problem_should_add_the_storage_data(app: Flask, logged_in_client: FlaskClient):
+def test_add_problem_should_add_the_storage_data(
+    app: Flask, logged_in_client: FlaskClient
+):
     payload: dict[str, Any] = {
-        "head": {
-            "title": "the_second_problem",
-            "time_limit": 3,
-            "memory_limit": 48763
-        },
+        "head": {"title": "the_second_problem", "time_limit": 3, "memory_limit": 48763},
         "content": {
             "description": "some_description",
             "input_description": "some_input_description",
@@ -227,12 +212,16 @@ def test_add_problem_should_add_the_storage_data(app: Flask, logged_in_client: F
     with app.app_context():
         problem: Problem | None = Problem.query.filter_by(problem_id=1).first()
         assert problem is not None
-        storage_file_data: dict[str, Any] = loads(read_file(f"{problem.problem_token}.json", TunnelCode.PROBLEM))
+        storage_file_data: dict[str, Any] = loads(
+            read_file(f"{problem.problem_token}.json", TunnelCode.PROBLEM)
+        )
         assert storage_file_data["head"] == payload["head"]
         assert storage_file_data["content"] == payload["content"]
 
 
-def test_add_problem_with_wrong_payload_should_return_http_status_bad_request(app: Flask, logged_in_client: FlaskClient):
+def test_add_problem_with_wrong_payload_should_return_http_status_bad_request(
+    app: Flask, logged_in_client: FlaskClient
+):
     payload: dict[str, Any] = {
         "bla": ":)",
     }
@@ -240,13 +229,16 @@ def test_add_problem_with_wrong_payload_should_return_http_status_bad_request(ap
     response: TestResponse = logged_in_client.post("/api/problem/", json=payload)
 
     assert response.status_code == HTTPStatus.BAD_REQUEST
-    
-def test_add_problem_with_invalid_time_limit_should_return_http_status_bad_request(logged_in_client: FlaskClient):
+
+
+def test_add_problem_with_invalid_time_limit_should_return_http_status_bad_request(
+    logged_in_client: FlaskClient,
+):
     payload: dict[str, Any] = {
         "head": {
             "title": "the_second_problem",
             "time_limit": -1,
-            "memory_limit": 48763
+            "memory_limit": 48763,
         },
         "content": {
             "description": "some_description",
@@ -261,13 +253,11 @@ def test_add_problem_with_invalid_time_limit_should_return_http_status_bad_reque
     assert response.status_code == HTTPStatus.BAD_REQUEST
 
 
-def test_add_problem_with_invalid_memory_limit_should_return_http_status_bad_request(logged_in_client: FlaskClient):
+def test_add_problem_with_invalid_memory_limit_should_return_http_status_bad_request(
+    logged_in_client: FlaskClient,
+):
     payload: dict[str, Any] = {
-        "head": {
-            "title": "the_second_problem",
-            "time_limit": 10,
-            "memory_limit": -1
-        },
+        "head": {"title": "the_second_problem", "time_limit": 10, "memory_limit": -1},
         "content": {
             "description": "some_description",
             "input_description": "some_input_description",
@@ -275,19 +265,17 @@ def test_add_problem_with_invalid_memory_limit_should_return_http_status_bad_req
             "note": "some_note",
         },
     }
-    
+
     response: TestResponse = logged_in_client.post("/api/problem/", json=payload)
 
     assert response.status_code == HTTPStatus.BAD_REQUEST
 
 
-def test_add_problem_with_invalid_title_should_return_http_status_bad_request(logged_in_client: FlaskClient):
+def test_add_problem_with_invalid_title_should_return_http_status_bad_request(
+    logged_in_client: FlaskClient,
+):
     payload: dict[str, Any] = {
-        "head": {
-            "title": "",
-            "time_limit": 10,
-            "memory_limit": 48763
-        },
+        "head": {"title": "", "time_limit": 10, "memory_limit": 48763},
         "content": {
             "description": "some_description",
             "input_description": "some_input_description",
@@ -295,7 +283,7 @@ def test_add_problem_with_invalid_title_should_return_http_status_bad_request(lo
             "note": "some_note",
         },
     }
-    
+
     response: TestResponse = logged_in_client.post("/api/problem/", json=payload)
 
     assert response.status_code == HTTPStatus.BAD_REQUEST
