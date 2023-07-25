@@ -305,3 +305,10 @@ def test_add_problem_with_unauthorized_should_return_http_status_unauthorized(
     response: TestResponse = client.post("/api/problem/", json=payload)
 
     assert response.status_code == HTTPStatus.UNAUTHORIZED
+
+def test_add_problem_with_no_paylaod_should_return_http_status_bad_request(
+    app: Flask, logged_in_client: FlaskClient
+):
+    response: TestResponse = logged_in_client.post("/api/problem/")
+
+    assert response.status_code == HTTPStatus.BAD_REQUEST
