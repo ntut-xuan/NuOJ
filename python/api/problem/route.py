@@ -60,7 +60,8 @@ def get_all_problems_data_route() -> Response:
 @validate_problem_request_payload_format_or_return_bad_request
 @validate_problem_request_payload_is_valid_or_return_unprocessable_entity
 def add_problem_data_route() -> Response:
-    payload: dict[str, Any] = request.get_json(silent=True)
+    payload: dict[str, Any] | Any = request.get_json(silent=True)
+    assert payload is not None
     jwt: str | None = request.cookies.get("jwt")
     assert jwt is not None
     user: User = get_user_by_jwt_token(jwt)
