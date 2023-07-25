@@ -54,7 +54,7 @@ def validate_problem_request_payload_format_or_return_bad_request(
     return wrapper
 
 
-def validate_problem_request_payload_is_valid_or_return_bad_request(
+def validate_problem_request_payload_is_valid_or_return_unprocessable_entity(
     func: Callable[..., Response | T]
 ) -> Callable[..., Response | T]:
     @wraps(func)
@@ -71,7 +71,7 @@ def validate_problem_request_payload_is_valid_or_return_bad_request(
             assert payload.head.time_limit > 0
             assert payload.head.memory_limit > 0
         except Exception:
-            return make_simple_error_response(HTTPStatus.BAD_REQUEST, "Invalid payload")
+            return make_simple_error_response(HTTPStatus.UNPROCESSABLE_ENTITY, "Invalid payload")
 
         return func(*args, **kwargs)
 

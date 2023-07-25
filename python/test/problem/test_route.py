@@ -250,7 +250,7 @@ def test_add_problem_with_invalid_time_limit_should_return_http_status_bad_reque
 
     response: TestResponse = logged_in_client.post("/api/problem/", json=payload)
 
-    assert response.status_code == HTTPStatus.BAD_REQUEST
+    assert response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
 
 
 def test_add_problem_with_invalid_memory_limit_should_return_http_status_bad_request(
@@ -268,7 +268,7 @@ def test_add_problem_with_invalid_memory_limit_should_return_http_status_bad_req
 
     response: TestResponse = logged_in_client.post("/api/problem/", json=payload)
 
-    assert response.status_code == HTTPStatus.BAD_REQUEST
+    assert response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
 
 
 def test_add_problem_with_invalid_title_should_return_http_status_bad_request(
@@ -286,4 +286,4 @@ def test_add_problem_with_invalid_title_should_return_http_status_bad_request(
 
     response: TestResponse = logged_in_client.post("/api/problem/", json=payload)
 
-    assert response.status_code == HTTPStatus.BAD_REQUEST
+    assert response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY

@@ -15,7 +15,7 @@ from api.problem.dataclass import ProblemHead, ProblemContent, ProblemData
 from api.problem.validate import (
     validate_problem_request_payload_is_exist_or_return_bad_request,
     validate_problem_request_payload_format_or_return_bad_request,
-    validate_problem_request_payload_is_valid_or_return_bad_request,
+    validate_problem_request_payload_is_valid_or_return_unprocessable_entity,
 )
 from database import db
 from models import Problem, User
@@ -58,7 +58,7 @@ def get_all_problems_data_route() -> Response:
 @validate_jwt_is_valid_or_return_unauthorized
 @validate_problem_request_payload_is_exist_or_return_bad_request
 @validate_problem_request_payload_format_or_return_bad_request
-@validate_problem_request_payload_is_valid_or_return_bad_request
+@validate_problem_request_payload_is_valid_or_return_unprocessable_entity
 def add_problem_data_route() -> Response:
     payload: dict[str, Any] = request.get_json(silent=True)
     jwt: str | None = request.cookies.get("jwt")
