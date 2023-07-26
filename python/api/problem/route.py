@@ -17,6 +17,7 @@ from api.problem.validate import (
     validate_problem_request_payload_format_or_return_bad_request,
     validate_problem_request_payload_is_valid_or_return_unprocessable_entity,
     validate_problem_with_specific_id_is_exists_or_return_forbidden,
+    validate_problem_author_is_match_cookies_user_or_return_forbidden,
 )
 from database import db
 from models import Problem, User
@@ -87,6 +88,38 @@ def add_problem_data_route() -> Response:
     )
 
     # return 200 ok
+    return make_response({"message": "OK."})
+
+
+@problem_bp.route("/<int:id>/", methods=["PUT"])
+@validate_jwt_is_exists_or_return_unauthorized
+@validate_jwt_is_valid_or_return_unauthorized
+@validate_problem_request_payload_is_exist_or_return_bad_request
+@validate_problem_request_payload_format_or_return_bad_request
+@validate_problem_request_payload_is_valid_or_return_unprocessable_entity
+@validate_problem_with_specific_id_is_exists_or_return_forbidden
+@validate_problem_author_is_match_cookies_user_or_return_forbidden
+def update_problem(id: int) -> Response:
+    payload: dict[str, Any] | None = request.get_json(silent=True)
+    assert payload is not None
+    problem: Problem | None = Problem.query.filter_by(problem_id=id).first()
+    assert problem is not None
+    jwt: str = request.cookies["jwt"]
+    user: User = get_user_by_jwt_token(jwt)
+
+    problem_token: str = problem.problem_token
+    payload["head"] |= {"problem_pid": problem.problem_id}
+    problem_data: ProblemData = ProblemData(
+        head=ProblemHead(**payload["head"]),
+        content=ProblemContent(**payload["content"]),
+        author=user,
+    )
+
+    write_file(
+        f"{problem_token}.json",
+        dumps(problem_data.__storage_dict__()),
+        TunnelCode.PROBLEM,
+    )
     return make_response({"message": "OK."})
 
 

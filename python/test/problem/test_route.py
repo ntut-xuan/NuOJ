@@ -72,7 +72,7 @@ def setup_problem_to_database(app: Flask):
         second_problem: Problem = Problem(
             problem_id=2,
             problem_token="the_second_random_token",
-            problem_author="problem_test_user",
+            problem_author="cb7ce8d5-8a5a-48e0-b9f0-7247dd5825dd",
         )
         db.session.add(first_problem)
         db.session.add(second_problem)
@@ -158,8 +158,8 @@ def test_get_all_problem_should_respond_all_the_problem(
                 "note": "some_note",
             },
             "author": {
-                "user_uid": "problem_test_user",
-                "handle": "problem_test_user",
+                "user_uid": "cb7ce8d5-8a5a-48e0-b9f0-7247dd5825dd",
+                "handle": "test_account",
             },
         },
     ]
@@ -313,3 +313,136 @@ def test_add_problem_with_no_paylaod_should_return_http_status_bad_request(
     response: TestResponse = logged_in_client.post("/api/problem/")
 
     assert response.status_code == HTTPStatus.BAD_REQUEST
+
+
+def test_update_problem_should_update_the_problem(
+    app: Flask, logged_in_client: FlaskClient, setup_problem: None
+):
+    payload: dict[str, Any] = {
+        "head": {"title": "the_third_problem", "time_limit": 3, "memory_limit": 48763},
+        "content": {
+            "description": "another_another_description",
+            "input_description": "another_another_input_description",
+            "output_description": "another_another_output_description",
+            "note": "another_another_note",
+        },
+    }
+
+    response: TestResponse = logged_in_client.put("/api/problem/2/", json=payload)
+
+    assert response.status_code == HTTPStatus.OK
+    with app.app_context():
+        problem_storage_raw_text: str = read_file(
+            "the_second_random_token.json", TunnelCode.PROBLEM
+        )
+        problem_storage_data = loads(problem_storage_raw_text)
+        assert problem_storage_data["head"] == payload["head"]
+        assert problem_storage_data["content"] == payload["content"]
+
+
+def test_update_problem_with_unauthorized_should_return_http_status_code_unauthorized(
+    app: Flask, client: FlaskClient, setup_problem: None
+):
+    payload: dict[str, Any] = {
+        "head": {"title": "the_third_problem", "time_limit": 3, "memory_limit": 48763},
+        "content": {
+            "description": "another_another_description",
+            "input_description": "another_another_input_description",
+            "output_description": "another_another_output_description",
+            "note": "another_another_note",
+        },
+    }
+
+    response: TestResponse = client.put("/api/problem/2/", json=payload)
+
+    assert response.status_code == HTTPStatus.UNAUTHORIZED
+
+
+def test_update_problem_with_no_payload_should_return_http_status_code_bad_request(
+    app: Flask, logged_in_client: FlaskClient, setup_problem: None
+):
+    response: TestResponse = logged_in_client.put("/api/problem/2/")
+
+    assert response.status_code == HTTPStatus.BAD_REQUEST
+
+
+def test_update_problem_with_invalid_format_should_return_http_status_code_bad_request(
+    app: Flask, logged_in_client: FlaskClient, setup_problem: None
+):
+    payload: dict[str, Any] = {"hi": ":)"}
+
+    response: TestResponse = logged_in_client.put("/api/problem/2/", json=payload)
+
+    assert response.status_code == HTTPStatus.BAD_REQUEST
+
+
+def test_update_problem_with_invalid_time_limit_should_return_http_status_code_bad_request(
+    app: Flask, logged_in_client: FlaskClient, setup_problem: None
+):
+    payload: dict[str, Any] = {
+        "head": {"title": "the_third_problem", "time_limit": -1, "memory_limit": 48763},
+        "content": {
+            "description": "another_another_description",
+            "input_description": "another_another_input_description",
+            "output_description": "another_another_output_description",
+            "note": "another_another_note",
+        },
+    }
+
+    response: TestResponse = logged_in_client.put("/api/problem/2/", json=payload)
+
+    assert response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
+
+
+def test_update_problem_with_invalid_memory_limit_should_return_http_status_code_bad_request(
+    app: Flask, logged_in_client: FlaskClient, setup_problem: None
+):
+    payload: dict[str, Any] = {
+        "head": {"title": "the_third_problem", "time_limit": 10, "memory_limit": -1},
+        "content": {
+            "description": "another_another_description",
+            "input_description": "another_another_input_description",
+            "output_description": "another_another_output_description",
+            "note": "another_another_note",
+        },
+    }
+
+    response: TestResponse = logged_in_client.put("/api/problem/2/", json=payload)
+
+    assert response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
+
+
+def test_update_problem_with_invalid_title_should_return_http_status_code_bad_request(
+    app: Flask, logged_in_client: FlaskClient, setup_problem: None
+):
+    payload: dict[str, Any] = {
+        "head": {"title": "", "time_limit": 10, "memory_limit": -1},
+        "content": {
+            "description": "another_another_description",
+            "input_description": "another_another_input_description",
+            "output_description": "another_another_output_description",
+            "note": "another_another_note",
+        },
+    }
+
+    response: TestResponse = logged_in_client.put("/api/problem/2/", json=payload)
+
+    assert response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
+
+
+def test_update_problem_with_not_author_account_should_return_http_status_code_forbidden(
+    app: Flask, logged_in_client: FlaskClient, setup_problem: None
+):
+    payload: dict[str, Any] = {
+        "head": {"title": "the_third_problem", "time_limit": 3, "memory_limit": 48763},
+        "content": {
+            "description": "another_another_description",
+            "input_description": "another_another_input_description",
+            "output_description": "another_another_output_description",
+            "note": "another_another_note",
+        },
+    }
+
+    response: TestResponse = logged_in_client.put("/api/problem/1/", json=payload)
+
+    assert response.status_code == HTTPStatus.FORBIDDEN
