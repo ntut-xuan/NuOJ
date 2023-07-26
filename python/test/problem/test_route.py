@@ -306,6 +306,7 @@ def test_add_problem_with_unauthorized_should_return_http_status_unauthorized(
 
     assert response.status_code == HTTPStatus.UNAUTHORIZED
 
+
 def test_add_problem_with_no_paylaod_should_return_http_status_bad_request(
     app: Flask, logged_in_client: FlaskClient
 ):
