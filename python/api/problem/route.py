@@ -16,6 +16,7 @@ from api.problem.validate import (
     validate_problem_request_payload_is_exist_or_return_bad_request,
     validate_problem_request_payload_format_or_return_bad_request,
     validate_problem_request_payload_is_valid_or_return_unprocessable_entity,
+    validate_problem_with_specific_id_is_exists_or_return_forbidden,
 )
 from database import db
 from models import Problem, User
@@ -26,13 +27,10 @@ problem_bp = Blueprint("problem", __name__, url_prefix="/api/problem")
 
 
 @problem_bp.route("/<int:id>/", methods=["GET"])
+@validate_problem_with_specific_id_is_exists_or_return_forbidden
 def get_problems_data_route(id: int) -> Response:
     problem: Problem | None = Problem.query.filter_by(problem_id=id).first()
-
-    if problem is None:
-        return make_simple_error_response(
-            HTTPStatus.FORBIDDEN, "The problem with the specific ID is not found."
-        )
+    assert problem is not None
 
     problem_pid: str = problem.problem_id
 
