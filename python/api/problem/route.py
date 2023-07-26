@@ -130,6 +130,7 @@ def update_problem(id: int) -> Response:
 @validate_problem_author_is_match_cookies_user_or_return_forbidden
 def delete_problem(id: int) -> Response:
     problem: Problem | None = Problem.query.filter_by(problem_id=id).first()
+    assert problem is not None
 
     db.session.delete(problem)
     db.session.commit()
