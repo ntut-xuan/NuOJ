@@ -21,7 +21,7 @@ from api.problem.validate import (
 )
 from database import db
 from models import Problem, User
-from storage.util import TunnelCode, read_file, write_file
+from storage.util import TunnelCode, delete_file, read_file, write_file
 from util import make_simple_error_response
 
 problem_bp = Blueprint("problem", __name__, url_prefix="/api/problem")
@@ -120,6 +120,21 @@ def update_problem(id: int) -> Response:
         dumps(problem_data.__storage_dict__()),
         TunnelCode.PROBLEM,
     )
+    return make_response({"message": "OK."})
+
+
+@problem_bp.route("/<int:id>/", methods=["DELETE"])
+@validate_jwt_is_exists_or_return_unauthorized
+@validate_jwt_is_valid_or_return_unauthorized
+@validate_problem_with_specific_id_is_exists_or_return_forbidden
+@validate_problem_author_is_match_cookies_user_or_return_forbidden
+def delete_problem(id: int) -> Response:
+    problem: Problem | None = Problem.query.filter_by(problem_id=id).first()
+
+    db.session.delete(problem)
+    db.session.commit()
+
+    delete_file(f"{problem.problem_token}.json", tunnel=TunnelCode.PROBLEM)
     return make_response({"message": "OK."})
 
 

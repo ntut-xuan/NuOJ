@@ -9,7 +9,7 @@ from werkzeug.test import TestResponse
 
 from database import db
 from models import Problem, User
-from storage.util import TunnelCode, read_file, write_file
+from storage.util import TunnelCode, is_file_exists, read_file, write_file
 
 
 @pytest.fixture
@@ -444,5 +444,41 @@ def test_update_problem_with_not_author_account_should_return_http_status_code_f
     }
 
     response: TestResponse = logged_in_client.put("/api/problem/1/", json=payload)
+
+    assert response.status_code == HTTPStatus.FORBIDDEN
+
+
+def test_delete_problem_should_delete_the_problem(
+    app: Flask, logged_in_client: FlaskClient, setup_problem: None
+):
+    response: TestResponse = logged_in_client.delete("/api/problem/2/")
+
+    assert response.status_code == HTTPStatus.OK
+    with app.app_context():
+        assert not is_file_exists("the_second_problem.json", TunnelCode.PROBLEM)
+        problem: Problem | None = Problem.query.filter_by(problem_id=2).first()
+        assert problem is None
+
+
+def test_delete_problem_with_unauthorized_should_return_http_status_code_unauthorized(
+    app: Flask, client: FlaskClient, setup_problem: None
+):
+    response: TestResponse = client.delete("/api/problem/2/")
+
+    assert response.status_code == HTTPStatus.UNAUTHORIZED
+
+
+def test_delete_problem_with_absent_id_should_return_http_status_code_forbidden(
+    app: Flask, logged_in_client: FlaskClient, setup_problem: None
+):
+    response: TestResponse = logged_in_client.delete("/api/problem/88/")
+
+    assert response.status_code == HTTPStatus.FORBIDDEN
+
+
+def test_delete_problem_with_not_author_account_should_return_http_status_code_forbidden(
+    app: Flask, logged_in_client: FlaskClient, setup_problem: None
+):
+    response: TestResponse = logged_in_client.delete("/api/problem/1/")
 
     assert response.status_code == HTTPStatus.FORBIDDEN
