@@ -430,6 +430,24 @@ def test_update_problem_with_invalid_title_should_return_http_status_code_bad_re
     assert response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
 
 
+def test_update_problem_with_absent_problem_should_return_http_status_code_forbidden(
+    app: Flask, logged_in_client: FlaskClient, setup_problem: None
+):
+    payload: dict[str, Any] = {
+        "head": {"title": "the_third_problem", "time_limit": 3, "memory_limit": 48763},
+        "content": {
+            "description": "another_another_description",
+            "input_description": "another_another_input_description",
+            "output_description": "another_another_output_description",
+            "note": "another_another_note",
+        },
+    }
+
+    response: TestResponse = logged_in_client.put("/api/problem/88/", json=payload)
+
+    assert response.status_code == HTTPStatus.FORBIDDEN
+
+
 def test_update_problem_with_not_author_account_should_return_http_status_code_forbidden(
     app: Flask, logged_in_client: FlaskClient, setup_problem: None
 ):
