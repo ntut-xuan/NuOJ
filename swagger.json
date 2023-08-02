@@ -1027,6 +1027,27 @@
                     }
                 }
             }
+        },
+        "/api/submission/{problem_id}": {
+            "get": {
+                "summary": "The route for get the submissions of the specific problem.",
+                "tags": ["submission"],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/submission_response"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
     },
     "components": {
