@@ -864,6 +864,27 @@
                 }
             }
         },
+        "/api/problem/{problem_id}/code": {
+            "get": {
+                "summary": "Get the codes of the specific problem.",
+                "tags": ["problem"],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/code_response"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/api/problem": {
             "get": {
                 "summary": "The route to get all the problem.",
@@ -1024,6 +1045,41 @@
                                 }
                             }
                         }
+                    }
+                }
+            }
+        },
+        "/api/submission/{submission_id}/code": {
+            "get": {
+                "summary": "The route for get the code of the specific submission.",
+                "tags": ["submission"],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/code_response"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/submission/{submission_id}/rejudge": {
+            "post": {
+                "summary": "The route for rejudge the specific submission.",
+                "tags": ["submission"],
+                "responses": {
+                    "200": {
+                        "$ref": "#/components/responses/200_message_ok"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/401_authentication_required"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/403_permission_denied"
                     }
                 }
             }
@@ -1264,7 +1320,7 @@
                         "type": "string",
                         "example": "print('Hello World')"
                     },
-                    "compiler": {
+                    "language": {
                         "type": "string",
                         "example": "C++14 (g++)"
                     },
@@ -1292,7 +1348,7 @@
                         "properties": {
                             "user_uid": {
                                 "type": "integer",
-                                "example": 1
+                                "example": "8d828772-50a5-4496-8114-0bf64132c125"
                             },
                             "handle": {
                                 "type": "string",
@@ -1330,6 +1386,27 @@
                                 "example": "131072"
                             }
                         }
+                    }
+                }
+            },
+            "code_response": {
+                "type": "object",
+                "properties": {
+                    "submission_id": {
+                        "type": "string",
+                        "example": "66783329"
+                    },
+                    "user_uid": {
+                        "type": "string",
+                        "example": "8d828772-50a5-4496-8114-0bf64132c125"
+                    },
+                    "language": {
+                        "type": "string",
+                        "example": "Python 3.11"
+                    },
+                    "content": {
+                        "type": "string",
+                        "example": "print('Hello World')"
                     }
                 }
             }
