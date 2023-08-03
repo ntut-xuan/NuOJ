@@ -10,6 +10,7 @@ from api.auth.api_route import auth_bp
 from api.problem.route import problem_bp
 from api.profile.route import profile_bp
 from api.auth.test_route import auth_test_bp
+from api.system.route import system_bp
 from database import create_db_command, db
 from page.auth.route import auth_page_bp
 from page.problem.route import problem_page_bp
@@ -45,14 +46,11 @@ def create_app(test_config: Mapping[str, Any] | None = None) -> Flask:
     app.register_blueprint(page)
     app.register_blueprint(problem_page_bp)
     app.register_blueprint(submission_page_bp)
+    app.register_blueprint(system_bp)
 
     @app.route("/static/<path:path>")
     def fetch_static_file_from_specific_path(path):
         return send_from_directory("../static", path)
-
-    @app.route("/heartbeat", methods=["GET"])
-    def fetch_heartbeat():
-        return Response(json.dumps({"status": "OK"}), mimetype="application/json")
 
     # crypto_util.GenerateKey()
     return app
