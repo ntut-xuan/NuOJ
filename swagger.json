@@ -1105,9 +1105,21 @@
                 }
             }
         },
-        "/api/result": {
+        "/api/result/{submission_id}": {
             "post": {
                 "summary": "Add the result from judger.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "submission_id",
+                        "description": "The submissiod ID to specific the submission.",
+                        "required": true,
+                        "example": "32236778",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
                 "tags": ["result"],
                 "requestBody": {
                     "content": {
@@ -1129,9 +1141,7 @@
                         "$ref": "#/components/responses/401_authentication_required"
                     }
                 }
-            }
-        },
-        "/api/result/{submission_id}": {
+            },
             "put": {
                 "summary": "Modified the verdict to the specific submission. Usually used in rejudge function.",
                 "parameters": [
