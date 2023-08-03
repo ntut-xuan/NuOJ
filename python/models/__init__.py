@@ -1,5 +1,6 @@
 import enum
 from database import db
+from sqlalchemy.sql.functions import current_timestamp
 
 
 class SubmissionVerdict(enum.Enum):
@@ -34,20 +35,37 @@ class Profile(db.Model):  # type: ignore[name-defined]
 
 class Problem(db.Model):  # type: ignore[name-defined]
     problem_id = db.Column(db.Integer, primary_key=True, nullable=False)
-    problem_token = db.Column(db.String, unique=True, nullable=False)
+    problem_token = db.Column(db.String(100), unique=True, nullable=False)
     problem_author = db.Column(
         db.ForeignKey(User.user_uid, ondelete="CASCADE", onupdate="CASCADE")
     )
 
 
+class VerdictErrorComment(db.Model):
+    id = db.Column(db.Integer, primary_key=True, nullable=False, autoincrement=True)
+    failed_testcase_index = db.Column(db.Integer, nullable=False)
+    message = db.Column(db.String(100), nullable=False)
+
+
+class Verdict(db.Model):
+    id = db.Column(db.Integer, primary_key=True, nullable=False, autoincrement=True)
+    tracker_uid = db.Column(db.String(100), unique=True, nullable=False)
+    date = db.Column(db.DateTime, default=current_timestamp(), nullable=False)
+    verdict = db.Column(db.String(100), nullable=False)
+    error_id = db.Column(db.ForeignKey(VerdictErrorComment.id, ondelete="CASCADE", onupdate="CASCADE"), nullable=True)
+    memory_usage = db.Column(db.Integer, nullable=False)
+    time_usage = db.Column(db.Integer, nullable=False)
+
+
 class Submission(db.Model):  # type: ignore[name-defined]
-    submission_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    problem_id = db.Column(
-        db.ForeignKey(Problem.problem_id, ondelete="CASCADE", onupdate="CASCADE")
-    )
+    id = db.Column(db.Integer, primary_key=True, nullable=False, autoincrement=True)
     user_uid = db.Column(
-        db.ForeignKey(User.user_uid, ondelete="CASCADE", onupdate="CASCADE")
+        db.ForeignKey(User.user_uid), nullable=False
     )
-    verdict = db.Column(db.Enum(SubmissionVerdict), default=SubmissionVerdict.PENDING)
-    time = db.Column(db.Float, default=None)
-    memory = db.Column(db.Float, default=None)
+    problem_id = db.Column(
+        db.ForeignKey(Problem.problem_id), nullable=False
+    )
+    date = db.Column(db.DateTime, default=current_timestamp(), nullable=False)
+    compiler = db.Column(db.String(100), nullable=False)
+    tracker_uid = db.Column(db.ForeignKey(Verdict.tracker_uid), nullable=True)
+
