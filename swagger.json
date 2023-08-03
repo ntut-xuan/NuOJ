@@ -1139,42 +1139,6 @@
                     },
                     "401": {
                         "$ref": "#/components/responses/401_authentication_required"
-                    }
-                }
-            },
-            "put": {
-                "summary": "Modified the verdict to the specific submission. Usually used in rejudge function.",
-                "parameters": [
-                    {
-                        "in": "path",
-                        "name": "submission_id",
-                        "description": "The submissiod ID to specific the submission.",
-                        "required": true,
-                        "example": "32236778",
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "requestBody": {
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "$ref": "#/components/schemas/result_requestbody"
-                            }
-                        }
-                    }
-                },
-                "tags": ["result"],
-                "responses": {
-                    "200": {
-                        "$ref": "#/components/responses/200_message_ok"
-                    },
-                    "400": {
-                        "$ref": "#/components/responses/400_incorrect_format"
-                    },
-                    "401": {
-                        "$ref": "#/components/responses/401_authentication_required"
                     },
                     "403": {
                         "$ref": "#/components/responses/403_target_absent"
