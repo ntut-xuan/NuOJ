@@ -41,13 +41,13 @@ class Problem(db.Model):  # type: ignore[name-defined]
     )
 
 
-class VerdictErrorComment(db.Model):
+class VerdictErrorComment(db.Model):  # type: ignore[name-defined]
     id = db.Column(db.Integer, primary_key=True, nullable=False, autoincrement=True)
     failed_testcase_index = db.Column(db.Integer, nullable=False)
     message = db.Column(db.String(100), nullable=False)
 
 
-class Verdict(db.Model):
+class Verdict(db.Model):  # type: ignore[name-defined]
     id = db.Column(db.Integer, primary_key=True, nullable=False, autoincrement=True)
     tracker_uid = db.Column(db.String(100), unique=True, nullable=False)
     date = db.Column(db.DateTime, default=current_timestamp(), nullable=False)
