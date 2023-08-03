@@ -1,8 +1,11 @@
+from datetime import datetime
+
 import pytest
 from flask import Flask
+from sqlalchemy.sql import null
 
 from database import db
-from models import Problem, Profile, Submission, SubmissionVerdict, User
+from models import Problem, Profile, Submission, Verdict, VerdictErrorComment, User
 
 
 @pytest.fixture
@@ -92,26 +95,72 @@ def test_problem_model_with_valid_data_should_add_record_to_database(
 
 
 def test_submission_model_with_valid_data_should_add_record_to_database(
-    app: Flask, setup_problem: None
+    app: Flask, setup_user: None, setup_problem: None
 ):
     with app.app_context():
+        specific_datetime: datetime = datetime.now()
         submission: Submission = Submission(
-            submission_id=1,
-            problem_id=1,
+            id=1,
             user_uid="some-random-uuid",
-            verdict=SubmissionVerdict.ACCEPTED,
-            time=1.1,
-            memory=32767,
+            problem_id=1,
+            date=specific_datetime,
+            compiler="C++14",
+            tracker_uid=None
         )
 
         db.session.add(submission)
         db.session.commit()
 
         submission_from_database: Submission | None = Submission.query.filter(
-            Submission.submission_id == 1
+            Submission.id == 1
         ).first()
         assert submission_from_database is not None
-        assert submission_from_database.submission_id == 1
+        assert submission_from_database.id == 1
+        assert submission_from_database.user_uid == "some-random-uuid"
         assert submission_from_database.problem_id == 1
-        assert submission_from_database.time == 1.1
-        assert submission_from_database.memory == 32767
+        assert submission_from_database.date == specific_datetime
+        assert submission_from_database.compiler == "C++14"
+        assert submission_from_database.tracker_uid == None
+
+
+def test_verdict_model_with_valid_data_should_add_record_to_database(app: Flask):
+    with app.app_context():
+        specific_datetime: datetime = datetime.now()
+        verdict: Verdict = Verdict(
+            id=1,
+            tracker_uid="some-random-uuid",
+            date=specific_datetime,
+            verdict="Accepted",
+            error_id=None,
+            memory_usage=100000,
+            time_usage=3014
+        )
+
+        db.session.add(verdict)
+        db.session.commit()
+
+        verdict_from_database: Verdict | None = Verdict.query.filter(Verdict.id == 1).first()
+        assert verdict_from_database is not None
+        assert verdict_from_database.verdict == "Accepted"
+        assert verdict_from_database.tracker_uid == "some-random-uuid"
+        assert verdict_from_database.date == specific_datetime
+        assert verdict_from_database.error_id == None
+        assert verdict_from_database.memory_usage == 100000
+        assert verdict_from_database.time_usage == 3014
+
+
+def test_verdict_error_message_model_with_valid_data_should_add_record_to_database(app: Flask):
+    with app.app_context():
+        verdict_error_comment: VerdictErrorComment = VerdictErrorComment(
+            id=1,
+            failed_testcase_index=5,
+            message="Wrong answer expected 9 but got 8."
+        )
+
+        db.session.add(verdict_error_comment)
+        db.session.commit()
+
+        verdict_error_comment_from_database: VerdictErrorComment | None = VerdictErrorComment.query.filter(VerdictErrorComment.id == 1).first()
+        assert verdict_error_comment_from_database is not None
+        assert verdict_error_comment_from_database.failed_testcase_index == 5
+        assert verdict_error_comment_from_database.message == "Wrong answer expected 9 but got 8."
