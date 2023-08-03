@@ -1109,6 +1109,15 @@
             "post": {
                 "summary": "Add the result from judger.",
                 "tags": ["result"],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/result_requestbody"
+                            }
+                        }
+                    }
+                },
                 "responses": {
                     "200": {
                         "$ref": "#/components/responses/200_message_ok"
@@ -1125,6 +1134,27 @@
         "/api/result/{submission_id}": {
             "put": {
                 "summary": "Modified the verdict to the specific submission. Usually used in rejudge function.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "submission_id",
+                        "description": "The submissiod ID to specific the submission.",
+                        "required": true,
+                        "example": "32236778",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/result_requestbody"
+                            }
+                        }
+                    }
+                },
                 "tags": ["result"],
                 "responses": {
                     "200": {
@@ -1444,6 +1474,43 @@
                     "content": {
                         "type": "string",
                         "example": "print('Hello World')"
+                    }
+                }
+            },
+            "result_requestbody": {
+                "type": "object",
+                "properties": {
+                    "tracker_id": {
+                        "type": "string",
+                        "example": "9910eff8-ecd1-4ded-877f-b1b2d53bed85"
+                    },
+                    "verdict": {
+                        "type": "string",
+                        "example": "Accepted"
+                    },
+                    "failed_comment": {
+                        "type": "object",
+                        "properties": {
+                            "failed_testcase_index": {
+                                "type": "integer",
+                                "example": 5
+                            }
+                        }
+                    },
+                    "usage": {
+                        "type": "object",
+                        "properties": {
+                            "memory_usage": {
+                                "type": "integer",
+                                "description": "In kilobytes.",
+                                "example": "131072"
+                            },
+                            "time_usage": {
+                                "type": "integer",
+                                "description": "In milliseconds.",
+                                "example": "1312"
+                            }
+                        }
                     }
                 }
             }
