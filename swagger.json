@@ -864,6 +864,72 @@
                 }
             }
         },
+        "/api/problem": {
+            "get": {
+                "summary": "The route to get all the problem.",
+                "tags": [
+                    "problem"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/problem_response"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "summary": "The route to add the problem.",
+                "tags": [
+                    "problem"
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/problem_requestbody"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "$ref": "#/components/responses/200_message_ok"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/401_authentication_required"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/403_permission_denied"
+                    },
+                    "422": {
+                        "description": "Invalid time limit or memory limit, or the limit in the payload is reach the max limit.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Invalid time limit or memory limit, or the limit in the payload is reach the max limit."
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/api/problem/{problem_id}/code": {
             "get": {
                 "summary": "Get the codes of the specific problem.",
@@ -1009,72 +1075,6 @@
                     },
                     "403": {
                         "$ref": "#/components/responses/403_target_absent"
-                    }
-                }
-            }
-        },
-        "/api/problem": {
-            "get": {
-                "summary": "The route to get all the problem.",
-                "tags": [
-                    "problem"
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "type": "array",
-                                    "items": {
-                                        "$ref": "#/components/schemas/problem_response"
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            },
-            "post": {
-                "summary": "The route to add the problem.",
-                "tags": [
-                    "problem"
-                ],
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "$ref": "#/components/schemas/problem_requestbody"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "200": {
-                        "$ref": "#/components/responses/200_message_ok"
-                    },
-                    "401": {
-                        "$ref": "#/components/responses/401_authentication_required"
-                    },
-                    "403": {
-                        "$ref": "#/components/responses/403_permission_denied"
-                    },
-                    "422": {
-                        "description": "Invalid time limit or memory limit, or the limit in the payload is reach the max limit.",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Invalid time limit or memory limit, or the limit in the payload is reach the max limit."
-                                        }
-                                    }
-                                }
-                            }
-                        }
                     }
                 }
             }
