@@ -885,6 +885,142 @@
                 }
             }
         },
+        "/api/problem/{problem_id}/solution": {
+            "get": {
+                "summary": "Get the solutions of the specific problem.",
+                "tags": ["problem"],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "content": {
+                                            "type": "string",
+                                            "example": "Some code here."
+                                        },
+                                        "verdict": {
+                                            "type": "string",
+                                            "example": "Accepted"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/401_authentication_required"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/403_target_absent"
+                    }
+                }
+            },
+            "post": {
+                "summary": "Setup or modified the solution of the specific problem.",
+                "tags": ["problem"],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "content": {
+                                        "type": "string",
+                                        "example": "Some code here."
+                                    },
+                                    "verdict": {
+                                        "type": "string",
+                                        "example": "Accepted"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "$ref": "#/components/responses/200_message_ok"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/401_authentication_required"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/403_target_absent"
+                    }
+                }
+            }
+        },
+        "/api/problem/{problem_id}/checker": {
+            "get": {
+                "summary": "Get the checker of the problem",
+                "tags": ["problem"],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "type": {
+                                            "type": "string",
+                                            "example": "String Comparator"
+                                        },
+                                        "content": {
+                                            "type": "string",
+                                            "example": "Some code here."
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/401_authentication_required"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/403_target_absent"
+                    }
+                }
+            },
+            "post": {
+                "summary": "Setup or modified the checker of the problem",
+                "tags": ["problem"],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "type": {
+                                        "type": "string",
+                                        "example": "String Comparator"
+                                    },
+                                    "content": {
+                                        "type": "string",
+                                        "example": "Some code here."
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "$ref": "#/components/responses/200_message_ok"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/401_authentication_required"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/403_target_absent"
+                    }
+                }
+            }
+        },
         "/api/problem": {
             "get": {
                 "summary": "The route to get all the problem.",
