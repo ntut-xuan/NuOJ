@@ -33,12 +33,12 @@ class Profile(db.Model):  # type: ignore[name-defined]
     bio = db.Column(db.String(100), default=None)
 
 
-class ProblemChecker(db.Model):
+class ProblemChecker(db.Model): # type: ignore[name-defined]
     id = db.Column(db.Integer, primary_key=True, nullable=False, autoincrement=True)
     filename = db.Column(db.String(100), unique=True, nullable=False)
 
 
-class ProblemSolution(db.Model):
+class ProblemSolution(db.Model): # type: ignore[name-defined]
     id = db.Column(db.Integer, primary_key=True, nullable=False, autoincrement=True)
     filename = db.Column(db.String(100), unique=True, nullable=False)
 
