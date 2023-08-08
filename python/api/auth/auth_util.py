@@ -111,6 +111,17 @@ def verified_the_email_of_handle(handle: str) -> None:
     db.session.commit()
 
 
+def get_user_by_jwt_token(jwt: str):
+    key: str = current_app.config["jwt_key"]
+    codec: HS256JWTCodec = HS256JWTCodec(key)
+    payload: dict[str, Any] = codec.decode(jwt)
+    handle: str = payload["data"]["handle"]
+
+    user: User = User.query.filter_by(handle=handle).first()
+    assert user is not None
+    return user
+
+
 def _init_profile_storage_file(user_uid: str, handle: str, email: str) -> None:
     write_file(
         user_uid + ".json",
