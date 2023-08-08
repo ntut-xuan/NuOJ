@@ -21,7 +21,7 @@ from api.problem.validate import (
     validate_problem_author_is_match_cookies_user_or_return_forbidden,
 )
 from database import db
-from models import Problem, ProblemSolution, User
+from models import Problem, ProblemChecker, ProblemSolution, User
 from storage.util import TunnelCode, delete_file, read_file, write_file
 from util import make_simple_error_response
 
@@ -155,6 +155,24 @@ def get_problem_solution(id: int) -> Response:
     
     filename: str = query_row.filename
     solution_content: str = read_file(filename, TunnelCode.SOLUTION)
+    return make_response({"content": solution_content})
+
+
+@problem_bp.route("/<int:id>/checker", methods=["GET"])
+@validate_jwt_is_exists_or_return_unauthorized
+@validate_jwt_is_valid_or_return_unauthorized
+@validate_problem_with_specific_id_is_exists_or_return_forbidden
+@validate_problem_author_is_match_cookies_user_or_return_forbidden
+def get_problem_checker(id: int) -> Response:
+    query_row: Row | None = db.session.execute(
+        db.select(ProblemChecker.filename).select_from(Problem).join(ProblemChecker).where(Problem.problem_id == id)
+    ).first()
+
+    if query_row is None:
+        return make_response({"content": ""})
+    
+    filename: str = query_row.filename
+    solution_content: str = read_file(filename, TunnelCode.CHECKER)
     return make_response({"content": solution_content})
 
 

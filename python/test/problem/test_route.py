@@ -8,7 +8,7 @@ from flask.testing import FlaskClient
 from werkzeug.test import TestResponse
 
 from database import db
-from models import Problem, ProblemSolution, User
+from models import Problem, ProblemChecker, ProblemSolution, User
 from storage.util import TunnelCode, is_file_exists, read_file, write_file
 
 
@@ -107,6 +107,26 @@ def setup_problem_solution(app: Flask) -> str:
         solution_content = "print('Hello World')"
         write_file("1fdd43e9-fad4-4a59-8b9f-e4460e5ae1eb.py", solution_content, TunnelCode.SOLUTION)
         return solution_content
+    
+
+@pytest.fixture
+def setup_problem_checker(app: Flask) -> str:
+    with app.app_context():
+        problem_checker: ProblemChecker = ProblemChecker(
+            id=1,
+            filename="1fdd43e9-fad4-4a59-8b9f-e4460e5ae1eb.cpp"
+        )
+        db.session.add(problem_checker)
+        db.session.commit()
+
+        problem: Problem | None = Problem.query.filter_by(problem_id=2).first()
+        assert problem is not None
+        problem.problem_checker = 1
+        db.session.commit()
+
+        checker_content = "Some checker content"
+        write_file("1fdd43e9-fad4-4a59-8b9f-e4460e5ae1eb.cpp", checker_content, TunnelCode.CHECKER)
+        return checker_content
 
 
 class TestGetSpecificProblem:
@@ -589,6 +609,57 @@ class TestGetProblemSolution:
 
     def test_with_not_logged_in_client_should_return_http_status_code_unauthorized(
         self, app: Flask, client: FlaskClient, setup_problem: None, setup_problem_solution: str
+    ):
+        response: TestResponse = client.get("/api/problem/2/solution")
+
+        assert response.status_code == HTTPStatus.UNAUTHORIZED
+
+    def test_with_not_owner_problem_id_should_return_http_status_code_forbidden(
+        self, app: Flask, logged_in_client: FlaskClient, setup_problem: None, setup_problem_solution: str
+    ):
+        response: TestResponse = logged_in_client.get("/api/problem/1/solution")
+
+        assert response.status_code == HTTPStatus.FORBIDDEN
+
+
+class TestGetProblemChecker:
+    def test_with_valid_problem_id_should_return_http_status_code_ok(
+        self, app: Flask, logged_in_client: FlaskClient, setup_problem: None, setup_problem_checker: str
+    ):
+        response: TestResponse = logged_in_client.get("/api/problem/2/checker")
+
+        assert response.status_code == HTTPStatus.OK
+
+    def test_with_valid_problem_id_should_return_problem_checker_content(
+        self, app: Flask, logged_in_client: FlaskClient, setup_problem: None, setup_problem_checker: str
+    ):
+        response: TestResponse = logged_in_client.get("/api/problem/2/checker")
+
+        assert response.status_code == HTTPStatus.OK
+        payload: dict[str, Any] | None = response.get_json(silent=True)
+        assert payload is not None
+        checker_content: str = setup_problem_checker
+        assert payload["content"] == checker_content
+
+    def test_with_valid_problem_id_and_empty_checker_should_return_empty_problem_solution_content(
+        self, app: Flask, logged_in_client: FlaskClient, setup_problem: None
+    ):
+        response: TestResponse = logged_in_client.get("/api/problem/2/checker")
+
+        assert response.status_code == HTTPStatus.OK
+        payload: dict[str, Any] | None = response.get_json(silent=True)
+        assert payload is not None
+        assert payload["content"] == ""
+
+    def test_with_invalid_problem_id_should_return_http_status_code_forbidden(
+        self, app: Flask, logged_in_client: FlaskClient, setup_problem: None, setup_problem_checker: str
+    ):
+        response: TestResponse = logged_in_client.get("/api/problem/999/checker")
+
+        assert response.status_code == HTTPStatus.FORBIDDEN
+
+    def test_with_not_logged_in_client_should_return_http_status_code_unauthorized(
+        self, app: Flask, client: FlaskClient, setup_problem: None, setup_problem_checker: str
     ):
         response: TestResponse = client.get("/api/problem/2/solution")
 
