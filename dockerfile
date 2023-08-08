@@ -8,6 +8,7 @@ RUN mkdir /etc/nuoj
 COPY . /etc/nuoj
 RUN mkdir /etc/nuoj/storage/
 RUN mkdir /etc/nuoj/storage/problem/
+RUN mkdir /etc/nuoj/storage/problem_checker/
 RUN mkdir /etc/nuoj/storage/problem_solution/
 RUN mkdir /etc/nuoj/storage/user_avater/
 RUN mkdir /etc/nuoj/storage/user_profile/
