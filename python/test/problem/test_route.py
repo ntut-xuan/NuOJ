@@ -552,6 +552,13 @@ class TestDeleteProblem:
 
 
 class TestGetProblemSolution:
+    def test_with_valid_problem_id_should_return_http_status_code_ok(
+        self, app: Flask, logged_in_client: FlaskClient, setup_problem: None, setup_problem_solution: str
+    ):
+        response: TestResponse = logged_in_client.get("/api/problem/2/solution")
+
+        assert response.status_code == HTTPStatus.OK
+
     def test_with_valid_problem_id_should_return_problem_solution_content(
         self, app: Flask, logged_in_client: FlaskClient, setup_problem: None, setup_problem_solution: str
     ):
@@ -572,3 +579,24 @@ class TestGetProblemSolution:
         payload: dict[str, Any] | None = response.get_json(silent=True)
         assert payload is not None
         assert payload["content"] == ""
+
+    def test_with_invalid_problem_id_should_return_http_status_code_forbidden(
+        self, app: Flask, logged_in_client: FlaskClient, setup_problem: None, setup_problem_solution: str
+    ):
+        response: TestResponse = logged_in_client.get("/api/problem/999/solution")
+
+        assert response.status_code == HTTPStatus.FORBIDDEN
+
+    def test_with_not_logged_in_client_should_return_http_status_code_unauthorized(
+        self, app: Flask, client: FlaskClient, setup_problem: None, setup_problem_solution: str
+    ):
+        response: TestResponse = client.get("/api/problem/2/solution")
+
+        assert response.status_code == HTTPStatus.UNAUTHORIZED
+
+    def test_with_not_owner_problem_id_should_return_http_status_code_forbidden(
+        self, app: Flask, logged_in_client: FlaskClient, setup_problem: None, setup_problem_solution: str
+    ):
+        response: TestResponse = logged_in_client.get("/api/problem/1/solution")
+
+        assert response.status_code == HTTPStatus.FORBIDDEN
