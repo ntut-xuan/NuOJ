@@ -8,7 +8,7 @@ from flask.testing import FlaskClient
 from werkzeug.test import TestResponse
 
 from database import db
-from models import Problem, User
+from models import Problem, ProblemSolution, User
 from storage.util import TunnelCode, is_file_exists, read_file, write_file
 
 
@@ -86,6 +86,27 @@ def setup_problem(
     setup_problem_to_storage: None,
 ):
     pass
+
+
+@pytest.fixture
+def setup_problem_solution(app: Flask) -> str:
+    with app.app_context():
+        problem_solution: ProblemSolution = ProblemSolution(
+            id=1,
+            language="Python3",
+            filename="1fdd43e9-fad4-4a59-8b9f-e4460e5ae1eb.py"
+        )
+        db.session.add(problem_solution)
+        db.session.commit()
+
+        problem: Problem | None = Problem.query.filter_by(problem_id=2).first()
+        assert problem is not None
+        problem.problem_solution = 1
+        db.session.commit()
+
+        solution_content = "print('Hello World')"
+        write_file("1fdd43e9-fad4-4a59-8b9f-e4460e5ae1eb.py", solution_content, TunnelCode.SOLUTION)
+        return solution_content
 
 
 class TestGetSpecificProblem:
@@ -528,3 +549,26 @@ class TestDeleteProblem:
         response: TestResponse = logged_in_client.delete("/api/problem/1/")
 
         assert response.status_code == HTTPStatus.FORBIDDEN
+
+
+class TestGetProblemSolution:
+    def test_with_valid_problem_id_should_return_problem_solution_content(
+        self, app: Flask, logged_in_client: FlaskClient, setup_problem: None, setup_problem_solution: str
+    ):
+        response: TestResponse = logged_in_client.get("/api/problem/2/solution")
+
+        assert response.status_code == HTTPStatus.OK
+        payload: dict[str, Any] | None = response.get_json(silent=True)
+        assert payload is not None
+        solution: str = setup_problem_solution
+        assert payload["content"] == solution
+
+    def test_with_valid_problem_id_and_empty_solution_should_return_empty_problem_solution_content(
+        self, app: Flask, logged_in_client: FlaskClient, setup_problem: None
+    ):
+        response: TestResponse = logged_in_client.get("/api/problem/2/solution")
+
+        assert response.status_code == HTTPStatus.OK
+        payload: dict[str, Any] | None = response.get_json(silent=True)
+        assert payload is not None
+        assert payload["content"] == ""

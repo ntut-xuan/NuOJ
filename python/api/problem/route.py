@@ -5,6 +5,7 @@ from typing import Any
 from uuid import uuid4
 
 from flask import Blueprint, Response, make_response, request
+from sqlalchemy.engine.row import Row
 
 from api.auth.auth_util import get_user_by_jwt_token
 from api.auth.validator import (
@@ -20,7 +21,7 @@ from api.problem.validate import (
     validate_problem_author_is_match_cookies_user_or_return_forbidden,
 )
 from database import db
-from models import Problem, User
+from models import Problem, ProblemSolution, User
 from storage.util import TunnelCode, delete_file, read_file, write_file
 from util import make_simple_error_response
 
@@ -137,6 +138,24 @@ def delete_problem(id: int) -> Response:
 
     delete_file(f"{problem.problem_token}.json", tunnel=TunnelCode.PROBLEM)
     return make_response({"message": "OK."})
+
+
+@problem_bp.route("/<int:id>/solution", methods=["GET"])
+@validate_jwt_is_exists_or_return_unauthorized
+@validate_jwt_is_valid_or_return_unauthorized
+@validate_problem_with_specific_id_is_exists_or_return_forbidden
+@validate_problem_author_is_match_cookies_user_or_return_forbidden
+def get_problem_solution(id: int) -> Response:
+    query_row: Row | None = db.session.execute(
+        db.select(ProblemSolution.filename).select_from(Problem).join(ProblemSolution).where(Problem.problem_id == id)
+    ).first()
+
+    if query_row is None:
+        return make_response({"content": ""})
+    
+    filename: str = query_row.filename
+    solution_content: str = read_file(filename, TunnelCode.SOLUTION)
+    return make_response({"content": solution_content})
 
 
 def __get_problem_file_data_with_problem_token(problem_token: str) -> dict[str, Any]:
