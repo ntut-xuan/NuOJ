@@ -5,7 +5,7 @@ from flask import Flask
 from sqlalchemy.sql import null
 
 from database import db
-from models import Problem, Profile, Submission, Verdict, VerdictErrorComment, User
+from models import Problem, ProblemChecker, ProblemSolution, Profile, Submission, Verdict, VerdictErrorComment, User
 
 
 @pytest.fixture
@@ -164,3 +164,35 @@ def test_verdict_error_message_model_with_valid_data_should_add_record_to_databa
         assert verdict_error_comment_from_database is not None
         assert verdict_error_comment_from_database.failed_testcase_index == 5
         assert verdict_error_comment_from_database.message == "Wrong answer expected 9 but got 8."
+
+
+def test_problem_checker_model_with_valid_data_should_add_record_to_database(app: Flask):
+    with app.app_context():
+        random_filename: str = "5b3e4966-09cf-40be-9059-55fa656ba45a"
+        problem_checker: ProblemChecker = ProblemChecker(
+            id=1,
+            filename=random_filename
+        )
+
+        db.session.add(problem_checker)
+        db.session.commit()
+
+        problem_checker_from_database: ProblemChecker | None = ProblemChecker.query.filter_by(id=1).first()
+        assert problem_checker_from_database is not None
+        assert problem_checker_from_database.filename == random_filename
+
+
+def test_problem_solution_model_with_valid_data_should_add_record_to_database(app: Flask):
+    with app.app_context():
+        random_filename: str = "5b3e4966-09cf-40be-9059-55fa656ba45a"
+        problem_checker: ProblemSolution = ProblemSolution(
+            id=1,
+            filename=random_filename
+        )
+
+        db.session.add(problem_checker)
+        db.session.commit()
+
+        problem_checker_from_database: ProblemSolution | None = ProblemSolution.query.filter_by(id=1).first()
+        assert problem_checker_from_database is not None
+        assert problem_checker_from_database.filename == random_filename
