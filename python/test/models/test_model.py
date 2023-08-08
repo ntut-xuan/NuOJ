@@ -187,6 +187,7 @@ def test_problem_solution_model_with_valid_data_should_add_record_to_database(ap
         random_filename: str = "5b3e4966-09cf-40be-9059-55fa656ba45a"
         problem_checker: ProblemSolution = ProblemSolution(
             id=1,
+            language= "C++14",
             filename=random_filename
         )
 
@@ -195,4 +196,5 @@ def test_problem_solution_model_with_valid_data_should_add_record_to_database(ap
 
         problem_checker_from_database: ProblemSolution | None = ProblemSolution.query.filter_by(id=1).first()
         assert problem_checker_from_database is not None
+        assert problem_checker_from_database.language == "C++14"
         assert problem_checker_from_database.filename == random_filename

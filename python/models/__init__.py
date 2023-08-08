@@ -40,6 +40,7 @@ class ProblemChecker(db.Model): # type: ignore[name-defined]
 
 class ProblemSolution(db.Model): # type: ignore[name-defined]
     id = db.Column(db.Integer, primary_key=True, nullable=False, autoincrement=True)
+    language = db.Column(db.String(100), unique=True, nullable=False)
     filename = db.Column(db.String(100), unique=True, nullable=False)
 
 
