@@ -147,15 +147,16 @@ def delete_problem(id: int) -> Response:
 @validate_problem_author_is_match_cookies_user_or_return_forbidden
 def get_problem_solution(id: int) -> Response:
     query_row: Row | None = db.session.execute(
-        db.select(ProblemSolution.filename).select_from(Problem).join(ProblemSolution).where(Problem.problem_id == id)
+        db.select(ProblemSolution.filename, ProblemSolution.language).select_from(Problem).join(ProblemSolution).where(Problem.problem_id == id)
     ).first()
 
     if query_row is None:
-        return make_response({"content": ""})
+        return make_response({"content": "", "language": ""})
     
     filename: str = query_row.filename
+    language: str = query_row.language
     solution_content: str = read_file(filename, TunnelCode.SOLUTION)
-    return make_response({"content": solution_content})
+    return make_response({"content": solution_content, "language": language})
 
 
 @problem_bp.route("/<int:id>/checker", methods=["GET"])

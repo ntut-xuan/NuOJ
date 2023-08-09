@@ -105,11 +105,12 @@ def setup_langauge(app: Flask):
 
 
 @pytest.fixture
-def setup_problem_solution(app: Flask, setup_langauge: None) -> str:
+def setup_problem_solution(app: Flask, setup_langauge: None) -> tuple[str, str]:
     with app.app_context():
+        language: str = "Python3"
         problem_solution: ProblemSolution = ProblemSolution(
             id=1,
-            language="Python3",
+            language=language,
             filename="1fdd43e9-fad4-4a59-8b9f-e4460e5ae1eb.py"
         )
         db.session.add(problem_solution)
@@ -122,7 +123,7 @@ def setup_problem_solution(app: Flask, setup_langauge: None) -> str:
 
         solution_content = "print('Hello World')"
         write_file("1fdd43e9-fad4-4a59-8b9f-e4460e5ae1eb.py", solution_content, TunnelCode.SOLUTION)
-        return solution_content
+        return (solution_content, language)
     
 
 @pytest.fixture
@@ -589,22 +590,24 @@ class TestDeleteProblem:
 
 class TestGetProblemSolution:
     def test_with_valid_problem_id_should_return_http_status_code_ok(
-        self, app: Flask, logged_in_client: FlaskClient, setup_problem: None, setup_problem_solution: str
+        self, app: Flask, logged_in_client: FlaskClient, setup_problem: None, setup_problem_solution: tuple[str, str]
     ):
         response: TestResponse = logged_in_client.get("/api/problem/2/solution")
 
         assert response.status_code == HTTPStatus.OK
 
     def test_with_valid_problem_id_should_return_problem_solution_content(
-        self, app: Flask, logged_in_client: FlaskClient, setup_problem: None, setup_problem_solution: str
+        self, app: Flask, logged_in_client: FlaskClient, setup_problem: None, setup_problem_solution: tuple[str, str]
     ):
         response: TestResponse = logged_in_client.get("/api/problem/2/solution")
 
         assert response.status_code == HTTPStatus.OK
         payload: dict[str, Any] | None = response.get_json(silent=True)
         assert payload is not None
-        solution: str = setup_problem_solution
+        solution: str = setup_problem_solution[0]
+        language: str = setup_problem_solution[1]
         assert payload["content"] == solution
+        assert payload["language"] == language
 
     def test_with_valid_problem_id_and_empty_solution_should_return_empty_problem_solution_content(
         self, app: Flask, logged_in_client: FlaskClient, setup_problem: None
@@ -617,21 +620,21 @@ class TestGetProblemSolution:
         assert payload["content"] == ""
 
     def test_with_invalid_problem_id_should_return_http_status_code_forbidden(
-        self, app: Flask, logged_in_client: FlaskClient, setup_problem: None, setup_problem_solution: str
+        self, app: Flask, logged_in_client: FlaskClient, setup_problem: None, setup_problem_solution: tuple[str, str]
     ):
         response: TestResponse = logged_in_client.get("/api/problem/999/solution")
 
         assert response.status_code == HTTPStatus.FORBIDDEN
 
     def test_with_not_logged_in_client_should_return_http_status_code_unauthorized(
-        self, app: Flask, client: FlaskClient, setup_problem: None, setup_problem_solution: str
+        self, app: Flask, client: FlaskClient, setup_problem: None, setup_problem_solution: tuple[str, str]
     ):
         response: TestResponse = client.get("/api/problem/2/solution")
 
         assert response.status_code == HTTPStatus.UNAUTHORIZED
 
     def test_with_not_owner_problem_id_should_return_http_status_code_forbidden(
-        self, app: Flask, logged_in_client: FlaskClient, setup_problem: None, setup_problem_solution: str
+        self, app: Flask, logged_in_client: FlaskClient, setup_problem: None, setup_problem_solution: tuple[str, str]
     ):
         response: TestResponse = logged_in_client.get("/api/problem/1/solution")
 
@@ -682,7 +685,7 @@ class TestGetProblemChecker:
         assert response.status_code == HTTPStatus.UNAUTHORIZED
 
     def test_with_not_owner_problem_id_should_return_http_status_code_forbidden(
-        self, app: Flask, logged_in_client: FlaskClient, setup_problem: None, setup_problem_solution: str
+        self, app: Flask, logged_in_client: FlaskClient, setup_problem: None, setup_problem_solution: tuple[str, str]
     ):
         response: TestResponse = logged_in_client.get("/api/problem/1/solution")
 
