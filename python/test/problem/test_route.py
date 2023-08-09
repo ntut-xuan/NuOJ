@@ -642,7 +642,7 @@ class TestGetProblemSolution:
         assert response.status_code == HTTPStatus.FORBIDDEN
 
 
-class TestSetProblemSolution:
+class TestSetupProblemSolution:
     def test_with_valid_payload_should_return_http_status_code_ok(
         self, app: Flask, logged_in_client: FlaskClient, setup_langauge: None, setup_problem: None
     ):
