@@ -5,7 +5,7 @@ from flask import Flask
 from sqlalchemy.sql import null
 
 from database import db
-from models import Problem, ProblemChecker, ProblemSolution, Profile, Submission, Verdict, VerdictErrorComment, User
+from models import Language, Problem, ProblemChecker, ProblemSolution, Profile, Submission, Verdict, VerdictErrorComment, User
 
 
 @pytest.fixture
@@ -34,6 +34,18 @@ def setup_problem(app: Flask, setup_user: None):
         )
 
         db.session.add(problem)
+        db.session.commit()
+
+
+@pytest.fixture
+def setup_language(app: Flask):
+    with app.app_context():
+        language: Language = Language(
+            name="C++14",
+            extension="cpp"
+        )
+
+        db.session.add(language)
         db.session.commit()
 
 
@@ -182,7 +194,7 @@ def test_problem_checker_model_with_valid_data_should_add_record_to_database(app
         assert problem_checker_from_database.filename == random_filename
 
 
-def test_problem_solution_model_with_valid_data_should_add_record_to_database(app: Flask):
+def test_problem_solution_model_with_valid_data_should_add_record_to_database(app: Flask, setup_language: None):
     with app.app_context():
         random_filename: str = "5b3e4966-09cf-40be-9059-55fa656ba45a"
         problem_checker: ProblemSolution = ProblemSolution(
@@ -198,3 +210,18 @@ def test_problem_solution_model_with_valid_data_should_add_record_to_database(ap
         assert problem_checker_from_database is not None
         assert problem_checker_from_database.language == "C++14"
         assert problem_checker_from_database.filename == random_filename
+
+
+def test_language_model_with_valid_data_should_add_record_to_database(app: Flask):
+    with app.app_context():
+        language: Language = Language(
+            name="C++14",
+            extension="cpp"
+        )
+
+        db.session.add(language)
+        db.session.commit()
+
+        language_from_database: Language | None = Language.query.filter_by(name="C++14").first()
+        assert language_from_database is not None
+        assert language_from_database.extension == "cpp"

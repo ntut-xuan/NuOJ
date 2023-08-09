@@ -11,6 +11,11 @@ class SubmissionVerdict(enum.Enum):
     MEMORY_LIMIT_EXCEEDED = 3
 
 
+class Language(db.Model): # type: ignore[name-defined]
+    name = db.Column(db.String(100), primary_key=True)
+    extension = db.Column(db.String(100))
+
+
 class User(db.Model):  # type: ignore[name-defined]
     user_uid = db.Column(db.String(36), primary_key=True)
     handle = db.Column(db.String(32), unique=True)
@@ -40,7 +45,9 @@ class ProblemChecker(db.Model): # type: ignore[name-defined]
 
 class ProblemSolution(db.Model): # type: ignore[name-defined]
     id = db.Column(db.Integer, primary_key=True, nullable=False, autoincrement=True)
-    language = db.Column(db.String(100), unique=True, nullable=False)
+    language = db.Column(
+        db.ForeignKey(Language.name, ondelete="CASCADE", onupdate="CASCADE")
+    )
     filename = db.Column(db.String(100), unique=True, nullable=False)
 
 
