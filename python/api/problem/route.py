@@ -14,14 +14,16 @@ from api.auth.validator import (
 )
 from api.problem.dataclass import ProblemHead, ProblemContent, ProblemData
 from api.problem.validate import (
+    validate_language_should_be_exists_or_return_unprocessable_entity,
     validate_problem_request_payload_is_exist_or_return_bad_request,
     validate_problem_request_payload_format_or_return_bad_request,
     validate_problem_request_payload_is_valid_or_return_unprocessable_entity,
     validate_problem_with_specific_id_is_exists_or_return_forbidden,
     validate_problem_author_is_match_cookies_user_or_return_forbidden,
+    validate_setup_problem_solution_payload_or_return_bad_request,
 )
 from database import db
-from models import Problem, ProblemChecker, ProblemSolution, User
+from models import Language, Problem, ProblemChecker, ProblemSolution, User
 from storage.util import TunnelCode, delete_file, read_file, write_file
 from util import make_simple_error_response
 
@@ -157,6 +159,42 @@ def get_problem_solution(id: int) -> Response:
     language: str = query_row.language
     solution_content: str = read_file(filename, TunnelCode.SOLUTION)
     return make_response({"content": solution_content, "language": language})
+
+
+@problem_bp.route("/<int:id>/solution", methods=["POST"])
+@validate_jwt_is_exists_or_return_unauthorized
+@validate_jwt_is_valid_or_return_unauthorized
+@validate_setup_problem_solution_payload_or_return_bad_request
+@validate_language_should_be_exists_or_return_unprocessable_entity
+@validate_problem_with_specific_id_is_exists_or_return_forbidden
+@validate_problem_author_is_match_cookies_user_or_return_forbidden
+def setup_problem_solution(id: int) -> Response:
+    payload: dict[str, Any] | None = request.get_json(silent=True)
+    assert payload is not None 
+
+    filename: str = str(uuid4())
+    problem_solution: ProblemSolution = ProblemSolution(
+        filename=filename,
+        language=payload["language"],
+    )
+
+    db.session.add(problem_solution)
+    db.session.flush()
+
+    solution_id: int = problem_solution.id
+
+    language: Language | None = Language.query.filter_by(name=payload["language"]).first()
+    assert language is not None
+    
+    write_file(f"{filename}.{language.extension}", payload["content"], TunnelCode.SOLUTION)
+
+    problem: Problem | None = Problem.query.filter_by(problem_id=id).first()
+    assert problem is not None
+
+    problem.problem_solution = solution_id
+    db.session.commit()
+
+    return make_response({"message": "OK"})
 
 
 @problem_bp.route("/<int:id>/checker", methods=["GET"])

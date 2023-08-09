@@ -1,6 +1,7 @@
 from http import HTTPStatus
 from json import dumps, loads
 from typing import Any
+from uuid import uuid4
 
 import pytest
 from flask import Flask
@@ -639,6 +640,121 @@ class TestGetProblemSolution:
         response: TestResponse = logged_in_client.get("/api/problem/1/solution")
 
         assert response.status_code == HTTPStatus.FORBIDDEN
+
+
+class TestSetProblemSolution:
+    def test_with_valid_payload_should_return_http_status_code_ok(
+        self, app: Flask, logged_in_client: FlaskClient, setup_langauge: None, setup_problem: None
+    ):
+        payload: dict[str, Any] = {
+            "content": "Some answer content",
+            "language": "C++14"
+        }
+
+        response: TestResponse = logged_in_client.post("/api/problem/2/solution", json=payload)
+
+        assert response.status_code == HTTPStatus.OK
+
+    def test_with_valid_payload_should_setup_data_into_database(
+        self, app: Flask, logged_in_client: FlaskClient, setup_langauge: None, setup_problem: None
+    ):
+        payload: dict[str, Any] = {
+            "content": "Some answer content",
+            "language": "C++14"
+        }
+
+        response: TestResponse = logged_in_client.post("/api/problem/2/solution", json=payload)
+
+        assert response.status_code == HTTPStatus.OK
+        with app.app_context():
+            problem: Problem | None = Problem.query.filter_by(problem_id=2).first()
+            assert problem is not None
+            assert problem.problem_solution == 1 # We assume the ID of ProblemSolution is 1 since it's the first ProblemSolution we added.
+            problem_solution: ProblemSolution | None = ProblemSolution.query.filter_by(id=1).first()
+            assert len(problem_solution.filename) == len(str(uuid4())) # We ignore to check the value instead of check the length is valid.
+            assert problem_solution.language == "C++14"
+
+    def test_with_valid_payload_should_add_the_solution_file_to_storage(
+        self, app: Flask, logged_in_client: FlaskClient, setup_langauge: None, setup_problem: None
+    ):
+        payload: dict[str, Any] = {
+            "content": "Some answer content",
+            "language": "C++14"
+        }
+
+        response: TestResponse = logged_in_client.post("/api/problem/2/solution", json=payload)
+
+        assert response.status_code == HTTPStatus.OK
+        with app.app_context():
+            problem: Problem | None = Problem.query.filter_by(problem_id=2).first()
+            assert problem is not None
+            problem_solution: ProblemSolution | None = ProblemSolution.query.filter_by(id=problem.problem_solution).first()
+            assert problem_solution is not None
+            filename: str = problem_solution.filename
+            language: Language | None = Language.query.filter_by(name=problem_solution.language).first()
+            assert language is not None
+            content: str = read_file(f"{filename}.{language.extension}", TunnelCode.SOLUTION)
+            assert content == payload["content"]
+
+    def test_with_not_logged_in_client_should_return_http_status_code_unauthorized(
+        self, client: FlaskClient, setup_langauge: None, setup_problem: None
+    ):
+        payload: dict[str, Any] = {
+            "content": "Some answer content",
+            "language": "C++14"
+        }
+
+        response: TestResponse = client.post("/api/problem/2/solution", json=payload)
+
+        assert response.status_code == HTTPStatus.UNAUTHORIZED
+
+    def test_with_invalid_payload_should_return_http_status_code_bad_request(
+        self, logged_in_client: FlaskClient, setup_langauge: None, setup_problem: None
+    ):
+        payload: dict[str, Any] = {
+            "invalid payload": "absolutely"
+        }
+
+        response: TestResponse = logged_in_client.post("/api/problem/2/solution", json=payload)
+
+        assert response.status_code == HTTPStatus.BAD_REQUEST
+
+    def test_with_unregister_language_should_return_http_status_code_unprocessable_entity(
+        self, logged_in_client: FlaskClient, setup_langauge: None, setup_problem: None
+    ):
+        payload: dict[str, Any] = {
+            "content": "Some answer content",
+            "language": "Unregister Language"
+        }
+
+        response: TestResponse = logged_in_client.post("/api/problem/2/solution", json=payload)
+
+        assert response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
+
+    def test_with_absent_problem_should_return_http_status_code_forbidden(
+        self, logged_in_client: FlaskClient, setup_langauge: None, setup_problem: None
+    ):
+        payload: dict[str, Any] = {
+            "content": "Some answer content",
+            "language": "C++14"
+        }
+
+        response: TestResponse = logged_in_client.post("/api/problem/888/solution", json=payload)
+
+        assert response.status_code == HTTPStatus.FORBIDDEN
+
+    def test_with_not_owner_problem_should_return_http_status_code_forbidden(
+        self, logged_in_client: FlaskClient, setup_langauge: None, setup_problem: None
+    ):
+        payload: dict[str, Any] = {
+            "content": "Some answer content",
+            "language": "C++14"
+        }
+
+        response: TestResponse = logged_in_client.post("/api/problem/1/solution", json=payload)
+
+        assert response.status_code == HTTPStatus.FORBIDDEN
+
 
 
 class TestGetProblemChecker:
