@@ -8,7 +8,7 @@ from flask.testing import FlaskClient
 from werkzeug.test import TestResponse
 
 from database import db
-from models import Problem, ProblemChecker, ProblemSolution, User
+from models import Language, Problem, ProblemChecker, ProblemSolution, User
 from storage.util import TunnelCode, is_file_exists, read_file, write_file
 
 
@@ -87,9 +87,25 @@ def setup_problem(
 ):
     pass
 
+@pytest.fixture
+def setup_langauge(app: Flask):
+    with app.app_context():
+        language_cpp: Language = Language(
+            name="C++14",
+            extension="cpp"
+        )
+        language_py: Language = Language(
+            name="Python3",
+            extension="py"
+        )
+
+        db.session.add(language_cpp)
+        db.session.add(language_py)
+        db.session.commit()
+
 
 @pytest.fixture
-def setup_problem_solution(app: Flask) -> str:
+def setup_problem_solution(app: Flask, setup_langauge: None) -> str:
     with app.app_context():
         problem_solution: ProblemSolution = ProblemSolution(
             id=1,
