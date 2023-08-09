@@ -966,6 +966,11 @@
                                         "content": {
                                             "type": "string",
                                             "example": "Some code here."
+                                        },
+                                        "language": {
+                                            "type": "string",
+                                            "example": "C++14",
+                                            "description": "See avaliable language."
                                         }
                                     }
                                 }
@@ -992,6 +997,11 @@
                                     "content": {
                                         "type": "string",
                                         "example": "Some code here."
+                                    },
+                                    "language": {
+                                        "type": "string",
+                                        "example": "C++14",
+                                        "description": "See avaliable language."
                                     }
                                 }
                             }
@@ -1001,6 +1011,9 @@
                 "responses": {
                     "200": {
                         "$ref": "#/components/responses/200_message_ok"
+                    },
+                    "400": {
+                        "$ref": "#/components/responses/400_incorrect_format"
                     },
                     "401": {
                         "$ref": "#/components/responses/401_authentication_required"
