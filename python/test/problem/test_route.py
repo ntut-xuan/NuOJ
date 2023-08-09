@@ -671,6 +671,7 @@ class TestSetupProblemSolution:
             assert problem is not None
             assert problem.problem_solution == 1 # We assume the ID of ProblemSolution is 1 since it's the first ProblemSolution we added.
             problem_solution: ProblemSolution | None = ProblemSolution.query.filter_by(id=1).first()
+            assert problem_solution is not None
             assert len(problem_solution.filename) == len(str(uuid4())) # We ignore to check the value instead of check the length is valid.
             assert problem_solution.language == "C++14"
 
