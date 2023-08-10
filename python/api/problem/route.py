@@ -22,9 +22,10 @@ from api.problem.validate import (
     validate_problem_author_is_match_cookies_user_or_return_forbidden,
     validate_setup_problem_checker_payload_or_return_bad_request,
     validate_setup_problem_solution_payload_or_return_bad_request,
+    validate_setup_problem_testcase_payload_or_return_bad_request,
 )
 from database import db
-from models import Language, Problem, ProblemChecker, ProblemSolution, User
+from models import Language, Problem, ProblemChecker, ProblemSolution, Testcase, User
 from storage.util import TunnelCode, delete_file, read_file, write_file
 from util import make_simple_error_response
 
@@ -243,6 +244,34 @@ def setup_problem_checker(id: int) -> Response:
 
     problem.problem_checker = solution_id
     db.session.commit()
+
+    return make_response({"message": "OK"})
+
+
+@problem_bp.route("/<int:id>/testcase", methods=["POST"])
+@validate_jwt_is_exists_or_return_unauthorized
+@validate_jwt_is_valid_or_return_unauthorized
+@validate_setup_problem_testcase_payload_or_return_bad_request
+@validate_problem_with_specific_id_is_exists_or_return_forbidden
+@validate_problem_author_is_match_cookies_user_or_return_forbidden
+def setup_testcase_route(id: int) -> Response:
+    payload: dict[str, Any] | None = request.get_json(silent=True)
+    assert payload 
+
+    testcases: list[str] = payload["testcase"]
+    filename: str = str(uuid4())
+
+    testcase: Testcase = Testcase(
+        filename=filename
+    )
+    db.session.add(testcase)
+    db.session.flush()
+
+    problem: Problem | None = Problem.query.filter_by(problem_id=id).first()
+    problem.problem_testcase = testcase.id
+    db.session.commit()
+
+    write_file(f"{filename}.json", dumps(testcases), TunnelCode.TESTCASE)
 
     return make_response({"message": "OK"})
 
