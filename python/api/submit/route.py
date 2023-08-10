@@ -1,3 +1,5 @@
+from typing import Any
+
 import requests
 from datetime import datetime
 from flask import Blueprint, make_response, request
@@ -11,7 +13,7 @@ submit_bp = Blueprint("submit", __name__, url_prefix="/api/submit")
 
 
 def get_judge_payload(user_code: str, user_code_language: str, solution: str, solution_language: str, checker: str, checker_language: str, submission_id: str):
-    judge_payload: dict[str, str] = {
+    judge_payload: dict[str, Any] = {
         "user_code": {
             "code": user_code,
             "compiler": user_code_language
@@ -73,11 +75,12 @@ def fetch_solution_from_problem_id(problem_id: int) -> tuple[str, str]:
     problem_solution: ProblemSolution | None = ProblemSolution.query.filter_by(problem_id=problem_id).first()
     
     if problem_solution is None:
-        return ""
+        return ("", "")
     
     filename: str = problem_solution.filename
     language_name: str = problem_solution.language
     language: Language | None = Language.query.filter_by(name=language_name)
+    assert language is not None
     extension: str = language.extension
     content: str = read_file(f"{filename}.{extension}", TunnelCode.SOLUTION)
 
@@ -88,7 +91,7 @@ def fetch_checker_from_problem_id(problem_id: int) -> tuple[str, str]:
     problem_checker: ProblemChecker | None = ProblemChecker.query.filter_by(problem_id=problem_id).first()
     
     if problem_checker is None:
-        return ""
+        return ("", "")
     
     filename: str = problem_checker.filename
     content: str = read_file(f"{filename}.cpp", TunnelCode.SOLUTION)

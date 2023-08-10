@@ -1050,17 +1050,6 @@ class TestSetupTestcase:
 
         assert response.status_code == HTTPStatus.UNAUTHORIZED
 
-    def test_with_not_logged_in_client_should_return_http_status_code_unauthorized(
-        self, app: Flask, client: FlaskClient, setup_problem: None
-    ):
-        payload: dict[str, Any] = {
-            "testcase": ["3", "5", "8"]
-        }
-
-        response: TestResponse = client.post("/api/problem/2/testcase", json=payload)
-
-        assert response.status_code == HTTPStatus.UNAUTHORIZED
-
     def test_with_not_owner_problem_should_return_http_status_code_forbidden(
         self, app: Flask, logged_in_client: FlaskClient, setup_problem: None
     ):

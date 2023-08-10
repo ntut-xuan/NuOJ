@@ -286,6 +286,7 @@ def setup_testcase_route(id: int) -> Response:
     db.session.flush()
 
     problem: Problem | None = Problem.query.filter_by(problem_id=id).first()
+    assert problem is not None
     problem.problem_testcase = testcase.id
     db.session.commit()
 
