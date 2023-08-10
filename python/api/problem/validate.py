@@ -7,7 +7,7 @@ from flask import Response, request
 
 from api.auth.auth_util import get_user_by_jwt_token
 from api.problem.dataclass import ProblemContent, ProblemHeadWithoutPid
-from models import Problem, User
+from models import Language, Problem, User
 from util import make_simple_error_response
 
 T = TypeVar("T")
@@ -124,4 +124,68 @@ def validate_problem_author_is_match_cookies_user_or_return_forbidden(
 
         return func(*args, **kwargs)
 
+    return wrapper
+
+
+def validate_setup_problem_solution_payload_or_return_bad_request(
+    func: Callable[..., Response | T]
+) -> Callable[..., Response | T]:
+    @dataclass
+    class PayloadVerification:
+        content: str
+        language: str
+
+    @wraps(func)
+    def wrapper(*args, **kwargs) -> Response | T:
+        payload: dict[str, Any] | None = request.get_json(silent=True)
+        assert payload is not None
+
+        try:
+            PayloadVerification(**payload)
+        except Exception:
+            return make_simple_error_response(
+                HTTPStatus.BAD_REQUEST, "Incorrect format of payload"
+            )
+        
+        return func(*args, **kwargs)
+    return wrapper
+
+
+def validate_setup_problem_checker_payload_or_return_bad_request(
+    func: Callable[..., Response | T]
+) -> Callable[..., Response | T]:
+    @dataclass
+    class PayloadVerification:
+        content: str
+
+    @wraps(func)
+    def wrapper(*args, **kwargs) -> Response | T:
+        payload: dict[str, Any] | None = request.get_json(silent=True)
+        assert payload is not None
+
+        try:
+            PayloadVerification(**payload)
+        except Exception:
+            return make_simple_error_response(
+                HTTPStatus.BAD_REQUEST, "Incorrect format of payload"
+            )
+        
+        return func(*args, **kwargs)
+    return wrapper
+
+
+def validate_language_should_be_exists_or_return_unprocessable_entity(
+    func: Callable[..., Response | T]
+) -> Callable[..., Response | T]:
+    @wraps(func)
+    def wrapper(*args, **kwargs) -> Response | T:
+        payload: dict[str, Any] | None = request.get_json(silent=True)
+        assert payload is not None
+
+        language: Language | None = Language.query.filter_by(name=payload["language"]).first()
+
+        if language is None:
+            return make_simple_error_response(HTTPStatus.UNPROCESSABLE_ENTITY, "Invalid Language (See the information about the avaliable language.)")
+
+        return func(*args, **kwargs)
     return wrapper

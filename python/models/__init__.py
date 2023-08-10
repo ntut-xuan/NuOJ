@@ -11,6 +11,11 @@ class SubmissionVerdict(enum.Enum):
     MEMORY_LIMIT_EXCEEDED = 3
 
 
+class Language(db.Model): # type: ignore[name-defined]
+    name = db.Column(db.String(100), primary_key=True)
+    extension = db.Column(db.String(100))
+
+
 class User(db.Model):  # type: ignore[name-defined]
     user_uid = db.Column(db.String(36), primary_key=True)
     handle = db.Column(db.String(32), unique=True)
@@ -33,11 +38,30 @@ class Profile(db.Model):  # type: ignore[name-defined]
     bio = db.Column(db.String(100), default=None)
 
 
+class ProblemChecker(db.Model): # type: ignore[name-defined]
+    id = db.Column(db.Integer, primary_key=True, nullable=False, autoincrement=True)
+    filename = db.Column(db.String(100), unique=True, nullable=False)
+
+
+class ProblemSolution(db.Model): # type: ignore[name-defined]
+    id = db.Column(db.Integer, primary_key=True, nullable=False, autoincrement=True)
+    language = db.Column(
+        db.ForeignKey(Language.name, ondelete="CASCADE", onupdate="CASCADE")
+    )
+    filename = db.Column(db.String(100), unique=True, nullable=False)
+
+
 class Problem(db.Model):  # type: ignore[name-defined]
     problem_id = db.Column(db.Integer, primary_key=True, nullable=False)
     problem_token = db.Column(db.String(100), unique=True, nullable=False)
     problem_author = db.Column(
         db.ForeignKey(User.user_uid, ondelete="CASCADE", onupdate="CASCADE")
+    )
+    problem_checker = db.Column(
+        db.ForeignKey(ProblemChecker.id, ondelete="CASCADE", onupdate="CASCAde")
+    )
+    problem_solution = db.Column(
+        db.ForeignKey(ProblemSolution.id, ondelete="CASCADE", onupdate="CASCADE")
     )
 
 
@@ -68,4 +92,3 @@ class Submission(db.Model):  # type: ignore[name-defined]
     date = db.Column(db.DateTime, default=current_timestamp(), nullable=False)
     compiler = db.Column(db.String(100), nullable=False)
     tracker_uid = db.Column(db.ForeignKey(Verdict.tracker_uid), nullable=True)
-

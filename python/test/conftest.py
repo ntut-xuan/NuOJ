@@ -66,6 +66,8 @@ def enabled_mail_setting(app: Flask) -> None:
 
 def _create_storage_folder_structure(storage_path):
     (Path(storage_path) / "problem/").mkdir()
+    (Path(storage_path) / "problem_checker/").mkdir()
+    (Path(storage_path) / "problem_solution/").mkdir()
     (Path(storage_path) / "user_avater/").mkdir()
     (Path(storage_path) / "user_profile/").mkdir()
     (Path(storage_path) / "user_submission/").mkdir()

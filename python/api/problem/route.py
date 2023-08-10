@@ -5,6 +5,7 @@ from typing import Any
 from uuid import uuid4
 
 from flask import Blueprint, Response, make_response, request
+from sqlalchemy.engine.row import Row
 
 from api.auth.auth_util import get_user_by_jwt_token
 from api.auth.validator import (
@@ -13,14 +14,17 @@ from api.auth.validator import (
 )
 from api.problem.dataclass import ProblemHead, ProblemContent, ProblemData
 from api.problem.validate import (
+    validate_language_should_be_exists_or_return_unprocessable_entity,
     validate_problem_request_payload_is_exist_or_return_bad_request,
     validate_problem_request_payload_format_or_return_bad_request,
     validate_problem_request_payload_is_valid_or_return_unprocessable_entity,
     validate_problem_with_specific_id_is_exists_or_return_forbidden,
     validate_problem_author_is_match_cookies_user_or_return_forbidden,
+    validate_setup_problem_checker_payload_or_return_bad_request,
+    validate_setup_problem_solution_payload_or_return_bad_request,
 )
 from database import db
-from models import Problem, User
+from models import Language, Problem, ProblemChecker, ProblemSolution, User
 from storage.util import TunnelCode, delete_file, read_file, write_file
 from util import make_simple_error_response
 
@@ -137,6 +141,110 @@ def delete_problem(id: int) -> Response:
 
     delete_file(f"{problem.problem_token}.json", tunnel=TunnelCode.PROBLEM)
     return make_response({"message": "OK."})
+
+
+@problem_bp.route("/<int:id>/solution", methods=["GET"])
+@validate_jwt_is_exists_or_return_unauthorized
+@validate_jwt_is_valid_or_return_unauthorized
+@validate_problem_with_specific_id_is_exists_or_return_forbidden
+@validate_problem_author_is_match_cookies_user_or_return_forbidden
+def get_problem_solution(id: int) -> Response:
+    query_row: Row | None = db.session.execute(
+        db.select(ProblemSolution.filename, ProblemSolution.language).select_from(Problem).join(ProblemSolution).where(Problem.problem_id == id)
+    ).first()
+
+    if query_row is None:
+        return make_response({"content": "", "language": ""})
+    
+    filename: str = query_row.filename
+    language: str = query_row.language
+    solution_content: str = read_file(filename, TunnelCode.SOLUTION)
+    return make_response({"content": solution_content, "language": language})
+
+
+@problem_bp.route("/<int:id>/solution", methods=["POST"])
+@validate_jwt_is_exists_or_return_unauthorized
+@validate_jwt_is_valid_or_return_unauthorized
+@validate_setup_problem_solution_payload_or_return_bad_request
+@validate_language_should_be_exists_or_return_unprocessable_entity
+@validate_problem_with_specific_id_is_exists_or_return_forbidden
+@validate_problem_author_is_match_cookies_user_or_return_forbidden
+def setup_problem_solution(id: int) -> Response:
+    payload: dict[str, Any] | None = request.get_json(silent=True)
+    assert payload is not None 
+
+    filename: str = str(uuid4())
+    problem_solution: ProblemSolution = ProblemSolution(
+        filename=filename,
+        language=payload["language"],
+    )
+
+    db.session.add(problem_solution)
+    db.session.flush()
+
+    solution_id: int = problem_solution.id
+
+    language: Language | None = Language.query.filter_by(name=payload["language"]).first()
+    assert language is not None
+    
+    write_file(f"{filename}.{language.extension}", payload["content"], TunnelCode.SOLUTION)
+
+    problem: Problem | None = Problem.query.filter_by(problem_id=id).first()
+    assert problem is not None
+
+    problem.problem_solution = solution_id
+    db.session.commit()
+
+    return make_response({"message": "OK"})
+
+
+@problem_bp.route("/<int:id>/checker", methods=["GET"])
+@validate_jwt_is_exists_or_return_unauthorized
+@validate_jwt_is_valid_or_return_unauthorized
+@validate_problem_with_specific_id_is_exists_or_return_forbidden
+@validate_problem_author_is_match_cookies_user_or_return_forbidden
+def get_problem_checker(id: int) -> Response:
+    query_row: Row | None = db.session.execute(
+        db.select(ProblemChecker.filename).select_from(Problem).join(ProblemChecker).where(Problem.problem_id == id)
+    ).first()
+
+    if query_row is None:
+        return make_response({"content": ""})
+    
+    filename: str = query_row.filename
+    solution_content: str = read_file(filename, TunnelCode.CHECKER)
+    return make_response({"content": solution_content})
+
+
+@problem_bp.route("/<int:id>/checker", methods=["POST"])
+@validate_jwt_is_exists_or_return_unauthorized
+@validate_jwt_is_valid_or_return_unauthorized
+@validate_setup_problem_checker_payload_or_return_bad_request
+@validate_problem_with_specific_id_is_exists_or_return_forbidden
+@validate_problem_author_is_match_cookies_user_or_return_forbidden
+def setup_problem_checker(id: int) -> Response:
+    payload: dict[str, Any] | None = request.get_json(silent=True)
+    assert payload is not None 
+
+    filename: str = str(uuid4())
+    problem_checker: ProblemChecker = ProblemChecker(
+        filename=filename,
+    )
+
+    db.session.add(problem_checker)
+    db.session.flush()
+
+    solution_id: int = problem_checker.id
+
+    write_file(f"{filename}.cpp", payload["content"], TunnelCode.CHECKER)
+
+    problem: Problem | None = Problem.query.filter_by(problem_id=id).first()
+    assert problem is not None
+
+    problem.problem_checker = solution_id
+    db.session.commit()
+
+    return make_response({"message": "OK"})
 
 
 def __get_problem_file_data_with_problem_token(problem_token: str) -> dict[str, Any]:
