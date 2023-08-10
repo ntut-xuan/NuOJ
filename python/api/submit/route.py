@@ -3,7 +3,7 @@ from typing import Any
 
 import requests
 from datetime import datetime
-from flask import Blueprint, make_response, request
+from flask import Blueprint, Response, make_response, request
 
 from api.auth.auth_util import get_user_by_jwt_token
 from storage.util import TunnelCode, read_file
@@ -13,7 +13,7 @@ from models import Language, User, ProblemChecker, Problem, ProblemSolution, Sub
 submit_bp = Blueprint("submit", __name__, url_prefix="/api/submit")
 
 
-def get_judge_payload(user_code: str, user_code_language: str, solution: str, solution_language: str, checker: str, checker_language: str, testcase: str, submission_id: str):
+def get_judge_payload(user_code: str, user_code_language: str, solution: str, solution_language: str, checker: str, checker_language: str, testcase: list[str], submission_id: str):
     judge_payload: dict[str, Any] = {
         "user_code": {
             "code": user_code,
@@ -41,8 +41,9 @@ def get_judge_payload(user_code: str, user_code_language: str, solution: str, so
 
 
 @submit_bp.route("/", methods=["POST"])
-def submit_route():
-    payload: dict[str, str] = request.get_json(silent=True)
+def submit_route() -> Response:
+    payload: dict[str, Any] | None = request.get_json(silent=True)
+    assert payload is not None
     jwt: str = request.cookies["jwt"]
     
     user: User = get_user_by_jwt_token(jwt)
@@ -51,7 +52,7 @@ def submit_route():
     submission: Submission = Submission(
         user_id=user.user_uid,
         problem_id=problem_id,
-        date=datetime(),
+        date=datetime.now(),
         compiler=payload["language"],
     )
 
