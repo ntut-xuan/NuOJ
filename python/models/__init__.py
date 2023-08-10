@@ -51,6 +51,12 @@ class ProblemSolution(db.Model): # type: ignore[name-defined]
     filename = db.Column(db.String(100), unique=True, nullable=False)
 
 
+class Testcase(db.Model): # type: ignore[name-defined]
+    __test__ = False
+    id = db.Column(db.Integer, primary_key=True, nullable=False, autoincrement=True)
+    filename = db.Column(db.String(100), nullable=False)
+
+
 class Problem(db.Model):  # type: ignore[name-defined]
     problem_id = db.Column(db.Integer, primary_key=True, nullable=False)
     problem_token = db.Column(db.String(100), unique=True, nullable=False)
@@ -62,6 +68,9 @@ class Problem(db.Model):  # type: ignore[name-defined]
     )
     problem_solution = db.Column(
         db.ForeignKey(ProblemSolution.id, ondelete="CASCADE", onupdate="CASCADE")
+    )
+    problem_testcase = db.Column(
+        db.ForeignKey(Testcase.id, ondelete="CASCADE", onupdate="CASCADE")
     )
 
 
