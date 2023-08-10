@@ -757,6 +757,99 @@ class TestSetupProblemSolution:
         assert response.status_code == HTTPStatus.FORBIDDEN
 
 
+class TestSetupProblemChecker:
+    def test_with_valid_payload_should_return_http_status_code_ok(
+        self, app: Flask, logged_in_client: FlaskClient, setup_problem: None
+    ):
+        payload: dict[str, Any] = {
+            "content": "Some checker content",
+        }
+
+        response: TestResponse = logged_in_client.post("/api/problem/2/checker", json=payload)
+
+        assert response.status_code == HTTPStatus.OK
+
+    def test_with_valid_payload_should_setup_data_into_database(
+        self, app: Flask, logged_in_client: FlaskClient, setup_problem: None
+    ):
+        payload: dict[str, Any] = {
+            "content": "Some checker content",
+        }
+
+        response: TestResponse = logged_in_client.post("/api/problem/2/checker", json=payload)
+
+        assert response.status_code == HTTPStatus.OK
+        with app.app_context():
+            problem: Problem | None = Problem.query.filter_by(problem_id=2).first()
+            assert problem is not None
+            assert problem.problem_checker == 1 # We assume the ID of ProblemChecker is 1 since it's the first ProblemChecker we added.
+            problem_checker: ProblemChecker | None = ProblemChecker.query.filter_by(id=1).first()
+            assert problem_checker is not None
+            assert len(problem_checker.filename) == len(str(uuid4())) # We ignore to check the value instead of check the length is valid.
+
+    def test_with_valid_payload_should_add_the_solution_file_to_storage(
+        self, app: Flask, logged_in_client: FlaskClient, setup_problem: None
+    ):
+        payload: dict[str, Any] = {
+            "content": "Some answer content",
+        }
+
+        response: TestResponse = logged_in_client.post("/api/problem/2/checker", json=payload)
+
+        assert response.status_code == HTTPStatus.OK
+        with app.app_context():
+            problem: Problem | None = Problem.query.filter_by(problem_id=2).first()
+            assert problem is not None
+            problem_checker: ProblemChecker | None = ProblemChecker.query.filter_by(id=problem.problem_checker).first()
+            assert problem_checker is not None
+            filename: str = problem_checker.filename
+            content: str = read_file(f"{filename}.cpp", TunnelCode.CHECKER)
+            assert content == payload["content"]
+
+    def test_with_not_logged_in_client_should_return_http_status_code_unauthorized(
+        self, client: FlaskClient, setup_problem: None
+    ):
+        payload: dict[str, Any] = {
+            "content": "Some answer content",
+        }
+
+        response: TestResponse = client.post("/api/problem/2/checker", json=payload)
+
+        assert response.status_code == HTTPStatus.UNAUTHORIZED
+
+    def test_with_invalid_payload_should_return_http_status_code_bad_request(
+        self, logged_in_client: FlaskClient, setup_problem: None
+    ):
+        payload: dict[str, Any] = {
+            "invalid payload": "absolutely"
+        }
+
+        response: TestResponse = logged_in_client.post("/api/problem/2/checker", json=payload)
+
+        assert response.status_code == HTTPStatus.BAD_REQUEST
+
+    def test_with_absent_problem_should_return_http_status_code_forbidden(
+        self, logged_in_client: FlaskClient, setup_problem: None
+    ):
+        payload: dict[str, Any] = {
+            "content": "Some answer content",
+        }
+
+        response: TestResponse = logged_in_client.post("/api/problem/888/checker", json=payload)
+
+        assert response.status_code == HTTPStatus.FORBIDDEN
+
+    def test_with_not_owner_problem_should_return_http_status_code_forbidden(
+        self, logged_in_client: FlaskClient, setup_problem: None
+    ):
+        payload: dict[str, Any] = {
+            "content": "Some answer content",
+        }
+
+        response: TestResponse = logged_in_client.post("/api/problem/1/checker", json=payload)
+
+        assert response.status_code == HTTPStatus.FORBIDDEN
+
 
 class TestGetProblemChecker:
     def test_with_valid_problem_id_should_return_http_status_code_ok(

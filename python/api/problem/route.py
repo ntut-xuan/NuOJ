@@ -20,6 +20,7 @@ from api.problem.validate import (
     validate_problem_request_payload_is_valid_or_return_unprocessable_entity,
     validate_problem_with_specific_id_is_exists_or_return_forbidden,
     validate_problem_author_is_match_cookies_user_or_return_forbidden,
+    validate_setup_problem_checker_payload_or_return_bad_request,
     validate_setup_problem_solution_payload_or_return_bad_request,
 )
 from database import db
@@ -213,6 +214,37 @@ def get_problem_checker(id: int) -> Response:
     filename: str = query_row.filename
     solution_content: str = read_file(filename, TunnelCode.CHECKER)
     return make_response({"content": solution_content})
+
+
+@problem_bp.route("/<int:id>/checker", methods=["POST"])
+@validate_jwt_is_exists_or_return_unauthorized
+@validate_jwt_is_valid_or_return_unauthorized
+@validate_setup_problem_checker_payload_or_return_bad_request
+@validate_problem_with_specific_id_is_exists_or_return_forbidden
+@validate_problem_author_is_match_cookies_user_or_return_forbidden
+def setup_problem_checker(id: int) -> Response:
+    payload: dict[str, Any] | None = request.get_json(silent=True)
+    assert payload is not None 
+
+    filename: str = str(uuid4())
+    problem_checker: ProblemChecker = ProblemChecker(
+        filename=filename,
+    )
+
+    db.session.add(problem_checker)
+    db.session.flush()
+
+    solution_id: int = problem_checker.id
+
+    write_file(f"{filename}.cpp", payload["content"], TunnelCode.CHECKER)
+
+    problem: Problem | None = Problem.query.filter_by(problem_id=id).first()
+    assert problem is not None
+
+    problem.problem_checker = solution_id
+    db.session.commit()
+
+    return make_response({"message": "OK"})
 
 
 def __get_problem_file_data_with_problem_token(problem_token: str) -> dict[str, Any]:
