@@ -248,6 +248,24 @@ def setup_problem_checker(id: int) -> Response:
     return make_response({"message": "OK"})
 
 
+@problem_bp.route("/<int:id>/testcase", methods=["GET"])
+@validate_jwt_is_exists_or_return_unauthorized
+@validate_jwt_is_valid_or_return_unauthorized
+@validate_problem_with_specific_id_is_exists_or_return_forbidden
+@validate_problem_author_is_match_cookies_user_or_return_forbidden
+def get_problem_testcase(id: int) -> Response:
+    query_row: Row | None = db.session.execute(
+        db.select(Testcase.filename).select_from(Problem).join(Testcase).where(Problem.problem_id == id)
+    ).first()
+
+    if query_row is None:
+        return make_response({"testcase": "[]"})
+
+    filename: str = query_row.filename
+    content: str = read_file(f"{filename}.json", TunnelCode.TESTCASE)
+    return make_response({"testcase": content})
+
+
 @problem_bp.route("/<int:id>/testcase", methods=["POST"])
 @validate_jwt_is_exists_or_return_unauthorized
 @validate_jwt_is_valid_or_return_unauthorized
