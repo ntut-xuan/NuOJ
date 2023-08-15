@@ -2,6 +2,7 @@ import json
 from typing import Any
 
 import requests
+from requests import Response
 from datetime import datetime
 from flask import Blueprint, Response, make_response, request
 
@@ -13,18 +14,19 @@ from models import Language, User, ProblemChecker, Problem, ProblemSolution, Sub
 submit_bp = Blueprint("submit", __name__, url_prefix="/api/submit")
 
 
-@submit_bp.route("/", methods=["POST"])
+@submit_bp.route("", methods=["POST"])
 def submit_route() -> Response:
     payload: dict[str, Any] | None = request.get_json(silent=True)
     assert payload is not None
 
     user: User = _get_user_with_current_session()
     problem_id: int = payload["problem_id"]
+    code: str = payload["code"]
     language: str = payload["language"]
 
     submission: Submission = _generate_submission_record(user.user_uid, problem_id, language)
 
-    payload: dict[str, Any] = _generate_payload_with_problem(problem_id, submission.id)
+    payload: dict[str, Any] = _generate_payload_with_problem(code, language, problem_id, submission.id)
     tracker_uid: str = _send_request_with_payload(payload)
     
     submission.tracker_uid = tracker_uid
@@ -34,14 +36,14 @@ def submit_route() -> Response:
 
 
 def _send_request_with_payload(payload: dict[str, Any]) -> str:
-    response = requests.post("http://sandbox:4439/judge", json=payload)
-    response_payload = response.json()
+    response = requests.post("http://nuoj-sandbox:4439/api/judge", json=payload)
+    response_payload: dict[str, Any] | None = json.loads(response.text)
     tracker_uid = response_payload["tracker_id"]
 
     return tracker_uid
 
 
-def _generate_payload_with_problem(problem_id: int, submission_id: int):
+def _generate_payload_with_problem(code: str, language: str, problem_id: int, submission_id: int):
     problem: Problem | None = Problem.query.filter_by(problem_id=problem_id).first()
     assert problem is not None
 
@@ -49,7 +51,8 @@ def _generate_payload_with_problem(problem_id: int, submission_id: int):
     checker, checker_language = _fetch_checker_from_checker_id(problem.problem_checker)
     testcase = _fetch_testcase_from_testcase_id(problem.problem_testcase)
 
-    payload = _get_judge_payload(payload["code"], payload["language"], solution, solution_language, checker, checker_language, testcase, submission_id)
+    payload = _get_judge_payload(code, language, solution, solution_language, checker, checker_language, testcase, submission_id)
+    return payload
 
 
 def _get_judge_payload(user_code: str, user_code_language: str, solution: str, solution_language: str, checker: str, checker_language: str, testcase: list[str], submission_id: str):
@@ -66,8 +69,8 @@ def _get_judge_payload(user_code: str, user_code_language: str, solution: str, s
             "code": checker,
             "compiler": checker_language
         },
-        "testcase": testcase,
-        "type": "Judge",
+        "test_case": testcase,
+        "execute_type": "Judge",
         "options": {
             "threading": True,
             "time": 10,
@@ -81,7 +84,7 @@ def _get_judge_payload(user_code: str, user_code_language: str, solution: str, s
 
 def _generate_submission_record(user_uid: str, problem_id: str, language: str) -> int:
     submission: Submission = Submission(
-        user_id=user_uid,
+        user_uid=user_uid,
         problem_id=problem_id,
         date=datetime.now(),
         compiler=language,
@@ -94,14 +97,15 @@ def _generate_submission_record(user_uid: str, problem_id: str, language: str) -
 
 
 def _fetch_testcase_from_testcase_id(testcase_id: int) -> list[str]:
-    problem_testcase: Testcase | None = Testcase.query.filter_by(id=testcase_id)
+    problem_testcase: Testcase | None = Testcase.query.filter_by(id=testcase_id).first()
     
     if problem_testcase is None:
         return []
     
     filename: str = problem_testcase.filename
     json_text: str = read_file(f"{filename}.json", TunnelCode.TESTCASE)
-    testcase: list[str] = json.loads(json_text)
+    testcase_value: list[str] = json.loads(json_text)
+    testcase: list[dict[str, Any]] = [{"type": "plain-text", "value": value} for value in testcase_value]
     return testcase
 
 
@@ -113,7 +117,7 @@ def _fetch_solution_from_solution_id(solution_id: int) -> tuple[str, str]:
     
     filename: str = problem_solution.filename
     language_name: str = problem_solution.language
-    language: Language | None = Language.query.filter_by(name=language_name)
+    language: Language | None = Language.query.filter_by(name=language_name).first()
     assert language is not None
     extension: str = language.extension
     content: str = read_file(f"{filename}.{extension}", TunnelCode.SOLUTION)
@@ -130,7 +134,7 @@ def _fetch_checker_from_checker_id(checker_id: int) -> tuple[str, str]:
     filename: str = problem_checker.filename
     content: str = read_file(f"{filename}.cpp", TunnelCode.SOLUTION)
 
-    return (content, "cpp")
+    return (content, "c++14")
 
 
 def _get_user_with_current_session():

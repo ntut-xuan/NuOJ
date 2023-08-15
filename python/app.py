@@ -10,6 +10,7 @@ from api.auth.api_route import auth_bp
 from api.problem.route import problem_bp
 from api.profile.route import profile_bp
 from api.auth.test_route import auth_test_bp
+from api.submit.route import submit_bp
 from api.system.route import system_bp
 from database import create_db_command, db
 from page.auth.route import auth_page_bp
@@ -45,6 +46,7 @@ def create_app(test_config: Mapping[str, Any] | None = None) -> Flask:
     app.register_blueprint(auth_page_bp)
     app.register_blueprint(page)
     app.register_blueprint(problem_page_bp)
+    app.register_blueprint(submit_bp)
     app.register_blueprint(submission_page_bp)
     app.register_blueprint(system_bp)
 
