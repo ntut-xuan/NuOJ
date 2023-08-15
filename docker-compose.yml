@@ -38,8 +38,12 @@ services:
   nuoj-sandbox:
     build: ./sandbox
     container_name: nuoj-sandbox
+    environment:
+      - PYTHONUNBUFFERED=1
+      - NUOJ_SANDBOX_ENABLE_CG=${NUOJ_SANDBOX_ENABLE_CG}
     ports:
       - "4439:4439"
+    privileged: true
   fake-smtp-server:
     image: reachfive/fake-smtp-server:latest
     container_name: fake-smtp-server
