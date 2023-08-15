@@ -2,7 +2,6 @@ import json
 from typing import Any
 
 import requests
-from requests import Response
 from datetime import datetime
 from flask import Blueprint, Response, make_response, request
 
@@ -26,8 +25,8 @@ def submit_route() -> Response:
 
     submission: Submission = _generate_submission_record(user.user_uid, problem_id, language)
 
-    payload: dict[str, Any] = _generate_payload_with_problem(code, language, problem_id, submission.id)
-    tracker_uid: str = _send_request_with_payload(payload)
+    judge_payload: dict[str, Any] = _generate_payload_with_problem(code, language, problem_id, submission.id)
+    tracker_uid: str = _send_request_with_payload(judge_payload)
     
     submission.tracker_uid = tracker_uid
     db.session.commit()
@@ -36,9 +35,9 @@ def submit_route() -> Response:
 
 
 def _send_request_with_payload(payload: dict[str, Any]) -> str:
-    response = requests.post("http://nuoj-sandbox:4439/api/judge", json=payload)
-    response_payload: dict[str, Any] | None = json.loads(response.text)
-    tracker_uid = response_payload["tracker_id"]
+    response: requests.Response = requests.post("http://nuoj-sandbox:4439/api/judge", json=payload)
+    response_payload: dict[str, Any] = json.loads(response.text)
+    tracker_uid: str = response_payload["tracker_id"]
 
     return tracker_uid
 
@@ -55,7 +54,7 @@ def _generate_payload_with_problem(code: str, language: str, problem_id: int, su
     return payload
 
 
-def _get_judge_payload(user_code: str, user_code_language: str, solution: str, solution_language: str, checker: str, checker_language: str, testcase: list[str], submission_id: str):
+def _get_judge_payload(user_code: str, user_code_language: str, solution: str, solution_language: str, checker: str, checker_language: str, testcase: list[dict[str, Any]], submission_id: int):
     judge_payload: dict[str, Any] = {
         "user_code": {
             "code": user_code,
@@ -81,7 +80,7 @@ def _get_judge_payload(user_code: str, user_code_language: str, solution: str, s
     return judge_payload
 
 
-def _generate_submission_record(user_uid: str, problem_id: str, language: str) -> int:
+def _generate_submission_record(user_uid: str, problem_id: int, language: str) -> Submission:
     submission: Submission = Submission(
         user_uid=user_uid,
         problem_id=problem_id,
@@ -95,7 +94,7 @@ def _generate_submission_record(user_uid: str, problem_id: str, language: str) -
     return submission
 
 
-def _fetch_testcase_from_testcase_id(testcase_id: int) -> list[str]:
+def _fetch_testcase_from_testcase_id(testcase_id: int) -> list[dict[str, Any]]:
     problem_testcase: Testcase | None = Testcase.query.filter_by(id=testcase_id).first()
     
     if problem_testcase is None:
@@ -136,7 +135,7 @@ def _fetch_checker_from_checker_id(checker_id: int) -> tuple[str, str]:
     return (content, "c++14")
 
 
-def _get_user_with_current_session():
+def _get_user_with_current_session() -> User:
     jwt: str = request.cookies["jwt"]
     
     user: User = get_user_by_jwt_token(jwt)
