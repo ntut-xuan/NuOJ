@@ -48,18 +48,11 @@ def submit_route() -> Response:
     
     user: User = get_user_by_jwt_token(jwt)
     problem_id: int = payload["problem_id"]
+    language: str = payload["language"]
 
-    submission: Submission = Submission(
-        user_id=user.user_uid,
-        problem_id=problem_id,
-        date=datetime.now(),
-        compiler=payload["language"],
-    )
-
-    db.session.add(submission)
-    db.session.flush()
-
+    submission: Submission = _generate_submission_record(user.user_uid, problem_id, language)
     submission_id = submission.id
+    
     problem: Problem | None = Problem.query.filter_by(problem_id=problem_id).first()
     assert problem is not None
 
@@ -77,6 +70,20 @@ def submit_route() -> Response:
     db.session.commit()
 
     return make_response({"message": "OK"})
+
+
+def _generate_submission_record(user_uid: str, problem_id: str, language: str) -> int:
+    submission: Submission = Submission(
+        user_id=user_uid,
+        problem_id=problem_id,
+        date=datetime.now(),
+        compiler=language,
+    )
+
+    db.session.add(submission)
+    db.session.commit()
+
+    return submission
 
 
 def _fetch_testcase_from_testcase_id(testcase_id: int) -> list[str]:
