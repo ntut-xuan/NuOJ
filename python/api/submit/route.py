@@ -72,11 +72,10 @@ def _get_judge_payload(user_code: str, user_code_language: str, solution: str, s
         "test_case": testcase,
         "execute_type": "Judge",
         "options": {
-            "threading": True,
+            "threading": False,
             "time": 10,
             "wall_time": 10,
             "memory": 131072,
-            "webhook_url": f"http://nuoj:8080/result/{submission_id}"
         }
     }
     return judge_payload
@@ -132,7 +131,7 @@ def _fetch_checker_from_checker_id(checker_id: int) -> tuple[str, str]:
         return ("", "")
     
     filename: str = problem_checker.filename
-    content: str = read_file(f"{filename}.cpp", TunnelCode.SOLUTION)
+    content: str = read_file(f"{filename}.cpp", TunnelCode.CHECKER)
 
     return (content, "c++14")
 
