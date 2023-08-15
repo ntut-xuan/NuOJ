@@ -105,6 +105,6 @@ def setup_problem_to_database(app: Flask, setup_langauge: None, solution: str, c
 
 
 def test_submit_route_with_valid_payload_should_return_http_status_code_ok(logged_in_client: FlaskClient, payload: dict[str, Any], setup_problem_to_database: None):
-    request: TestResponse = logged_in_client.post("/api/submit", json=payload)
+    response: TestResponse = logged_in_client.post("/api/submit", json=payload)
 
-    assert request.status_code == HTTPStatus.OK
+    assert response.status_code == HTTPStatus.OK
