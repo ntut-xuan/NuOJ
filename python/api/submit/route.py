@@ -17,9 +17,8 @@ submit_bp = Blueprint("submit", __name__, url_prefix="/api/submit")
 def submit_route() -> Response:
     payload: dict[str, Any] | None = request.get_json(silent=True)
     assert payload is not None
-    jwt: str = request.cookies["jwt"]
-    
-    user: User = get_user_by_jwt_token(jwt)
+
+    user: User = _get_user_with_current_session()
     problem_id: int = payload["problem_id"]
     language: str = payload["language"]
 
@@ -132,3 +131,11 @@ def _fetch_checker_from_checker_id(checker_id: int) -> tuple[str, str]:
     content: str = read_file(f"{filename}.cpp", TunnelCode.SOLUTION)
 
     return (content, "cpp")
+
+
+def _get_user_with_current_session():
+    jwt: str = request.cookies["jwt"]
+    
+    user: User = get_user_by_jwt_token(jwt)
+
+    return user
