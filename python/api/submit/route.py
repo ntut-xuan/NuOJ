@@ -24,9 +24,8 @@ def submit_route() -> Response:
     language: str = payload["language"]
 
     submission: Submission = _generate_submission_record(user.user_uid, problem_id, language)
-    submission_id = submission.id
 
-    payload: dict[str, Any] = _generate_payload_with_problem(problem_id, submission_id)
+    payload: dict[str, Any] = _generate_payload_with_problem(problem_id, submission.id)
     tracker_uid: str = _send_request_with_payload(payload)
     
     submission.tracker_uid = tracker_uid
