@@ -9,7 +9,7 @@ from flask.testing import FlaskClient
 from werkzeug.test import TestResponse
 
 from database import db
-from models import Language, Problem, ProblemChecker, ProblemSolution, User
+from models import Language, Problem, ProblemChecker, ProblemSolution, Testcase, User
 from storage.util import TunnelCode, is_file_exists, read_file, write_file
 
 
@@ -145,6 +145,29 @@ def setup_problem_checker(app: Flask) -> str:
         checker_content = "Some checker content"
         write_file("1fdd43e9-fad4-4a59-8b9f-e4460e5ae1eb.cpp", checker_content, TunnelCode.CHECKER)
         return checker_content
+
+
+@pytest.fixture
+def setup_testcase(app: Flask) -> list[str]:
+    with app.app_context():
+        filename: str = str(uuid4())
+        testcase: Testcase = Testcase(
+            id=1,
+            filename=filename
+        )
+
+        db.session.add(testcase)
+        db.session.flush()
+
+        testcase_id: int = testcase.id
+        problem: Problem | None = Problem.query.filter_by(problem_id=2).first()
+        assert problem is not None
+        problem.problem_testcase = testcase_id
+        db.session.commit()
+
+        testcase_content: list[str] = ["5", "7", "9"]
+        write_file(f"{filename}.json", dumps(testcase_content), TunnelCode.TESTCASE)
+        return testcase_content
 
 
 class TestGetSpecificProblem:
@@ -898,5 +921,142 @@ class TestGetProblemChecker:
         self, app: Flask, logged_in_client: FlaskClient, setup_problem: None, setup_problem_solution: tuple[str, str]
     ):
         response: TestResponse = logged_in_client.get("/api/problem/1/solution")
+
+        assert response.status_code == HTTPStatus.FORBIDDEN
+
+
+class TestGetTestcase:
+    def test_with_valid_problem_id_should_return_http_status_code_ok(
+        self, app: Flask, logged_in_client: FlaskClient, setup_problem: None, setup_testcase: list[str]
+    ):
+        response: TestResponse = logged_in_client.get("/api/problem/2/testcase")
+
+        assert response.status_code == HTTPStatus.OK
+
+    def test_with_valid_problem_id_should_return_correct_response(
+        self, app: Flask, logged_in_client: FlaskClient, setup_problem: None, setup_testcase: list[str]
+    ):
+        response: TestResponse = logged_in_client.get("/api/problem/2/testcase")
+
+        assert response.status_code == HTTPStatus.OK
+        response_payload: dict[str, Any] | None = response.get_json(silent=True)
+        assert response_payload is not None
+        assert loads(response_payload["testcase"]) == setup_testcase
+
+    def test_with_not_setup_testcase_should_return_empty_testcase(
+        self, app: Flask, logged_in_client: FlaskClient, setup_problem: None
+    ):
+        response: TestResponse = logged_in_client.get("/api/problem/2/testcase")
+
+        assert response.status_code == HTTPStatus.OK
+        response_payload: dict[str, Any] | None = response.get_json(silent=True)
+        assert response_payload is not None
+        assert loads(response_payload["testcase"]) == []
+
+    def test_with_not_logged_in_client_should_return_http_status_code_unauthorized(
+        self, app: Flask, client: FlaskClient, setup_problem: None, setup_testcase: list[str]
+    ):
+        response: TestResponse = client.get("/api/problem/2/testcase")
+
+        assert response.status_code == HTTPStatus.UNAUTHORIZED
+
+    def test_with_absent_problem_should_return_http_status_code_forbidden(
+        self, app: Flask, logged_in_client: FlaskClient, setup_problem: None, setup_testcase: list[str]
+    ):
+        response: TestResponse = logged_in_client.get("/api/problem/888/testcase")
+
+        assert response.status_code == HTTPStatus.FORBIDDEN
+
+    def test_with_not_owner_problem_should_return_http_status_code_forbidden(
+        self, app: Flask, logged_in_client: FlaskClient, setup_problem: None, setup_testcase: list[str]
+    ):
+        response: TestResponse = logged_in_client.get("/api/problem/1/testcase")
+
+        assert response.status_code == HTTPStatus.FORBIDDEN
+
+
+class TestSetupTestcase:
+    def test_with_valid_payload_should_return_http_status_code_ok(
+        self, app: Flask, logged_in_client: FlaskClient, setup_problem: None
+    ):
+        payload: dict[str, Any] = {
+            "testcase": ["3", "5", "8"]
+        }
+
+        response: TestResponse = logged_in_client.post("/api/problem/2/testcase", json=payload)
+
+        assert response.status_code == HTTPStatus.OK
+
+    def test_with_valid_payload_should_add_record_into_database(
+        self, app: Flask, logged_in_client: FlaskClient, setup_problem: None
+    ):
+        with app.app_context():
+            payload: dict[str, Any] = {
+                "testcase": ["3", "5", "8"]
+            }
+
+            response: TestResponse = logged_in_client.post("/api/problem/2/testcase", json=payload)
+
+            assert response.status_code == HTTPStatus.OK
+            problem: Problem | None = Problem.query.filter_by(problem_id=2).first()
+            assert problem is not None
+            testcase_id = problem.problem_testcase
+            assert testcase_id == 1
+            testcase_from_database: Testcase | None = Testcase.query.filter_by(id=testcase_id).first()
+            assert testcase_from_database is not None
+            filename: str = testcase_from_database.filename
+            assert len(filename) == len(str(uuid4()))
+
+    def test_with_valid_payload_should_setup_testcase_file(
+        self, app: Flask, logged_in_client: FlaskClient, setup_problem: None
+    ):
+        with app.app_context():
+            payload: dict[str, Any] = {
+                "testcase": ["3", "5", "8"]
+            }
+
+            response: TestResponse = logged_in_client.post("/api/problem/2/testcase", json=payload)
+
+            assert response.status_code == HTTPStatus.OK
+            problem: Problem | None = Problem.query.filter_by(problem_id=2).first()
+            assert problem is not None
+            testcase_id = problem.problem_testcase
+            testcase_from_database: Testcase | None = Testcase.query.filter_by(id=testcase_id).first()
+            assert testcase_from_database is not None
+            filename: str = testcase_from_database.filename
+            testcase_raw_text = read_file(f"{filename}.json", TunnelCode.TESTCASE)
+            testcase_payload: list[str] = loads(testcase_raw_text)
+            assert testcase_payload == payload["testcase"]
+
+    def test_with_invalid_payload_should_return_http_status_code_bad_request(
+        self, app: Flask, logged_in_client: FlaskClient, setup_problem: None
+    ):
+        payload: dict[str, Any] = {
+            "invalid_payload": "absolutly"
+        }
+
+        response: TestResponse = logged_in_client.post("/api/problem/2/testcase", json=payload)
+
+        assert response.status_code == HTTPStatus.BAD_REQUEST
+
+    def test_with_not_logged_in_client_should_return_http_status_code_unauthorized(
+        self, app: Flask, client: FlaskClient, setup_problem: None
+    ):
+        payload: dict[str, Any] = {
+            "invalid_payload": "absolutly"
+        }
+
+        response: TestResponse = client.post("/api/problem/2/testcase", json=payload)
+
+        assert response.status_code == HTTPStatus.UNAUTHORIZED
+
+    def test_with_not_owner_problem_should_return_http_status_code_forbidden(
+        self, app: Flask, logged_in_client: FlaskClient, setup_problem: None
+    ):
+        payload: dict[str, Any] = {
+            "testcase": ["3", "5", "8"]
+        }
+
+        response: TestResponse = logged_in_client.post("/api/problem/1/testcase", json=payload)
 
         assert response.status_code == HTTPStatus.FORBIDDEN

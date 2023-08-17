@@ -5,7 +5,7 @@ from flask import Flask
 from sqlalchemy.sql import null
 
 from database import db
-from models import Language, Problem, ProblemChecker, ProblemSolution, Profile, Submission, Verdict, VerdictErrorComment, User
+from models import Language, Problem, ProblemChecker, ProblemSolution, Profile, Submission, Testcase, Verdict, VerdictErrorComment, User
 
 
 @pytest.fixture
@@ -225,3 +225,19 @@ def test_language_model_with_valid_data_should_add_record_to_database(app: Flask
         language_from_database: Language | None = Language.query.filter_by(name="C++14").first()
         assert language_from_database is not None
         assert language_from_database.extension == "cpp"
+
+
+def test_testcase_model_with_valid_data_should_add_record_to_database(app: Flask):
+    with app.app_context():
+        random_filename: str = "5b3e4966-09cf-40be-9059-55fa656ba45a"
+        testcase: Testcase = Testcase(
+            id=1,
+            filename=random_filename
+        )
+
+        db.session.add(testcase)
+        db.session.commit()
+
+        testcase_from_database: Testcase | None = Testcase.query.filter_by(id=1).first()
+        assert testcase_from_database is not None
+        assert len(testcase_from_database.filename) == len(random_filename)
