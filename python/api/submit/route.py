@@ -71,10 +71,11 @@ def _get_judge_payload(user_code: str, user_code_language: str, solution: str, s
         "test_case": testcase,
         "execute_type": "Judge",
         "options": {
-            "threading": False,
+            "threading": True,
             "time": 10,
             "wall_time": 10,
             "memory": 131072,
+            "webhook_url": f"http://nuoj:8080/api/result/{submission_id}"
         }
     }
     return judge_payload
