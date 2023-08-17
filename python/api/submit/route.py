@@ -6,6 +6,8 @@ from datetime import datetime
 from flask import Blueprint, Response, make_response, request
 
 from api.auth.auth_util import get_user_by_jwt_token
+from api.auth.validator import validate_jwt_is_exists_or_return_unauthorized, validate_jwt_is_valid_or_return_unauthorized
+from api.submit.validate import validate_problem_can_submit_or_return_unprocessable_entity, validate_submit_payload_or_return_bad_request
 from storage.util import TunnelCode, read_file
 from database import db
 from models import Language, User, ProblemChecker, Problem, ProblemSolution, Submission, Testcase
@@ -14,6 +16,10 @@ submit_bp = Blueprint("submit", __name__, url_prefix="/api/submit")
 
 
 @submit_bp.route("", methods=["POST"])
+@validate_jwt_is_exists_or_return_unauthorized
+@validate_jwt_is_valid_or_return_unauthorized
+@validate_submit_payload_or_return_bad_request
+@validate_problem_can_submit_or_return_unprocessable_entity
 def submit_route() -> Response:
     payload: dict[str, Any] | None = request.get_json(silent=True)
     assert payload is not None
@@ -97,9 +103,7 @@ def _generate_submission_record(user_uid: str, problem_id: int, language: str) -
 
 def _fetch_testcase_from_testcase_id(testcase_id: int) -> list[dict[str, Any]]:
     problem_testcase: Testcase | None = Testcase.query.filter_by(id=testcase_id).first()
-    
-    if problem_testcase is None:
-        return []
+    assert problem_testcase is not None
     
     filename: str = problem_testcase.filename
     json_text: str = read_file(f"{filename}.json", TunnelCode.TESTCASE)
@@ -110,9 +114,7 @@ def _fetch_testcase_from_testcase_id(testcase_id: int) -> list[dict[str, Any]]:
 
 def _fetch_solution_from_solution_id(solution_id: int) -> tuple[str, str]:
     problem_solution: ProblemSolution | None = ProblemSolution.query.filter_by(id=solution_id).first()
-    
-    if problem_solution is None:
-        return ("", "")
+    assert problem_solution is not None
     
     filename: str = problem_solution.filename
     language_name: str = problem_solution.language
@@ -126,9 +128,7 @@ def _fetch_solution_from_solution_id(solution_id: int) -> tuple[str, str]:
 
 def _fetch_checker_from_checker_id(checker_id: int) -> tuple[str, str]:
     problem_checker: ProblemChecker | None = ProblemChecker.query.filter_by(id=checker_id).first()
-    
-    if problem_checker is None:
-        return ("", "")
+    assert problem_checker is not None
     
     filename: str = problem_checker.filename
     content: str = read_file(f"{filename}.cpp", TunnelCode.CHECKER)
