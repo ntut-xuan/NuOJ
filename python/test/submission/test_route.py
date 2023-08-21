@@ -35,6 +35,12 @@ def wa_payload():
 
 
 @pytest.fixture
+def tle_payload():
+    with open("./test/submission/response/tle_response.json", "r") as file:
+        return json.loads(file.read())
+
+
+@pytest.fixture
 def code():
     with open("./test/submit/code/code.cpp", "r") as file:
         code = file.read()
@@ -200,6 +206,34 @@ class TestAddJudgeResult:
             assert (
                 verdict_error_comment.message
                 == "wrong answer 1st lines differ - expected: '1004', found: '14'\n"
+            )
+
+    def test_with_tle_valid_payload_should_store_correct_data_to_database(
+        self,
+        app: Flask,
+        logged_in_client: FlaskClient,
+        tle_payload: dict[str, Any],
+        setup_submission: str
+    ):
+        response: TestResponse = logged_in_client.post(
+            "/api/submission/1/result", json=tle_payload
+        )
+
+        assert response.status_code == HTTPStatus.OK
+        with app.app_context():
+            tracker_uid: str = setup_submission
+            verdict: Verdict = Verdict.query.filter_by(tracker_uid=tracker_uid).first()
+            assert verdict.verdict == "TLE"
+            assert verdict.memory_usage == fetch_memory_average_usage(tle_payload)
+            assert verdict.time_usage == fetch_time_average_usage(tle_payload)
+            assert verdict.error_id == 1
+            verdict_error_comment: VerdictErrorComment = (
+                VerdictErrorComment.query.filter_by(id=1).first()
+            )
+            assert verdict_error_comment.failed_testcase_index == 0
+            assert (
+                verdict_error_comment.message
+                == "The programming has reached the time limit. (10.099s)"
             )
 
 

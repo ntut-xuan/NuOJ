@@ -6,7 +6,7 @@ from typing import Any
 class JudgeStatus(Enum):
     AC = "AC"
     WA = "WA"
-
+    TLE = "TLE"
     
 class ResponseStatus(Enum):
     OK = "OK"
@@ -16,12 +16,13 @@ class ResponseStatus(Enum):
 class JudgeMeta:
     time: float
     memory: int
-    exitcode: int
+    exitcode: int | None = None
     
     def __post_init__(self):
         self.memory = int(self.memory)
         self.time = float(self.time)
-        self.exitcode = int(self.exitcode)
+        if self.exitcode != None:
+            self.exitcode = int(self.exitcode)
 
 
 @dataclass
@@ -44,14 +45,17 @@ class JudgeOutputSet:
 
 @dataclass
 class JudgeRuntimeInfo:
-    checker: JudgeMeta
-    submit: JudgeMeta
-    solution: JudgeMeta
+    checker: JudgeMeta | None = None
+    submit: JudgeMeta | None = None
+    solution: JudgeMeta | None = None
 
     def __post_init__(self):
-        self.checker = JudgeMeta(**self.checker)
-        self.submit = JudgeMeta(**self.submit)
-        self.solution = JudgeMeta(**self.solution)
+        if self.checker is not None:
+            self.checker = JudgeMeta(**self.checker)
+        if self.submit is not None:
+            self.submit = JudgeMeta(**self.submit)
+        if self.solution is not None:
+            self.solution = JudgeMeta(**self.solution)
 
 
 @dataclass

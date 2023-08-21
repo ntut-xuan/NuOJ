@@ -1,0 +1,45 @@
+{
+    "data": {
+        "compile_detail": {
+            "checker": {
+                "exitcode": "0",
+                "memory": "171752",
+                "time": "0.689"
+            },
+            "solution": {
+                "exitcode": "0",
+                "memory": "175492",
+                "time": "0.402"
+            },
+            "submit": {
+                "exitcode": "0",
+                "memory": "175464",
+                "time": "0.401"
+            }
+        },
+        "judge_detail": [
+            {
+                "log": "The programming has reached the time limit. (10.099s)",
+                "output_set": {
+                    "answer": "14\n",
+                    "submit": ""
+                },
+                "runtime_info": {
+                    "solution": {
+                        "exitcode": "0",
+                        "memory": "2992",
+                        "time": "0.001"
+                    },
+                    "submit": {
+                        "memory": "2736",
+                        "time": "10.099"
+                    }
+                },
+                "verdict": "TLE"
+            }
+        ],
+        "message": "The programming has reached the time limit. (10.099s)",
+        "status": "TLE"
+    },
+    "status": "OK"
+}
