@@ -8,7 +8,7 @@ from flask import Flask
 from flask.testing import FlaskClient
 from werkzeug.test import TestResponse
 
-from api.submission.dataclass import JudgeResult
+from api.submission.dataclass import JudgeDetail, JudgeResult, JudgeMeta
 from database import db
 from models import (
     Language,
@@ -189,20 +189,30 @@ def fetch_memory_average_usage(payload: dict[str, Any]) -> int:
     judge_result: JudgeResult = JudgeResult(**payload)
     memory = 0
 
-    for judge_detail in judge_result.data.judge_detail:
-        memory += judge_detail.runtime_info.submit.memory
+    judge_details: list[JudgeDetail] | None = judge_result.data.judge_detail
+    assert judge_details
 
-    return memory // len(judge_result.data.judge_detail)
+    for judge_detail in judge_details:
+        judge_submit_meta: JudgeMeta | None = judge_detail.runtime_info.submit 
+        assert judge_submit_meta
+        memory += judge_submit_meta.memory
+
+    return memory // len(judge_details)
 
 
 def fetch_time_average_usage(payload: dict[str, Any]) -> float:
     judge_result: JudgeResult = JudgeResult(**payload)
     time: float = 0
 
-    for judge_detail in judge_result.data.judge_detail:
-        time += judge_detail.runtime_info.submit.time
+    judge_details: list[JudgeDetail] | None = judge_result.data.judge_detail
+    assert judge_details
 
-    return time / len(judge_result.data.judge_detail)
+    for judge_detail in judge_details:
+        judge_submit_meta: JudgeMeta | None = judge_detail.runtime_info.submit 
+        assert judge_submit_meta
+        time += judge_submit_meta.time
+
+    return time / len(judge_details)
 
 
 class TestAddJudgeResult:
