@@ -6,6 +6,7 @@ from typing import Any
 class JudgeStatus(Enum):
     AC = "AC"
     CE = "CE"
+    CCE = "CCE"
     CMLE = "CMLE"
     CRE = "CRE"
     CTLE = "CTLE"
@@ -39,14 +40,17 @@ class JudgeMeta:
 
 @dataclass
 class JudgeCompileDetail:
-    solution: JudgeMeta
-    checker: JudgeMeta
-    submit: JudgeMeta
+    solution: JudgeMeta | None = None
+    checker: JudgeMeta | None = None
+    submit: JudgeMeta | None = None
 
     def __post_init__(self):
-        self.checker = JudgeMeta(**self.checker)
-        self.submit = JudgeMeta(**self.submit)
-        self.solution = JudgeMeta(**self.solution)
+        if self.checker != None:
+            self.checker = JudgeMeta(**self.checker)
+        if self.submit != None:
+            self.submit = JudgeMeta(**self.submit)
+        if self.solution != None:
+            self.solution = JudgeMeta(**self.solution)
 
 
 @dataclass

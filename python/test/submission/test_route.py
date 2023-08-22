@@ -59,6 +59,12 @@ def ce_payload():
 
 
 @pytest.fixture
+def cce_payload():
+    with open("./test/submission/response/cce_response.json", "r") as file:
+        return json.loads(file.read())
+
+
+@pytest.fixture
 def cmle_payload():
     with open("./test/submission/response/cmle_response.json", "r") as file:
         return json.loads(file.read())
@@ -364,6 +370,32 @@ class TestAddJudgeResult:
             assert (
                 verdict_error_comment.message
                 == "Submit code compile failed."
+            )
+
+    def test_with_cce_valid_payload_should_store_correct_data_to_database(
+        self,
+        app: Flask,
+        logged_in_client: FlaskClient,
+        cce_payload: dict[str, Any],
+        setup_submission: str
+    ):
+        response: TestResponse = logged_in_client.post(
+            "/api/submission/1/result", json=cce_payload
+        )
+
+        assert response.status_code == HTTPStatus.OK
+        with app.app_context():
+            tracker_uid: str = setup_submission
+            verdict: Verdict = Verdict.query.filter_by(tracker_uid=tracker_uid).first()
+            assert verdict.verdict == "CCE"
+            assert verdict.error_id == 1
+            verdict_error_comment: VerdictErrorComment = (
+                VerdictErrorComment.query.filter_by(id=1).first()
+            )
+            assert verdict_error_comment.failed_testcase_index == -1
+            assert (
+                verdict_error_comment.message
+                == "Checker compile failed."
             )
 
     def test_with_cmle_valid_payload_should_store_correct_data_to_database(
