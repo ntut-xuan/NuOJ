@@ -1,0 +1,14 @@
+{
+    "data": {
+        "compile_detail": {
+            "solution": {
+                "exitcode": "1",
+                "memory": "173772",
+                "time": "0.603"
+            }
+        },
+        "message": "Solution compile failed.",
+        "status": "SCE"
+    },
+    "status": "OK"
+}

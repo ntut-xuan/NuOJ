@@ -14,6 +14,7 @@ class JudgeStatus(Enum):
     RE = "RE"
     TLE = "TLE"
     MLE = "MLE"
+    SCE = "SCE"
     SMLE = "SMLE"
     STLE = "STLE"
     SRE = "SRE"
