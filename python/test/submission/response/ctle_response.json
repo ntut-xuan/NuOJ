@@ -1,0 +1,50 @@
+{
+    "data": {
+        "compile_detail": {
+            "checker": {
+                "exitcode": "0",
+                "memory": "171864",
+                "time": "0.791"
+            },
+            "solution": {
+                "exitcode": "0",
+                "memory": "175560",
+                "time": "0.486"
+            },
+            "submit": {
+                "exitcode": "0",
+                "memory": "175512",
+                "time": "0.409"
+            }
+        },
+        "judge_detail": [
+            {
+                "log": "The programming has reached the time limit. (10.001s)",
+                "output_set": {
+                    "answer": "14\n",
+                    "submit": "14\n"
+                },
+                "runtime_info": {
+                    "checker": {
+                        "memory": "3100",
+                        "time": "10.001"
+                    },
+                    "solution": {
+                        "exitcode": "0",
+                        "memory": "3032",
+                        "time": "0.002"
+                    },
+                    "submit": {
+                        "exitcode": "0",
+                        "memory": "3016",
+                        "time": "0.001"
+                    }
+                },
+                "verdict": "CTLE"
+            }
+        ],
+        "message": "The programming has reached the time limit. (10.001s)",
+        "status": "CTLE"
+    },
+    "status": "OK"
+}

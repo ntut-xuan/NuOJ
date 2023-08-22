@@ -71,6 +71,12 @@ def cre_payload():
 
 
 @pytest.fixture
+def ctle_payload():
+    with open("./test/submission/response/ctle_response.json", "r") as file:
+        return json.loads(file.read())
+
+
+@pytest.fixture
 def code():
     with open("./test/submit/code/code.cpp", "r") as file:
         code = file.read()
@@ -398,6 +404,32 @@ class TestAddJudgeResult:
             assert (
                 verdict_error_comment.message
                 == "The programming return exitsig 6"
+            )
+
+    def test_with_ctle_valid_payload_should_store_correct_data_to_database(
+        self,
+        app: Flask,
+        logged_in_client: FlaskClient,
+        ctle_payload: dict[str, Any],
+        setup_submission: str
+    ):
+        response: TestResponse = logged_in_client.post(
+            "/api/submission/1/result", json=ctle_payload
+        )
+
+        assert response.status_code == HTTPStatus.OK
+        with app.app_context():
+            tracker_uid: str = setup_submission
+            verdict: Verdict = Verdict.query.filter_by(tracker_uid=tracker_uid).first()
+            assert verdict.verdict == "CTLE"
+            assert verdict.error_id == 1
+            verdict_error_comment: VerdictErrorComment = (
+                VerdictErrorComment.query.filter_by(id=1).first()
+            )
+            assert verdict_error_comment.failed_testcase_index == 0
+            assert (
+                verdict_error_comment.message
+                == "The programming has reached the time limit. (10.001s)"
             )
 
     def test_with_valid_payload_should_store_file_to_storage(
