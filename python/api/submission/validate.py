@@ -24,7 +24,7 @@ def validate_judge_result_payload_or_return_bad_request(
             JudgeResult(**payload)
         except Exception as e:
             return make_simple_error_response(
-                HTTPStatus.BAD_REQUEST, f"Incorrect format of payload"
+                HTTPStatus.BAD_REQUEST, f"Incorrect format of payload: {str(e)}"
             )
         
         return func(*args, **kwargs)

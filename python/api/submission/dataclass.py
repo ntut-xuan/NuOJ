@@ -6,7 +6,9 @@ from typing import Any
 class JudgeStatus(Enum):
     AC = "AC"
     WA = "WA"
+    RE = "RE"
     TLE = "TLE"
+    MLE = "MLE"
     
 class ResponseStatus(Enum):
     OK = "OK"
@@ -17,12 +19,15 @@ class JudgeMeta:
     time: float
     memory: int
     exitcode: int | None = None
+    exitsig: int | None = None
     
     def __post_init__(self):
         self.memory = int(self.memory)
         self.time = float(self.time)
         if self.exitcode != None:
             self.exitcode = int(self.exitcode)
+        if self.exitsig != None:
+            self.exitsig = int(self.exitsig)
 
 
 @dataclass
