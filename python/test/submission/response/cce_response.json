@@ -1,0 +1,19 @@
+{
+    "data": {
+        "compile_detail": {
+            "checker": {
+                "exitcode": "1",
+                "memory": "130164",
+                "time": "0.261"
+            },
+            "solution": {
+                "exitcode": "0",
+                "memory": "176280",
+                "time": "0.428"
+            }
+        },
+        "message": "Checker compile failed.",
+        "status": "CCE"
+    },
+    "status": "OK"
+}

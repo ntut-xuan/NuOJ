@@ -1,0 +1,51 @@
+{
+    "data": {
+        "compile_detail": {
+            "checker": {
+                "exitcode": "0",
+                "memory": "171840",
+                "time": "0.711"
+            },
+            "solution": {
+                "exitcode": "0",
+                "memory": "175560",
+                "time": "0.426"
+            },
+            "submit": {
+                "exitcode": "0",
+                "memory": "175540",
+                "time": "0.393"
+            }
+        },
+        "judge_detail": [
+            {
+                "log": "The programming return exitsig 6",
+                "output_set": {
+                    "answer": "14\n",
+                    "submit": "14\n"
+                },
+                "runtime_info": {
+                    "checker": {
+                        "exitsig": "6",
+                        "memory": "3360",
+                        "time": "0.001"
+                    },
+                    "solution": {
+                        "exitcode": "0",
+                        "memory": "3032",
+                        "time": "0.001"
+                    },
+                    "submit": {
+                        "exitcode": "0",
+                        "memory": "3036",
+                        "time": "0.001"
+                    }
+                },
+                "verdict": "CRE"
+            }
+        ],
+        "message": "The programming return exitsig 6",
+        "status": "CRE"
+    },
+    "status": "OK"
+}

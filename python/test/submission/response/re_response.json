@@ -1,0 +1,46 @@
+{
+    "data": {
+        "compile_detail": {
+            "checker": {
+                "exitcode": "0",
+                "memory": "171796",
+                "time": "0.671"
+            },
+            "solution": {
+                "exitcode": "0",
+                "memory": "175508",
+                "time": "0.437"
+            },
+            "submit": {
+                "exitcode": "0",
+                "memory": "54228",
+                "time": "0.125"
+            }
+        },
+        "judge_detail": [
+            {
+                "log": "The programming return exitsig 6",
+                "output_set": {
+                    "answer": "14\n",
+                    "submit": ""
+                },
+                "runtime_info": {
+                    "solution": {
+                        "exitcode": "0",
+                        "memory": "3016",
+                        "time": "0.001"
+                    },
+                    "submit": {
+                        "exitsig": "6",
+                        "memory": "2904",
+                        "time": "0.001"
+                    }
+                },
+                "verdict": "RE"
+            }
+        ],
+        "message": "The programming return exitsig 6",
+        "status": "RE"
+    },
+    "status": "OK"
+}

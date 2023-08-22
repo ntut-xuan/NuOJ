@@ -1,0 +1,76 @@
+{
+    "status": "OK",
+    "data": {
+        "status": "AC",
+        "message": "OK.",
+        "compile_detail": {
+            "solution": {
+                "time": "1.188",
+                "memory": "156816",
+                "exitcode": "0"
+            },
+            "checker": {
+                "time": "1.717",
+                "memory": "158192",
+                "exitcode": "0"
+            },
+            "submit": {
+                "time": "1.012",
+                "memory": "156920",
+                "exitcode": "0"
+            }
+        },
+        "judge_detail": [
+            {
+                "verdict": "AC",
+                "output_set": {
+                    "submit": "14\n",
+                    "answer": "14\n"
+                },
+                "runtime_info": {
+                    "solution": {
+                        "time": "0.002",
+                        "memory": "3656",
+                        "exitcode": "0"
+                    },
+                    "submit": {
+                        "time": "0.002",
+                        "memory": "3560",
+                        "exitcode": "0"
+                    },
+                    "checker": {
+                        "time": "0.002",
+                        "memory": "3884",
+                        "exitcode": "0"
+                    }
+                },
+                "log": "ok single line: '14'\n"
+            },
+            {
+                "verdict": "AC",
+                "output_set": {
+                    "submit": "16\n",
+                    "answer": "16\n"
+                },
+                "runtime_info": {
+                    "solution": {
+                        "time": "0.002",
+                        "memory": "3628",
+                        "exitcode": "0"
+                    },
+                    "submit": {
+                        "time": "0.002",
+                        "memory": "3656",
+                        "exitcode": "0"
+                    },
+                    "checker": {
+                        "time": "0.003",
+                        "memory": "3832",
+                        "exitcode": "0"
+                    }
+                },
+                "log": "ok single line: '16'\n"
+            }
+        ]
+    }
+}

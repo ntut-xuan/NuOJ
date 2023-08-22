@@ -1,0 +1,51 @@
+{
+    "status": "OK",
+    "data": {
+        "status": "WA",
+        "message": "wrong answer 1st lines differ - expected: '1004', found: '14'\n",
+        "compile_detail": {
+            "solution": {
+                "time": "0.899",
+                "memory": "158820",
+                "exitcode": "0"
+            },
+            "checker": {
+                "time": "1.365",
+                "memory": "156816",
+                "exitcode": "0"
+            },
+            "submit": {
+                "time": "0.777",
+                "memory": "158484",
+                "exitcode": "0"
+            }
+        },
+        "judge_detail": [
+            {
+                "verdict": "WA",
+                "output_set": {
+                    "submit": "1004\n",
+                    "answer": "1004\n"
+                },
+                "runtime_info": {
+                    "solution": {
+                        "time": "0.002",
+                        "memory": "3488",
+                        "exitcode": "0"
+                    },
+                    "submit": {
+                        "time": "0.003",
+                        "memory": "3644",
+                        "exitcode": "0"
+                    },
+                    "checker": {
+                        "time": "0.002",
+                        "memory": "4116",
+                        "exitcode": "1"
+                    }
+                },
+                "log": "wrong answer 1st lines differ - expected: '1004', found: '14'\n"
+            }
+        ]
+    }
+}

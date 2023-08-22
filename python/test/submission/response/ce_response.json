@@ -1,0 +1,24 @@
+{
+    "data": {
+        "compile_detail": {
+            "checker": {
+                "exitcode": "0",
+                "memory": "172088",
+                "time": "0.686"
+            },
+            "solution": {
+                "exitcode": "0",
+                "memory": "175508",
+                "time": "0.460"
+            },
+            "submit": {
+                "exitcode": "1",
+                "memory": "173780",
+                "time": "0.369"
+            }
+        },
+        "message": "Submit code compile failed.",
+        "status": "CE"
+    },
+    "status": "OK"
+}
