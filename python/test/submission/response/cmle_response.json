@@ -1,0 +1,51 @@
+{
+    "data": {
+        "compile_detail": {
+            "checker": {
+                "exitcode": "0",
+                "memory": "172324",
+                "time": "0.678"
+            },
+            "solution": {
+                "exitcode": "0",
+                "memory": "175516",
+                "time": "0.412"
+            },
+            "submit": {
+                "exitcode": "0",
+                "memory": "175528",
+                "time": "0.383"
+            }
+        },
+        "judge_detail": [
+            {
+                "log": "The programming has reached the memory limit. (9656KB)",
+                "output_set": {
+                    "answer": "14\n",
+                    "submit": "14\n"
+                },
+                "runtime_info": {
+                    "checker": {
+                        "exitsig": "11",
+                        "memory": "9656",
+                        "time": "0.003"
+                    },
+                    "solution": {
+                        "exitcode": "0",
+                        "memory": "3024",
+                        "time": "0.001"
+                    },
+                    "submit": {
+                        "exitcode": "0",
+                        "memory": "3028",
+                        "time": "0.001"
+                    }
+                },
+                "verdict": "CMLE"
+            }
+        ],
+        "message": "The programming has reached the memory limit. (9656KB)",
+        "status": "CMLE"
+    },
+    "status": "OK"
+}

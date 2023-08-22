@@ -6,10 +6,16 @@ from typing import Any
 class JudgeStatus(Enum):
     AC = "AC"
     CE = "CE"
+    CMLE = "CMLE"
+    CRE = "CRE"
+    CTLE = "CTLE"
     WA = "WA"
     RE = "RE"
     TLE = "TLE"
     MLE = "MLE"
+    SMLE = "SMLE"
+    STLE = "STLE"
+    SRE = "SRE"
     
 class ResponseStatus(Enum):
     OK = "OK"
