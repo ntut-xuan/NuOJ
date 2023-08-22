@@ -24,8 +24,8 @@ def add_verdict_route(submission_id: int):
 
     judge_verdict: str = judge_result.data.status
     judge_details: list[JudgeDetail] = judge_result.data.judge_detail
-    memory_usage: int = _fetch_memory_average_usage(judge_details)
-    time_usage: int = _fetch_time_average_usage(judge_details)
+    memory_usage: int = _fetch_memory_average_usage(judge_result.data.status, judge_details)
+    time_usage: int = _fetch_time_average_usage(judge_result.data.status, judge_details)
     tracker_uid: str = _fetch_tracker_uid_from_submission_id(submission_id)
     error_id: int | None = _make_verdict_error(judge_result.data.status, judge_result.data.message, judge_details)
 
@@ -75,10 +75,13 @@ def _fetch_failed_testcase_index(judge_details: list[JudgeDetail]):
     return -1
 
 
-def _fetch_memory_average_usage(judge_details: list[JudgeDetail]):
+def _fetch_memory_average_usage(status: JudgeStatus, judge_details: list[JudgeDetail]):
     memory: int = 0
 
     if len(judge_details) == 0:
+        return memory
+    
+    if status == JudgeStatus.SMLE or status == JudgeStatus.SRE or status == JudgeStatus.STLE:
         return memory
 
     for judge_detail in judge_details:
@@ -87,10 +90,13 @@ def _fetch_memory_average_usage(judge_details: list[JudgeDetail]):
     return memory // len(judge_details)
 
 
-def _fetch_time_average_usage(judge_details: list[JudgeDetail]):
+def _fetch_time_average_usage(status: JudgeStatus, judge_details: list[JudgeDetail]):
     time: float = 0
 
     if len(judge_details) == 0:
+        return time
+    
+    if status == JudgeStatus.SMLE or status == JudgeStatus.SRE or status == JudgeStatus.STLE:
         return time
 
     for judge_detail in judge_details:
