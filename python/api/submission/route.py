@@ -81,7 +81,7 @@ def _fetch_memory_average_usage(status: JudgeStatus, judge_details: list[JudgeDe
     if len(judge_details) == 0:
         return memory
     
-    if status == JudgeStatus.SMLE or status == JudgeStatus.SRE or status == JudgeStatus.STLE:
+    if _is_solution_error(status):
         return memory
 
     for judge_detail in judge_details:
@@ -96,10 +96,14 @@ def _fetch_time_average_usage(status: JudgeStatus, judge_details: list[JudgeDeta
     if len(judge_details) == 0:
         return time
     
-    if status == JudgeStatus.SMLE or status == JudgeStatus.SRE or status == JudgeStatus.STLE:
+    if _is_solution_error(status):
         return time
 
     for judge_detail in judge_details:
         time += judge_detail.runtime_info.submit.time
 
     return time / len(judge_details)
+
+
+def _is_solution_error(status: JudgeStatus):
+    return status == JudgeStatus.SMLE.value or status == JudgeStatus.SRE.value or status == JudgeStatus.STLE.value

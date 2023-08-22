@@ -453,7 +453,7 @@ class TestAddJudgeResult:
         with app.app_context():
             tracker_uid: str = setup_submission
             verdict: Verdict = Verdict.query.filter_by(tracker_uid=tracker_uid).first()
-            assert verdict.verdict == "CTLE"
+            assert verdict.verdict == "SRE"
             assert verdict.error_id == 1
             verdict_error_comment: VerdictErrorComment = (
                 VerdictErrorComment.query.filter_by(id=1).first()
@@ -461,7 +461,7 @@ class TestAddJudgeResult:
             assert verdict_error_comment.failed_testcase_index == 0
             assert (
                 verdict_error_comment.message
-                == "The programming has reached the time limit. (10.001s)"
+                == "The programming return exitsig 6"
             )
 
     def test_with_valid_payload_should_store_file_to_storage(
