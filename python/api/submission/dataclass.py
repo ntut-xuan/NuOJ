@@ -1,10 +1,11 @@
 from enum import Enum
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Any
 
 
 class JudgeStatus(Enum):
     AC = "AC"
+    CE = "CE"
     WA = "WA"
     RE = "RE"
     TLE = "TLE"
@@ -81,12 +82,15 @@ class JudgeData:
     status: str
     message: str
     compile_detail: JudgeCompileDetail
-    judge_detail: list[JudgeDetail]
+    judge_detail: list[JudgeDetail] | None = None
     
     def __post_init__(self):
         self.status = JudgeStatus(self.status).value
         self.compile_detail = JudgeCompileDetail(**self.compile_detail)
-        self.judge_detail = [JudgeDetail(**obj) for obj in self.judge_detail]
+        if self.judge_detail is not None:
+            self.judge_detail = [JudgeDetail(**obj) for obj in self.judge_detail]
+        else:
+            self.judge_detail = []
 
 
 @dataclass

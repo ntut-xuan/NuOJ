@@ -6,7 +6,7 @@ from flask import Blueprint, make_response, request
 
 from api.auth.validator import validate_jwt_is_exists_or_return_unauthorized, validate_jwt_is_valid_or_return_unauthorized
 from api.submission.validate import validate_judge_result_payload_or_return_bad_request, validate_submission_should_exists_or_return_forbidden
-from api.submission.dataclass import JudgeDetail, JudgeResult
+from api.submission.dataclass import JudgeDetail, JudgeStatus, JudgeResult
 from database import db
 from models import Submission, Verdict, VerdictErrorComment
 from storage.util import TunnelCode, write_file
@@ -27,7 +27,7 @@ def add_verdict_route(submission_id: int):
     memory_usage: int = _fetch_memory_average_usage(judge_details)
     time_usage: int = _fetch_time_average_usage(judge_details)
     tracker_uid: str = _fetch_tracker_uid_from_submission_id(submission_id)
-    error_id: int | None = _make_verdict_error(judge_details)
+    error_id: int | None = _make_verdict_error(judge_result.data.status, judge_result.data.message, judge_details)
 
     verdict: Verdict = Verdict(
         verdict=judge_verdict,
@@ -44,13 +44,12 @@ def add_verdict_route(submission_id: int):
     return make_response({"status": "OK"})
 
 
-def _make_verdict_error(judge_details: list[JudgeDetail]) -> int | None:
-    failed_testcase_index: int = _fetch_failed_testcase_index(judge_details)
-
-    if failed_testcase_index == -1:
+def _make_verdict_error(status: JudgeStatus, message: str, judge_details: list[JudgeDetail]) -> int | None:
+    if status == JudgeStatus.AC.value:
         return None
 
-    log: str = judge_details[failed_testcase_index].log
+    failed_testcase_index: int = _fetch_failed_testcase_index(judge_details)
+    log: str = message
     verdictErrorMessage: VerdictErrorComment = VerdictErrorComment(
         failed_testcase_index=failed_testcase_index, message=log
     )
@@ -79,6 +78,9 @@ def _fetch_failed_testcase_index(judge_details: list[JudgeDetail]):
 def _fetch_memory_average_usage(judge_details: list[JudgeDetail]):
     memory: int = 0
 
+    if len(judge_details) == 0:
+        return memory
+
     for judge_detail in judge_details:
         memory += judge_detail.runtime_info.submit.memory
 
@@ -87,6 +89,9 @@ def _fetch_memory_average_usage(judge_details: list[JudgeDetail]):
 
 def _fetch_time_average_usage(judge_details: list[JudgeDetail]):
     time: float = 0
+
+    if len(judge_details) == 0:
+        return time
 
     for judge_detail in judge_details:
         time += judge_detail.runtime_info.submit.time
