@@ -16,37 +16,21 @@ from storage.util import TunnelCode, write_file
 submission_bp = Blueprint("submission", __name__, url_prefix="/api/submission")
 
 
+@submission_bp.route("", methods=["GET"])
+def get_submissions():
+    submissions: list[Submission] = Submission.query.all()
+    
+    submission_responses: list[str] = []
+    for submission in submissions:
+        submission_responses.append(_get_submission_response_by_submission_id(submission.id))
+
+    return make_response(submission_responses)
+
+
 @submission_bp.route("/<int:submission_id>", methods=["GET"])
 @validate_submission_should_exists_or_return_forbidden
 def get_submission(submission_id: int):
-    submission: Submission | None = Submission.query.filter_by(id=submission_id).first()
-    assert submission is not None
-    user: User | None = User.query.filter_by(user_uid=submission.user_uid).first()
-    assert user is not None
-    problem: Problem | None = Problem.query.filter_by(problem_id=submission.problem_id).first()
-    assert problem is not None
-    verdict: Verdict | None = Verdict.query.filter_by(tracker_uid=submission.tracker_uid).first()
-    problem_data = get_problem_data_object_with_problem_pid(problem.problem_id)
-
-    return make_response({
-        "id": submission.id,
-        "date": submission.date,
-        "user": {
-            "user_id": user.user_uid,
-            "handle": user.handle,
-            "email": user.email
-        },
-        "problem": {
-            "problem_id": problem.problem_id,
-            "title": problem_data.head.title
-        },
-        "compiler": submission.compiler,
-        "verdict": {
-            "verdict": None if verdict is None else verdict.verdict,
-            "time": None if verdict is None else verdict.time_usage,
-            "memory": None if verdict is None else verdict.memory_usage
-        }
-    })
+    return _get_submission_response_by_submission_id(submission_id)
 
 
 @submission_bp.route("/<int:submission_id>/result", methods=["POST"])
@@ -77,6 +61,37 @@ def add_verdict_route(submission_id: int):
     write_file(f"{tracker_uid}.json", json.dumps(payload), TunnelCode.VERDICT)
 
     return make_response({"status": "OK"})
+
+
+def _get_submission_response_by_submission_id(submission_id: int):
+    submission: Submission | None = Submission.query.filter_by(id=submission_id).first()
+    assert submission is not None
+    user: User | None = User.query.filter_by(user_uid=submission.user_uid).first()
+    assert user is not None
+    problem: Problem | None = Problem.query.filter_by(problem_id=submission.problem_id).first()
+    assert problem is not None
+    verdict: Verdict | None = Verdict.query.filter_by(tracker_uid=submission.tracker_uid).first()
+    problem_data = get_problem_data_object_with_problem_pid(problem.problem_id)
+
+    return {
+        "id": submission.id,
+        "date": submission.date,
+        "user": {
+            "user_id": user.user_uid,
+            "handle": user.handle,
+            "email": user.email
+        },
+        "problem": {
+            "problem_id": problem.problem_id,
+            "title": problem_data.head.title
+        },
+        "compiler": submission.compiler,
+        "verdict": {
+            "verdict": None if verdict is None else verdict.verdict,
+            "time": None if verdict is None else verdict.time_usage,
+            "memory": None if verdict is None else verdict.memory_usage
+        }
+    }
 
 
 def _make_verdict_error(status: str, message: str, judge_details: list[JudgeDetail] | None) -> int | None:

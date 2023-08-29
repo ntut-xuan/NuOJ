@@ -269,6 +269,43 @@ def fetch_time_average_usage(payload: dict[str, Any]) -> float:
 
     return time / len(judge_details)
 
+class TestGetSubmissions:
+    def test_should_return_status_code_ok(
+        self, logged_in_client: FlaskClient, setup_submission: str, setup_verdict: None
+    ):
+        response: TestResponse = logged_in_client.get("/api/submission")
+
+        assert response.status_code == HTTPStatus.OK
+
+    def test_should_return_correct_response(
+        self, logged_in_client: FlaskClient, setup_submission: str, setup_verdict: None
+    ):
+        expected_payload: list[dict[str, Any]] = [
+            {
+                "id": 1,
+                "date": datetime.datetime(2002, 6, 25).strftime('%a, %d %b %Y %H:%M:%S GMT'),
+                "user": {
+                    "user_id": "cb7ce8d5-8a5a-48e0-b9f0-7247dd5825dd",
+                    "handle": "test_account",
+                    "email": "test_account@nuoj.com"
+                },
+                "problem": {
+                    "problem_id": 1,
+                    "title": "the_first_problem"
+                },
+                "compiler": "c++14",
+                "verdict": {
+                    "verdict": "AC",
+                    "time": 10,
+                    "memory": 131072
+                }
+            }
+        ]
+        response: TestResponse = logged_in_client.get("/api/submission")
+
+        assert response.status_code == HTTPStatus.OK
+        response_json: dict[str, Any] | None = response.get_json(silent=True)
+        assert response_json == expected_payload
 
 class TestGetSubmission:
     def test_with_exists_submission_id_should_return_http_status_code_ok(
