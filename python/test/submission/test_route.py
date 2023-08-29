@@ -270,14 +270,14 @@ def fetch_time_average_usage(payload: dict[str, Any]) -> float:
     return time / len(judge_details)
 
 class TestGetSubmissions:
-    def test_should_return_status_code_ok(
+    def test_with_record_should_return_status_code_ok(
         self, logged_in_client: FlaskClient, setup_submission: str, setup_verdict: None
     ):
         response: TestResponse = logged_in_client.get("/api/submission")
 
         assert response.status_code == HTTPStatus.OK
 
-    def test_should_return_correct_response(
+    def test_with_record_hould_return_correct_response(
         self, logged_in_client: FlaskClient, setup_submission: str, setup_verdict: None
     ):
         expected_payload: list[dict[str, Any]] = [
@@ -301,6 +301,16 @@ class TestGetSubmissions:
                 }
             }
         ]
+        response: TestResponse = logged_in_client.get("/api/submission")
+
+        assert response.status_code == HTTPStatus.OK
+        response_json: dict[str, Any] | None = response.get_json(silent=True)
+        assert response_json == expected_payload
+
+    def test_with_empty_record_hould_return_correct_response(
+        self, logged_in_client: FlaskClient
+    ):
+        expected_payload: list[dict[str, Any]] = []
         response: TestResponse = logged_in_client.get("/api/submission")
 
         assert response.status_code == HTTPStatus.OK
