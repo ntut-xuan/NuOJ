@@ -1,3 +1,4 @@
+import datetime
 import json
 from http import HTTPStatus
 from typing import Any
@@ -137,7 +138,7 @@ def setup_langauge(app: Flask):
 
 @pytest.fixture
 def setup_problem_to_database(
-    app: Flask, setup_langauge: None, solution: str, checker: str
+    app: Flask, setup_langauge: None, solution: str, checker: str, setup_problem_to_storage: None
 ):
     solution_uuid: str = str(uuid4())
     checker_uuid: str = str(uuid4())
@@ -168,13 +169,48 @@ def setup_problem_to_database(
 
 
 @pytest.fixture
+def setup_problem_to_storage(app: Flask):
+    first_problem_payload: dict[str, Any] = {
+        "head": {"title": "the_first_problem", "time_limit": 1, "memory_limit": 48763},
+        "content": {
+            "description": "some_description",
+            "input_description": "some_input_description",
+            "output_description": "some_output_description",
+            "note": "some_note",
+        },
+    }
+    second_problem_payload: dict[str, Any] = {
+        "head": {"title": "the_second_problem", "time_limit": 3, "memory_limit": 48763},
+        "content": {
+            "description": "some_description",
+            "input_description": "some_input_description",
+            "output_description": "some_output_description",
+            "note": "some_note",
+        },
+    }
+
+    with app.app_context():
+        write_file(
+            "the_first_random_token.json",
+            json.dumps(first_problem_payload),
+            TunnelCode.PROBLEM,
+        )
+        write_file(
+            "the_second_random_token.json",
+            json.dumps(second_problem_payload),
+            TunnelCode.PROBLEM,
+        )
+
+
+@pytest.fixture
 def setup_submission(app: Flask, setup_problem_to_database: None) -> str:
-    tracker_uid: str = str(uuid4())
+    tracker_uid: str = "d4f79fdc-5b73-43fe-a249-540873cd1d9e"
 
     with app.app_context():
         submission: Submission = Submission(
             user_uid="cb7ce8d5-8a5a-48e0-b9f0-7247dd5825dd",
             problem_id=1,
+            date=datetime.date(2002, 6, 25),
             compiler="c++14",
             tracker_uid=tracker_uid,
         )
@@ -183,6 +219,25 @@ def setup_submission(app: Flask, setup_problem_to_database: None) -> str:
         db.session.commit()
 
     return tracker_uid
+
+
+@pytest.fixture
+def setup_verdict(app: Flask) -> None:
+    tracker_uid: str = "d4f79fdc-5b73-43fe-a249-540873cd1d9e"
+
+    with app.app_context():
+        verdict: Verdict = Verdict(
+            id=1,
+            tracker_uid=tracker_uid,
+            date=datetime.date(2002, 6, 25),
+            verdict="AC",
+            error_id=None,
+            memory_usage=131072,
+            time_usage=10
+        )
+
+        db.session.add(verdict)
+        db.session.commit()
 
 
 def fetch_memory_average_usage(payload: dict[str, Any]) -> int:
@@ -213,6 +268,48 @@ def fetch_time_average_usage(payload: dict[str, Any]) -> float:
         time += judge_submit_meta.time
 
     return time / len(judge_details)
+
+
+class TestGetSubmission:
+    def test_with_exists_submission_id_should_return_http_status_code_ok(
+        self, logged_in_client: FlaskClient, setup_submission: str, setup_verdict: None
+    ):
+        response: TestResponse = logged_in_client.get("/api/submission/1")
+
+        assert response.status_code == HTTPStatus.OK
+    
+    def test_with_exists_submission_id_should_return_correct_payload(
+        self, logged_in_client: FlaskClient, setup_submission: str, setup_verdict: None
+    ):
+        response: TestResponse = logged_in_client.get("/api/submission/1")
+
+        assert response.status_code == HTTPStatus.OK
+        response_json: dict[str, Any] | None = response.get_json(silent=True)
+        assert response_json is not None
+        assert response_json["id"] == 1
+        assert datetime.datetime.strptime(response_json["date"], '%a, %d %b %Y %H:%M:%S %Z') == datetime.datetime(2002, 6, 25)
+        assert response_json["user"] == {
+            "user_id": "cb7ce8d5-8a5a-48e0-b9f0-7247dd5825dd",
+            "handle": "test_account",
+            "email": "test_account@nuoj.com"
+        }
+        assert response_json["problem"] == {
+            "problem_id": 1,
+            "title": "the_first_problem"
+        }
+        assert response_json["compiler"] == "c++14"
+        assert response_json["verdict"] == {
+            "verdict": "AC",
+            "time": 10,
+            "memory": 131072
+        }
+    
+    def test_with_not_exists_submission_id_should_return_http_status_code_forbidden(
+        self, logged_in_client: FlaskClient, setup_submission: str, setup_verdict: None
+    ):
+        response: TestResponse = logged_in_client.get("/api/submission/999")
+
+        assert response.status_code == HTTPStatus.FORBIDDEN
 
 
 class TestAddJudgeResult:

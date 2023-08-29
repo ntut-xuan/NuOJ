@@ -24,6 +24,7 @@ from api.problem.validate import (
     validate_setup_problem_solution_payload_or_return_bad_request,
     validate_setup_problem_testcase_payload_or_return_bad_request,
 )
+from api.problem.util import get_problem_data_object_with_problem_pid
 from database import db
 from models import Language, Problem, ProblemChecker, ProblemSolution, Testcase, User
 from storage.util import TunnelCode, delete_file, read_file, write_file
@@ -40,7 +41,7 @@ def get_problems_data_route(id: int) -> Response:
 
     problem_pid: str = problem.problem_id
 
-    problem_data: ProblemData = __get_problem_data_object_with_problem_pid(problem_pid)
+    problem_data: ProblemData = get_problem_data_object_with_problem_pid(problem_pid)
 
     return make_response(problem_data.__dict__())
 
@@ -50,7 +51,7 @@ def get_all_problems_data_route() -> Response:
     problems: list[Problem] = Problem.query.all()
 
     payload: list[dict[str, Any]] = [
-        __get_problem_data_object_with_problem_pid(problem.problem_id).__dict__()
+        get_problem_data_object_with_problem_pid(problem.problem_id).__dict__()
         for problem in problems
     ]
 
@@ -293,33 +294,3 @@ def setup_testcase_route(id: int) -> Response:
     write_file(f"{filename}.json", dumps(testcases), TunnelCode.TESTCASE)
 
     return make_response({"message": "OK"})
-
-
-def __get_problem_file_data_with_problem_token(problem_token: str) -> dict[str, Any]:
-    problem_raw_data: str = read_file(f"{problem_token}.json", TunnelCode.PROBLEM)
-    problem_dict: dict[str, Any] = loads(problem_raw_data)
-
-    return problem_dict
-
-
-def __get_problem_data_object_with_problem_pid(problem_pid: str) -> ProblemData:
-    problem: Problem | None = Problem.query.filter_by(problem_id=problem_pid).first()
-    assert problem is not None
-
-    problem_id: str = problem.problem_id
-    problem_token: str = problem.problem_token
-    problem_author: str = problem.problem_author
-
-    user: User | None = User.query.filter_by(user_uid=problem_author).first()
-    assert user is not None
-
-    problem_dict = __get_problem_file_data_with_problem_token(problem_token)
-    problem_dict["head"] |= {"problem_pid": problem_id}
-
-    problem_data: ProblemData = ProblemData(
-        content=ProblemContent(**problem_dict["content"]),
-        head=ProblemHead(**problem_dict["head"]),
-        author=user,
-    )
-
-    return problem_data

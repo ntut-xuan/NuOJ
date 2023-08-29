@@ -5,13 +5,48 @@ from uuid import uuid4
 from flask import Blueprint, make_response, request
 
 from api.auth.validator import validate_jwt_is_exists_or_return_unauthorized, validate_jwt_is_valid_or_return_unauthorized
+from api.problem.dataclass import ProblemData
+from api.problem.util import get_problem_data_object_with_problem_pid
 from api.submission.validate import validate_judge_result_payload_or_return_bad_request, validate_submission_should_exists_or_return_forbidden
 from api.submission.dataclass import JudgeDetail, JudgeStatus, JudgeMeta, JudgeResult
 from database import db
-from models import Submission, Verdict, VerdictErrorComment
+from models import Problem, Submission, User, Verdict, VerdictErrorComment
 from storage.util import TunnelCode, write_file
 
 submission_bp = Blueprint("submission", __name__, url_prefix="/api/submission")
+
+
+@submission_bp.route("/<int:submission_id>", methods=["GET"])
+@validate_submission_should_exists_or_return_forbidden
+def get_submission(submission_id: int):
+    submission: Submission | None = Submission.query.filter_by(id=submission_id).first()
+    assert submission is not None
+    user: User | None = User.query.filter_by(user_uid=submission.user_uid).first()
+    assert user is not None
+    problem: Problem | None = Problem.query.filter_by(problem_id=submission.problem_id).first()
+    assert problem is not None
+    verdict: Verdict | None = Verdict.query.filter_by(tracker_uid=submission.tracker_uid).first()
+    problem_data = get_problem_data_object_with_problem_pid(problem.problem_id)
+
+    return make_response({
+        "id": submission.id,
+        "date": submission.date,
+        "user": {
+            "user_id": user.user_uid,
+            "handle": user.handle,
+            "email": user.email
+        },
+        "problem": {
+            "problem_id": problem.problem_id,
+            "title": problem_data.head.title
+        },
+        "compiler": submission.compiler,
+        "verdict": {
+            "verdict": None if verdict is None else verdict.verdict,
+            "time": None if verdict is None else verdict.time_usage,
+            "memory": None if verdict is None else verdict.memory_usage
+        }
+    })
 
 
 @submission_bp.route("/<int:submission_id>/result", methods=["POST"])
