@@ -7,11 +7,12 @@ from flask import Blueprint, make_response, request
 from api.auth.validator import validate_jwt_is_exists_or_return_unauthorized, validate_jwt_is_valid_or_return_unauthorized
 from api.problem.dataclass import ProblemData
 from api.problem.util import get_problem_data_object_with_problem_pid
-from api.submission.validate import validate_judge_result_payload_or_return_bad_request, validate_submission_should_exists_or_return_forbidden
+from api.submit.util import generate_payload_with_problem, send_request_with_payload
+from api.submission.validate import validate_judge_result_payload_or_return_bad_request, validate_submission_should_be_owner_or_return_forbidden, validate_submission_should_exists_or_return_forbidden
 from api.submission.dataclass import JudgeDetail, JudgeStatus, JudgeMeta, JudgeResult
 from database import db
-from models import Problem, Submission, User, Verdict, VerdictErrorComment
-from storage.util import TunnelCode, write_file
+from models import Language, Problem, Submission, User, Verdict, VerdictErrorComment
+from storage.util import TunnelCode, read_file, write_file
 
 submission_bp = Blueprint("submission", __name__, url_prefix="/api/submission")
 
@@ -33,6 +34,7 @@ def get_submission(submission_id: int):
     return _get_submission_response_by_submission_id(submission_id)
 
 
+# TODO: Should implement the auth for judger and web, or it may caused cyber-security issue.
 @submission_bp.route("/<int:submission_id>/result", methods=["POST"])
 @validate_judge_result_payload_or_return_bad_request
 @validate_submission_should_exists_or_return_forbidden
@@ -59,6 +61,29 @@ def add_verdict_route(submission_id: int):
     db.session.commit()
 
     write_file(f"{tracker_uid}.json", json.dumps(payload), TunnelCode.VERDICT)
+
+    return make_response({"status": "OK"})
+
+
+@submission_bp.route("/<int:submission_id>/rejudge", methods=["POST"])
+@validate_submission_should_exists_or_return_forbidden
+@validate_submission_should_be_owner_or_return_forbidden
+def rejudge_submission(submission_id: int):
+    submission: Submission | None = Submission.query.filter_by(id=submission_id).first()
+    assert submission is not None
+    language: Language | None = Language.query.filter_by(name=submission.compiler).first()
+    assert language is not None
+    language_name: str = language.name
+    problem: Problem | None = Problem.query.filter_by(problem_id=submission.problem_id).first()
+    assert problem is not None
+    problem_id: int = problem.problem_id
+    code: str = read_file(f'{submission.code_uid}.{language.extension}', TunnelCode.CODE)
+
+    payload: dict[str, Any] = generate_payload_with_problem(code, language_name, problem_id, submission_id)
+    tracker_uid: str = send_request_with_payload(payload)
+
+    submission.tracker_uid = tracker_uid
+    db.session.commit()
 
     return make_response({"status": "OK"})
 
