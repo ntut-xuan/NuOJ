@@ -17,6 +17,8 @@ from models import (
     ProblemChecker,
     ProblemSolution,
     Submission,
+    Testcase,
+    User,
     Verdict,
     VerdictErrorComment,
 )
@@ -121,7 +123,7 @@ def checker():
 
 
 @pytest.fixture
-def testcase() -> list[str]:
+def testcase_data() -> list[str]:
     return ["5", "7"]
 
 
@@ -137,8 +139,21 @@ def setup_langauge(app: Flask):
 
 
 @pytest.fixture
+def setup_testcase(app: Flask, testcase_data: list[str]) -> str:
+    testcase_filename: str = str(uuid4())
+    testcase: Testcase = Testcase(filename=testcase_filename)
+
+    with app.app_context():
+        db.session.add(testcase)
+        db.session.commit()
+        write_file(f"{testcase_filename}.json", json.dumps(testcase_data), TunnelCode.TESTCASE)
+
+        return testcase.id
+
+
+@pytest.fixture
 def setup_problem_to_database(
-    app: Flask, setup_langauge: None, solution: str, checker: str, setup_problem_to_storage: None
+    app: Flask, setup_langauge: None, solution: str, checker: str, setup_problem_to_storage: None, setup_testcase: str
 ):
     solution_uuid: str = str(uuid4())
     checker_uuid: str = str(uuid4())
@@ -154,7 +169,7 @@ def setup_problem_to_database(
             problem_author="cb7ce8d5-8a5a-48e0-b9f0-7247dd5825dd",
             problem_solution=1,
             problem_checker=1,
-            problem_testcase=None,
+            problem_testcase=setup_testcase,
         )
         db.session.add(problem_checker)
         db.session.add(problem_solution)
@@ -167,6 +182,18 @@ def setup_problem_to_database(
         write_file(f"{solution_uuid}.cpp", solution, TunnelCode.SOLUTION)
         write_file(f"{checker_uuid}.cpp", checker, TunnelCode.CHECKER)
 
+
+@pytest.fixture
+def setup_code_to_storage(
+    app: Flask, code: str
+) -> str:
+    code_uid: str = str(uuid4())
+
+    with app.app_context():
+        write_file(f"{code_uid}.cpp", code, TunnelCode.CODE)
+
+    return code_uid
+    
 
 @pytest.fixture
 def setup_problem_to_storage(app: Flask):
@@ -203,19 +230,44 @@ def setup_problem_to_storage(app: Flask):
 
 
 @pytest.fixture
-def setup_submission(app: Flask, setup_problem_to_database: None) -> str:
+def setup_test_user(app: Flask):
+    with app.app_context():
+        user: User = User(
+            user_uid="problem_test_user",
+            handle="problem_test_user",
+            email="problem@test-user.com",
+            password="random_password",
+            role=1,
+            email_verified=1,
+        )
+        db.session.add(user)
+        db.session.commit()
+
+
+@pytest.fixture
+def setup_submission(app: Flask, setup_test_user: None, setup_problem_to_database: None, setup_code_to_storage: str) -> str:
     tracker_uid: str = "d4f79fdc-5b73-43fe-a249-540873cd1d9e"
 
     with app.app_context():
-        submission: Submission = Submission(
+        submission1: Submission = Submission(
             user_uid="cb7ce8d5-8a5a-48e0-b9f0-7247dd5825dd",
             problem_id=1,
             date=datetime.date(2002, 6, 25),
             compiler="c++14",
+            code_uid=setup_code_to_storage,
+            tracker_uid=tracker_uid,
+        )
+        submission2: Submission = Submission(
+            user_uid="problem_test_user",
+            problem_id=1,
+            date=datetime.date(2002, 6, 25),
+            compiler="c++14",
+            code_uid=setup_code_to_storage,
             tracker_uid=tracker_uid,
         )
 
-        db.session.add(submission)
+        db.session.add(submission1)
+        db.session.add(submission2)
         db.session.commit()
 
     return tracker_uid
@@ -288,6 +340,25 @@ class TestGetSubmissions:
                     "user_id": "cb7ce8d5-8a5a-48e0-b9f0-7247dd5825dd",
                     "handle": "test_account",
                     "email": "test_account@nuoj.com"
+                },
+                "problem": {
+                    "problem_id": 1,
+                    "title": "the_first_problem"
+                },
+                "compiler": "c++14",
+                "verdict": {
+                    "verdict": "AC",
+                    "time": 10,
+                    "memory": 131072
+                }
+            },
+            {
+                "id": 2,
+                "date": datetime.datetime(2002, 6, 25).strftime('%a, %d %b %Y %H:%M:%S GMT'),
+                "user": {
+                    "user_id": "problem_test_user",
+                    "handle": "problem_test_user",
+                    "email": "problem@test-user.com"
                 },
                 "problem": {
                     "problem_id": 1,
@@ -758,3 +829,61 @@ class TestAddJudgeResult:
         )
 
         assert response.status_code == HTTPStatus.FORBIDDEN
+
+class TestSubmissionRejudge:
+    def test_with_valid_submission_id_should_return_http_status_code_ok(
+        self,
+        logged_in_client: FlaskClient,
+        setup_submission: str
+    ):
+        response: TestResponse = logged_in_client.post(
+            "/api/submission/1/rejudge"
+        )
+
+        assert response.status_code == HTTPStatus.OK
+
+    def test_with_valid_submission_id_should_refresh_tracker_uid(
+        self,
+        app: Flask,
+        logged_in_client: FlaskClient,
+        setup_testcase: str,
+        setup_submission: str
+    ):
+        response: TestResponse = logged_in_client.post(
+            "/api/submission/1/rejudge"
+        )
+
+        assert response.status_code == HTTPStatus.OK
+        with app.app_context():
+            submission: Submission = Submission.query.filter_by(id=1).first()
+            assert submission.tracker_uid != setup_submission
+
+    def test_with_invalid_submission_id_should_return_http_status_code_forbidden(
+        self,
+        app: Flask,
+        logged_in_client: FlaskClient,
+        setup_testcase: str,
+        setup_submission: str
+    ):
+        response: TestResponse = logged_in_client.post(
+            "/api/submission/999/rejudge"
+        )
+
+        assert response.status_code == HTTPStatus.FORBIDDEN
+        payload: dict[str, Any] = response.get_json(silent=True)
+        assert payload["message"] == "Absent submission ID"
+
+    def test_with_not_owner_submission_id_should_return_http_status_code_forbidden(
+        self,
+        app: Flask,
+        logged_in_client: FlaskClient,
+        setup_testcase: str,
+        setup_submission: str
+    ):
+        response: TestResponse = logged_in_client.post(
+            "/api/submission/2/rejudge"
+        )
+
+        assert response.status_code == HTTPStatus.FORBIDDEN
+        payload: dict[str, Any] = response.get_json(silent=True)
+        assert payload["message"] == "Permission denied"
