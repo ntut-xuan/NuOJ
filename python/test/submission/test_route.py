@@ -139,7 +139,7 @@ def setup_langauge(app: Flask):
 
 
 @pytest.fixture
-def setup_testcase(app: Flask, testcase_data: list[str]) -> str:
+def setup_testcase(app: Flask, testcase_data: list[str]) -> int:
     testcase_filename: str = str(uuid4())
     testcase: Testcase = Testcase(filename=testcase_filename)
 
@@ -148,7 +148,7 @@ def setup_testcase(app: Flask, testcase_data: list[str]) -> str:
         db.session.commit()
         write_file(f"{testcase_filename}.json", json.dumps(testcase_data), TunnelCode.TESTCASE)
 
-        return testcase.id
+        return int(testcase.id)
 
 
 @pytest.fixture
@@ -870,7 +870,8 @@ class TestSubmissionRejudge:
         )
 
         assert response.status_code == HTTPStatus.FORBIDDEN
-        payload: dict[str, Any] = response.get_json(silent=True)
+        payload: dict[str, Any] | None = response.get_json(silent=True)
+        assert payload is not None
         assert payload["message"] == "Absent submission ID"
 
     def test_with_not_owner_submission_id_should_return_http_status_code_forbidden(
@@ -885,5 +886,6 @@ class TestSubmissionRejudge:
         )
 
         assert response.status_code == HTTPStatus.FORBIDDEN
-        payload: dict[str, Any] = response.get_json(silent=True)
+        payload: dict[str, Any] | None = response.get_json(silent=True)
+        assert payload is not None
         assert payload["message"] == "Permission denied"

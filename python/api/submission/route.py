@@ -2,7 +2,7 @@ import json
 from typing import Any
 from uuid import uuid4
 
-from flask import Blueprint, make_response, request
+from flask import Blueprint, Response, make_response, request
 
 from api.auth.validator import validate_jwt_is_exists_or_return_unauthorized, validate_jwt_is_valid_or_return_unauthorized
 from api.problem.dataclass import ProblemData
@@ -18,7 +18,7 @@ submission_bp = Blueprint("submission", __name__, url_prefix="/api/submission")
 
 
 @submission_bp.route("", methods=["GET"])
-def get_submissions():
+def get_submissions() -> Response:
     submissions: list[Submission] = Submission.query.all()
     
     submission_responses: list[str] = []
@@ -30,15 +30,15 @@ def get_submissions():
 
 @submission_bp.route("/<int:submission_id>", methods=["GET"])
 @validate_submission_should_exists_or_return_forbidden
-def get_submission(submission_id: int):
-    return _get_submission_response_by_submission_id(submission_id)
+def get_submission(submission_id: int) -> Response:
+    return make_response(_get_submission_response_by_submission_id(submission_id))
 
 
 # TODO: Should implement the auth for judger and web, or it may caused cyber-security issue.
 @submission_bp.route("/<int:submission_id>/result", methods=["POST"])
 @validate_judge_result_payload_or_return_bad_request
 @validate_submission_should_exists_or_return_forbidden
-def add_verdict_route(submission_id: int):
+def add_verdict_route(submission_id: int) -> Response:
     payload: dict[str, Any] | None = request.get_json(silent=True)
     assert payload is not None
     judge_result: JudgeResult = JudgeResult(**payload)
@@ -68,7 +68,7 @@ def add_verdict_route(submission_id: int):
 @submission_bp.route("/<int:submission_id>/rejudge", methods=["POST"])
 @validate_submission_should_exists_or_return_forbidden
 @validate_submission_should_be_owner_or_return_forbidden
-def rejudge_submission(submission_id: int):
+def rejudge_submission(submission_id: int) -> Response:
     submission: Submission | None = Submission.query.filter_by(id=submission_id).first()
     assert submission is not None
     language: Language | None = Language.query.filter_by(name=submission.compiler).first()
