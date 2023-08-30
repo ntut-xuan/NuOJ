@@ -9,8 +9,8 @@ from flask.testing import FlaskClient
 from werkzeug.test import TestResponse
 
 from database import db
-from models import Language, Problem, ProblemChecker, ProblemSolution, Testcase
-from storage.util import TunnelCode, write_file
+from models import Language, Problem, ProblemChecker, ProblemSolution, Submission, Testcase
+from storage.util import TunnelCode, read_file, write_file
 
 
 @pytest.fixture
@@ -113,6 +113,23 @@ class TestSubmit:
         response: TestResponse = logged_in_client.post("/api/submit", json=payload)
 
         assert response.status_code == HTTPStatus.OK
+
+    def test_submit_route_with_valid_payload_should_dump_the_code(
+        self,
+        app: Flask,
+        logged_in_client: FlaskClient,
+        payload: dict[str, Any],
+        setup_problem_to_database_with_testcase: None,
+    ):
+        response: TestResponse = logged_in_client.post("/api/submit", json=payload)
+
+        assert response.status_code == HTTPStatus.OK
+        with app.app_context():
+            submission: Submission | None = Submission.query.filter_by(id=1).first()
+            assert submission is not None
+            language: Language | None = Language.query.filter_by(name=submission.compiler).first()
+            assert language is not None
+            assert read_file(f"{submission.code_uid}.{language.extension}", TunnelCode.CODE) == payload["code"]
 
     def test_submit_route_with_not_logged_in_client_should_return_http_status_code_unauthorized(
         self,

@@ -13,6 +13,7 @@ class TunnelCode(Enum):
     SUBMISSION = "user_submission"
     USER_PROFILE = "user_profile"
     VERDICT = "verdict"
+    CODE = "code"
 
 
 def is_file_exists(filename: str, tunnel: TunnelCode) -> bool:

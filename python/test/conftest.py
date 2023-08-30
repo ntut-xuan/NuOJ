@@ -73,6 +73,8 @@ def _create_storage_folder_structure(storage_path):
     (Path(storage_path) / "user_profile/").mkdir()
     (Path(storage_path) / "user_submission/").mkdir()
     (Path(storage_path) / "verdict").mkdir()
+    (Path(storage_path) / "code").mkdir()
+    
 
 
 def _add_test_account() -> None:

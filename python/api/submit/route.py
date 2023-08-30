@@ -1,5 +1,6 @@
 import json
 from typing import Any
+from uuid import uuid4
 
 import requests
 from datetime import datetime
@@ -8,7 +9,7 @@ from flask import Blueprint, Response, make_response, request
 from api.auth.auth_util import get_user_by_jwt_token
 from api.auth.validator import validate_jwt_is_exists_or_return_unauthorized, validate_jwt_is_valid_or_return_unauthorized
 from api.submit.validate import validate_problem_can_submit_or_return_unprocessable_entity, validate_submit_payload_or_return_bad_request
-from storage.util import TunnelCode, read_file
+from storage.util import TunnelCode, read_file, write_file
 from database import db
 from models import Language, User, ProblemChecker, Problem, ProblemSolution, Submission, Testcase
 
@@ -29,7 +30,9 @@ def submit_route() -> Response:
     code: str = payload["code"]
     language: str = payload["language"]
 
-    submission: Submission = _generate_submission_record(user.user_uid, problem_id, language)
+    code_uid: str = str(uuid4())
+    submission: Submission = _generate_submission_record(user.user_uid, problem_id, code_uid, language)
+    _dumps_submission_code(code, code_uid, language)
 
     judge_payload: dict[str, Any] = _generate_payload_with_problem(code, language, problem_id, submission.id)
     tracker_uid: str = _send_request_with_payload(judge_payload)
@@ -38,6 +41,13 @@ def submit_route() -> Response:
     db.session.commit()
 
     return make_response({"message": "OK"})
+
+
+def _dumps_submission_code(code: str, code_uid: str, language_str: str):
+    language: Language | None = Language.query.filter_by(name=language_str).first()
+    assert language is not None
+
+    write_file(f"{code_uid}.{language.extension}", code, TunnelCode.CODE)
 
 
 def _send_request_with_payload(payload: dict[str, Any]) -> str:
@@ -87,11 +97,12 @@ def _get_judge_payload(user_code: str, user_code_language: str, solution: str, s
     return judge_payload
 
 
-def _generate_submission_record(user_uid: str, problem_id: int, language: str) -> Submission:
+def _generate_submission_record(user_uid: str, problem_id: int, code_uid: str, language: str) -> Submission:
     submission: Submission = Submission(
         user_uid=user_uid,
         problem_id=problem_id,
         date=datetime.now(),
+        code_uid=code_uid,
         compiler=language,
     )
 
