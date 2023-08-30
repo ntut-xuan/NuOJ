@@ -1,4 +1,5 @@
 from datetime import datetime
+from uuid import uuid4
 
 import pytest
 from flask import Flask
@@ -111,12 +112,14 @@ def test_submission_model_with_valid_data_should_add_record_to_database(
 ):
     with app.app_context():
         specific_datetime: datetime = datetime.now()
+        code_uid: str = str(uuid4())
         submission: Submission = Submission(
             id=1,
             user_uid="some-random-uuid",
             problem_id=1,
             date=specific_datetime,
             compiler="C++14",
+            code_uid=code_uid,
             tracker_uid=None
         )
 
@@ -132,6 +135,7 @@ def test_submission_model_with_valid_data_should_add_record_to_database(
         assert submission_from_database.problem_id == 1
         assert submission_from_database.date == specific_datetime
         assert submission_from_database.compiler == "C++14"
+        assert submission_from_database.code_uid == code_uid
         assert submission_from_database.tracker_uid == None
 
 

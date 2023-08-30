@@ -100,4 +100,5 @@ class Submission(db.Model):  # type: ignore[name-defined]
     )
     date = db.Column(db.DateTime, default=current_timestamp(), nullable=False)
     compiler = db.Column(db.String(100), nullable=False)
+    code_uid = db.Column(db.String(100), nullable=False)
     tracker_uid = db.Column(db.String(100), nullable=True)
