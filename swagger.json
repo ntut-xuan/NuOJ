@@ -1036,10 +1036,6 @@
                                 "schema": {
                                     "type": "object",
                                     "properties": {
-                                        "type": {
-                                            "type": "string",
-                                            "example": "String Comparator"
-                                        },
                                         "content": {
                                             "type": "string",
                                             "example": "Some code here."
@@ -1066,10 +1062,6 @@
                             "schema": {
                                 "type": "object",
                                 "properties": {
-                                    "type": {
-                                        "type": "string",
-                                        "example": "String Comparator"
-                                    },
                                     "content": {
                                         "type": "string",
                                         "example": "Some code here."
@@ -1088,6 +1080,76 @@
                     },
                     "403": {
                         "$ref": "#/components/responses/403_target_absent"
+                    }
+                }
+            }
+        },
+        "/api/problem/{problem_id}/testcase": {
+            "get": {
+                "summary": "Get the testcases of the problem",
+                "tags": ["problem"],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "$ref": "#/components/schemas/testcase_response"
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/401_authentication_required"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/403_permission_denied"
+                    }
+                }
+            },
+            "post": {
+                "summary": "Setup or modified the testcases of the problem",
+                "tags": ["problem"],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/testcase_requestbody"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "$ref": "#/components/responses/200_message_ok"
+                    },
+                    "400": {
+                        "$ref": "#/components/responses/400_incorrect_format"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/401_authentication_required"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/403_permission_denied"
+                    }
+                }
+            }
+        },
+        "/api/problem/{problem_id}/submission": {
+            "get": {
+                "summary": "The route for get the submissions of the specific problem.",
+                "tags": ["problem"],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/submission_response"
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -1221,27 +1283,6 @@
                     },
                     "403": {
                         "$ref": "#/components/responses/403_permission_denied"
-                    }
-                }
-            }
-        },
-        "/api/submission/{problem_id}": {
-            "get": {
-                "summary": "The route for get the submissions of the specific problem.",
-                "tags": ["submission"],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "type": "array",
-                                    "items": {
-                                        "$ref": "#/components/schemas/submission_response"
-                                    }
-                                }
-                            }
-                        }
                     }
                 }
             }
@@ -1395,8 +1436,8 @@
                         "type": "object",
                         "properties": {
                             "problem_pid": {
-                                "type": "string",
-                                "example": "66570e6a-dd25-4461-8af7-d51aacba3c02"
+                                "type": "integer",
+                                "example": 1
                             },
                             "title": {
                                 "type": "string",
@@ -1628,6 +1669,13 @@
                         }
                     }
                 }
+            },
+            "testcase_requestbody": {
+                "type": "array",
+                "example": ["5\n1 2 3 4 5", "7\n1 2 3 4 5 6 7"]
+            },
+            "testcase_response": {
+                "$ref": "#/components/schemas/testcase_requestbody"
             }
         },
         "responses": {
