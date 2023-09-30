@@ -37,6 +37,7 @@ def create_app(test_config: Mapping[str, Any] | None = None) -> Flask:
 
     db.init_app(app)
 
+    app.url_map.strict_slashes = False
     app.cli.add_command(create_db_command)
     app.register_blueprint(auth_bp)
     app.register_blueprint(problem_bp)
