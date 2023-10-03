@@ -259,7 +259,7 @@ def get_problem_testcase(id: int) -> Response:
     ).first()
 
     if query_row is None:
-        return make_response({"testcase": "[]"})
+        return make_response({"testcase": []})
 
     filename: str = query_row.filename
     content: str = read_file(f"{filename}.json", TunnelCode.TESTCASE)
