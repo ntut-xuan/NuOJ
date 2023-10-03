@@ -259,11 +259,11 @@ def get_problem_testcase(id: int) -> Response:
     ).first()
 
     if query_row is None:
-        return make_response({"testcase": "[]"})
+        return make_response([])
 
     filename: str = query_row.filename
     content: str = read_file(f"{filename}.json", TunnelCode.TESTCASE)
-    return make_response({"testcase": content})
+    return make_response( content)
 
 
 @problem_bp.route("/<int:id>/testcase", methods=["POST"])
